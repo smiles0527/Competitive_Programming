@@ -16,7 +16,7 @@ public class CCC07J3
         {
             sum = sum + array[i];
         }
-        int avg = sum*(10-cases);
+        int avg = sum/(10-cases);
         int offer = input.nextInt();
         if (offer>avg)
         {
