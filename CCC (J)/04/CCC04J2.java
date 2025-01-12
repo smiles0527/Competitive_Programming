@@ -5,6 +5,7 @@ public class CCC04J2
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         int x = input.nextInt();
         int y = input.nextInt();
         int time = (y - x) / 60;

@@ -7,6 +7,7 @@ public class CCC11J1
         Scanner input = new Scanner(System.in);
         int antennae = input.nextInt();
         int eyes = input.nextInt();
+        input.close();
         if (antennae >= 3 && eyes <= 4)
         {
             System.out.println("TroyMartian");

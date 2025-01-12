@@ -36,6 +36,7 @@ public class CCC01J1
     {
         Scanner input = new Scanner(System.in);
         int h = input.nextInt();
+        input.close();
         int half = h / 2;
         int star = 1;
         int space = 2 * h - 2;

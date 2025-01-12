@@ -7,6 +7,7 @@ public class CCC01S2
         Scanner input = new Scanner(System.in);
         int x = input.nextInt();
         int y = input.nextInt();
+        input.close();
 
         int size = (int) Math.sqrt(y - x) + 1;
         int[][] spiral = new int[size][size];

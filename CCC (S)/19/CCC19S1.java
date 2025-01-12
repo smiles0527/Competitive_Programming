@@ -5,6 +5,7 @@ public class CCC19S1
     {
         Scanner input = new Scanner(System.in);
         String sequence = input.nextLine();
+        input.close();
         String[] instructions = sequence.split("");
         int h = 0;
         int v = 0;

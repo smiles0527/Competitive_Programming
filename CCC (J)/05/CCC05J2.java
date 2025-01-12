@@ -5,6 +5,7 @@ public class CCC05J2
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         int s = input.nextInt();
         int f = input.nextInt();
         int rsaCount = 0;

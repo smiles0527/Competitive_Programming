@@ -7,7 +7,7 @@ public class CCC11J2
         Scanner input = new Scanner(System.in);
         int h = input.nextInt();
         int M = input.nextInt();
-
+        input.close();
         int t = 1;
         int A = Integer.MAX_VALUE;
         while (t <= M && A > 0)

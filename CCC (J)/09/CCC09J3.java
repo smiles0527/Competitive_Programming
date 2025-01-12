@@ -6,6 +6,7 @@ public class CCC09J3
     {
         Scanner input = new Scanner(System.in);
         int otime = input.nextInt();
+        input.close();
         int vtime = getCityTime(otime, -300);
         int etime = getCityTime(otime, -200);
         int wtime = getCityTime(otime, -100);

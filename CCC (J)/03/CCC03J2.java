@@ -5,6 +5,7 @@ public class CCC03J2
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         while (true)
         {
             int c = input.nextInt();

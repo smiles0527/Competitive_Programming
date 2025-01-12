@@ -9,6 +9,7 @@
             int pike = input.nextInt();
             int pickerel = input.nextInt();
             int total = input.nextInt();
+            input.close();
             int ways = 0;
             for (int i = 0; i <= total/trout; i++) {
                 for (int j = 0; j <= total/pike; j++) {

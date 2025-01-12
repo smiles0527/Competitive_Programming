@@ -55,5 +55,6 @@ public class CCC06J3
             }
             System.out.println(t);
         }
+        input.close();
     }
 }

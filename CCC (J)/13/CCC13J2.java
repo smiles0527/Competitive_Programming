@@ -29,5 +29,6 @@ public class CCC13J2
         {
             System.out.println("NO");
         }
+        input.close();
     }
 }

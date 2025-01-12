@@ -4,6 +4,7 @@ public class CCC08J2 {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         String[] songs = {"A", "B", "C", "D", "E"};
+        input.close();
         while (true)
         {
             int number = input.nextInt();
@@ -66,4 +67,3 @@ public class CCC08J2 {
         songs[1] = temp;
     }
 }
-

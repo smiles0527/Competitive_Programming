@@ -8,6 +8,7 @@ public class CCC06S2
         String plain = input.nextLine();
         String c1 = input.nextLine();
         String c2 = input.nextLine();
+        input.close();
         for (int i = 0; i < c2.length(); i++)
         {
             int index = c1.indexOf(c2.charAt(i));

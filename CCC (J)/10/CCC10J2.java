@@ -28,6 +28,7 @@ public class CCC10J2
         int c = input.nextInt();
         int d = input.nextInt();
         int s = input.nextInt();
+        input.close();
         int nicky = steps(a, b, s);
         int byron = steps(c, d, s);
         if (nicky > byron)

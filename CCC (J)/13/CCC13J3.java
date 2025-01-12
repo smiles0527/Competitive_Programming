@@ -6,6 +6,7 @@ public class CCC13J3
     {
         Scanner input = new Scanner(System.in);
         String something = input.nextLine();
+        input.close();
         int year = Integer.parseInt(something) + 1;
 
         while (!distinct(year))

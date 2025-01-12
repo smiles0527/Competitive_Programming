@@ -6,6 +6,7 @@ public class CCC01S1
     {
         Scanner input = new Scanner(System.in);
         String str = input.next();
+        input.close();
         int c = 0;
         int d = 0;
         int h = 0;

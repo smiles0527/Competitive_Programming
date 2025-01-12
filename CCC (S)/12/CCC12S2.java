@@ -26,7 +26,7 @@ public class CCC12S2
             oldr = r;
         }
         System.out.println(total);
-
+        input.close();
     }
 
     public static int roman(char ch)

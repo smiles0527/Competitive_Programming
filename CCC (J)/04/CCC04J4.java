@@ -5,6 +5,7 @@ public class CCC04J4
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         String key = input.nextLine();
         String msg = input.nextLine();
