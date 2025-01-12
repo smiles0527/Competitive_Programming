@@ -6,6 +6,7 @@ public class CCC05S1
     {
         Scanner input = new Scanner(System.in);
         int cases = input.nextInt();
+        input.close();
         for (int i = 0; i < cases; i++)
         {
             String number = input.next();

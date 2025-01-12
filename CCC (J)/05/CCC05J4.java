@@ -11,7 +11,7 @@ public class CCC05J4
         int CutCols = input.nextInt();
         int CutRows = input.nextInt();
         int steps = input.nextInt();
-
+        input.close();
         boolean[][] yes = new boolean[Rows][Cols];
 
         for (int r = 0; r < Rows; r++)
@@ -106,28 +106,4 @@ public class CCC05J4
 
     }
 
-    private static void print2D(boolean[][] table, int cr, int cc)
-    {
-        for (int r = 0; r < table.length; r++)
-        {
-            for (int c = 0; c < table[r].length; c++)
-            {
-                if (r == cr && c == cc)
-                {
-                    System.out.print("@");
-                }
-                else if (table[r][c])
-                {
-                    System.out.print("#");
-                }
-                else
-                {
-                    System.out.print("*");
-                }
-            }
-            System.out.println();
-        }
-        System.out.println("///////////////////////////");
-
-    }
 }

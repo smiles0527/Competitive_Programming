@@ -28,5 +28,6 @@ public class CCC12J1
         {
             System.out.println("You are speeding and your fine is $500.");
         }
+        input.close();
     }
 }

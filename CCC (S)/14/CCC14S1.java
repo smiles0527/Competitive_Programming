@@ -29,6 +29,7 @@ public class CCC14S1 {
                 }
             }
         }
+        input.close();
         for (Integer friend : friends)
         {
             System.out.println(friend);

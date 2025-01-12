@@ -5,6 +5,7 @@ public class CCC00J1
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         int weekday = input.nextInt();
         int totalDays = input.nextInt();
         int spaces = 4 * (weekday-1) - 1;

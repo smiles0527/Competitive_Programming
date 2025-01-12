@@ -4,7 +4,6 @@ public class CCC13S2
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
-        {
             int weight = input.nextInt();
             int number = input.nextInt();
             int[] cars = new int[number];
@@ -31,6 +30,6 @@ public class CCC13S2
                 count++;
             }
             System.out.println(count);
-        }
+            input.close();
     }
 }

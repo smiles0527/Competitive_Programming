@@ -17,8 +17,7 @@ public class CCC12J2
         else{
             System.out.println("No Fish");
         }
-
-
+        input.close();
     }
 }
 

@@ -13,6 +13,7 @@ public class CCC06S1
             String baby = input.next();
             check(mom, dad, baby);
         }
+        input.close();
     }
 
     public static void check(String mom, String dad, String baby)

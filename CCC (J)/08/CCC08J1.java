@@ -22,5 +22,7 @@ public class CCC08J1
             System.out.println("Underweight");
 
         }
+        input.close();
     }
+
 }

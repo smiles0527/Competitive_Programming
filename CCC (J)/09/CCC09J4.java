@@ -6,6 +6,7 @@ public class CCC09J4
     {
         Scanner input = new Scanner(System.in);
         int w = input.nextInt();
+        input.close();
         String[] words = {"WELCOME", "TO", "CCC", "GOOD", "LUCK", "TODAY"};
         int startIndex = 0;
         while (startIndex < 7)

@@ -4,6 +4,7 @@ public class CCC03J3
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         int position = 1;
         while (position <= 100)
         {

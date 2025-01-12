@@ -15,5 +15,6 @@ public class CCC07J3 {
         int avg = sum/(10-cases);
         int offer = input.nextInt();
         System.out.println(offer > avg ? "deal" : "no deal");
+        input.close();
     }
 }

@@ -5,6 +5,7 @@ public class CCC15J2
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         int hcount = 0;
         int scount = 0;
         String question = input.nextLine();

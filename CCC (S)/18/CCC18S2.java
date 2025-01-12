@@ -14,6 +14,7 @@ public class CCC18S2 {
                 plants[i][j] = Integer.parseInt(row[j]);
             }
         }
+        input.close();
         while (!yes) {
             yes = check(plants, size);
             if (yes) {

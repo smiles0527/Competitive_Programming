@@ -7,6 +7,7 @@ public class CCC07J4
         Scanner input = new Scanner(System.in);
         String text1 = input.nextLine().replace(" ", "");
         String text2 = input.nextLine().replace(" ", "");
+        input.close();
         int len = text1.length();
         String temp = text2;
 

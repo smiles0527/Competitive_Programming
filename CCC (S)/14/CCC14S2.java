@@ -10,6 +10,7 @@ public class CCC14S2
         String names = input.nextLine();
         String good = input.nextLine();
         int count = 0;
+        input.close();
         String[] first = names.split(" ");
         String[] second = good.split(" ");
         for (int i = 0; i < first.length; i++)

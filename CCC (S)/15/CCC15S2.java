@@ -16,6 +16,7 @@ public class CCC15S2
         }
         int happyAth = 0;
         input.nextLine();
+        input.close();
         for (int i = 0; i < a; i++)
         {
             String[] order = input.nextLine().split(" ");

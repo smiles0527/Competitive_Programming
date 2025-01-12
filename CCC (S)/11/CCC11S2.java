@@ -27,5 +27,6 @@ public class CCC11S2
             }
         }
         System.out.println(count);
+        input.close();
     }
 }

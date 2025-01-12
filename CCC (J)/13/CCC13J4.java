@@ -5,6 +5,7 @@ public class CCC13J4
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         int minutes = input.nextInt();
         int chores = input.nextInt();
         int[] total = new int[chores];

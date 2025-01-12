@@ -1,4 +1,3 @@
-import java.util.Collections;
 import java.util.Scanner;
 public class CCC05J3 {
 
@@ -27,5 +26,6 @@ public class CCC05J3 {
             System.out.println("Turn " + turns[i] + " onto " + names[i-1] + " street." );
         }
         System.out.println("Turn " + turns[0] + " into your HOME.");
+        input.close();
     }
 }

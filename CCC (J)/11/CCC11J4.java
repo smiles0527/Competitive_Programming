@@ -84,7 +84,7 @@ public class CCC11J4{
                 break;
             }
         }
-
+        input.close();
     }
 
     public static boolean isDanger(int[] position, List<int[]> dangers)

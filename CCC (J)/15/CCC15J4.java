@@ -3,6 +3,7 @@ import java.util.*;
 public class CCC15J4 {
     public static void main(String[] args){
         Scanner input = new Scanner(System.in);
+        input.close();
         int n = input.nextInt();
         int time = 0;
         int[] answers = new int[101];

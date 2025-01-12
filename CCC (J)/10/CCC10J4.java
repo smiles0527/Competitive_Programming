@@ -6,6 +6,7 @@ public class CCC10J4
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
+        input.close();
         ArrayList<Integer> numbers = new ArrayList<>();
         while (true)
         {
@@ -34,7 +35,6 @@ public class CCC10J4
     private static int getPattern(ArrayList<Integer> difference)
     {
         int size = difference.size();
-        int count = 0;
         for (int len = 1; len <= size; len++)
         {
             int j = 0;
