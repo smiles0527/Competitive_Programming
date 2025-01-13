@@ -11,12 +11,10 @@ public class CCC04J4
         String msg = input.nextLine();
         int len = msg.length();
         int indexing = 0;
-        for (int i = 0; i < len; i++)
-        {
+        for (int i = 0; i < len; i++) {
             char x = msg.charAt(i);
             int index = alphabet.indexOf(x);
-            if (index >= 0)
-            {
+            if (index >= 0) {
                 int shifti = key.charAt(indexing) - 'A';
                 int nx = x + shifti;
                 if (nx > 'Z')
