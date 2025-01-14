@@ -2,6 +2,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "CCC04S3",
+      "request": "launch",
+      "mainClass": "CCC04S3",
+      "projectName": "codestuff_60fa04f5"
+    },
+    {
       "name": "C/C++ Runner: Debug Session",
       "type": "lldb",
       "request": "launch",
