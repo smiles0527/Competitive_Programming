@@ -1,86 +1,71 @@
-import java.util.*;
+import java.util.Scanner;
 
-public class CCC09J4
-{
-    public static void main(String[] args)
-    {
+public class CCC09J4 {
+        public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        int w = input.nextInt();
-        input.close();
         String[] words = {"WELCOME", "TO", "CCC", "GOOD", "LUCK", "TODAY"};
-        int startIndex = 0;
-        while (startIndex < 7)
-        {
-            //print 1line
-            int wordCount = getNumOfWords(words, startIndex, w);
-            int dotCount = getNumOfDots(words, startIndex, w, wordCount);
-            String line = justifyLine(words, startIndex, wordCount, dotCount);
-            System.out.println(line);
-            startIndex += wordCount;
+
+        int w = input.nextInt();
+
+        String s = words[0];
+        int i = 1;
+
+        while (i < words.length) {
+            while (i < words.length && s.length() + words[i].length() + 1 <= w) {
+                s += "." + words[i];
+                i++;
+            }
+
+            System.out.println(full(s, w));
+            if (i < words.length) {
+                s = words[i];
+            } else {
+                s = "";
+            }
+
+            i++;
         }
+
+        if (s.length() > 0) {
+            System.out.println(full(s, w));
+        }
+
+        input.close();
     }
 
-    private static String justifyLine(String[] words, int startIndex, int wordCount, int dotCount)
-    {
-        String str = "";
-        int gapCount = wordCount - 1;
-        for (int i = 0; i < wordCount - 1; i++)
-        {
-            str += words[i + startIndex];
-            int gap = dotCount / gapCount;
-            int rem = dotCount % gapCount;
-            if (i < rem)
-            {
-                gap += 1;
-                for (int j = 0; j < gap; j++)
-                {
-                    str += ".";
+        public static String full(String s, int w) {
+            StringBuilder t = new StringBuilder(s);
+            int i = 0;
+
+            if (t.indexOf(".") > 0) {
+                while (t.length() < w) {
+                    while (i < t.length() && t.charAt(i) != '.') {
+                        i++;
+                    }
+    
+                    if (i >= t.length()) {
+                        i = 0;
+                    }
+    
+
+                    t.insert(i, '.');
+                    i++;
+    
+                    while (i < t.length() && t.charAt(i) == '.') {
+                        i++;
+                    }
+    
+                    if (i >= t.length()) {
+                        i = 0; 
+                    }
+                }
+            } else {
+                while (t.length() < w) {
+                    t.append('.');
                 }
             }
-            else
-            {
-                for (int j = 0; j < rem; j++)
-                {
-                    str += ".";
-                }
-            }
-            if (rem == 0)
-            {
-                for (int j = 0; j < gap; j++)
-                {
-                    str += ".";
-                }
-            }
+    
+            return t.toString();
         }
-        str += words[startIndex + 2];
-        return str;
-    }
-
-    private static int getNumOfDots(String[] words, int startIndex, int w, int wordCount)
-    {
-        int totalLen = 0;
-        int dots = 0;
-        for (int i = 0; i < wordCount; i++)
-        {
-            totalLen += words[i + startIndex].length();
-        }
-        dots = w - totalLen;
-        return dots;
-    }
-
-    private static int getNumOfWords(String[] words, int startIndex, int w)
-    {
-        int totalLen = 0;
-        int numOfWords = 0;
-        for (int i = 0; i + startIndex < words.length; i++)
-        {
-            if (words[i + startIndex].length() + totalLen <= w)
-            {
-                totalLen += words[i + startIndex].length();
-                numOfWords++;
-
-            }
-        }
-        return numOfWords;
-    }
+    
 }
