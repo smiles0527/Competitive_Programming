@@ -1,10 +1,9 @@
 import java.util.*;
 
 public class CCC23J5 {
-    static final int MAX = 105;
     static int row;
     static int col;
-    static char[][] map = new char[MAX][MAX];
+    static char[][] map;
     static String word;
     static int count;
 
@@ -28,23 +27,23 @@ public class CCC23J5 {
 
         map = new char[row][col];
         for (int r = 0; r < row; r++) {
-            String row = scanner.next();
-            for (int c = 0; c < col; c++) {
-                map[r][c] = row.charAt(c);
+            String words = scanner.next();
+            for (int c = 0; c < col-c; c++) {
+                map[r][c] = words.charAt(c);
             }
         }
 
         count = 0;
         for (int r = 0; r < row; r++) {
             for (int c = 0; c < col; c++) {
-                backtrack(r, c, 0, 1, 0); // horizontal (left to right)
-                backtrack(r, c, 0, -1, 0); // horizontal (right to left)
-                backtrack(r, c, 0, 0, 1); // vertical (top to bottom)
-                backtrack(r, c, 0, 0, -1); // vertical (bottom to top)
-                backtrack(r, c, 0, 1, 1); // diagonal (top-left to bottom-right)
+                backtrack(r, c, 0, 1, 0);   //horizontal (left to right)
+                backtrack(r, c, 0, -1, 0);  // horizontal (right to left)
+                backtrack(r, c, 0, 0, 1);   // vertical (top to bottom)
+                backtrack(r, c, 0, 0, -1);  // vertical (bottom to top)
+                backtrack(r, c, 0, 1, 1);   // diagonal (top-left to bottom-right)
                 backtrack(r, c, 0, -1, -1); // diagonal (bottom-right to top-left)
-                backtrack(r, c, 0, 1, -1); // diagonal (bottom-left to top-right)
-                backtrack(r, c, 0, -1, 1); // diagonal (top-right to bottom-left)
+                backtrack(r, c, 0, 1, -1);  // diagonal (bottom-left to top-right)
+                backtrack(r, c, 0, -1, 1);  // diagonal (top-right to bottom-left)
             }
         }
 
@@ -52,3 +51,4 @@ public class CCC23J5 {
         scanner.close();
     }
 }
+
