@@ -2,34 +2,33 @@ import java.util.*;
 
 public class CCC09J4 {
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        String[] words = {"WELCOME", "TO", "CCC", "GOOD", "LUCK", "TODAY"};
-        int w = input.nextInt();
-
-        String s = words[0];
-        int i = 1;
-
-        while (i < words.length) {
-            while (i < words.length && s.length() + words[i].length() + 1 <= w) {
-                s += "." + words[i];
+        try (Scanner input = new Scanner(System.in)) {
+            String[] words = {"WELCOME", "TO", "CCC", "GOOD", "LUCK", "TODAY"};
+            int w = input.nextInt();
+            
+            String s = words[0];
+            int i = 1;
+            
+            while (i < words.length) {
+                while (i < words.length && s.length() + words[i].length() + 1 <= w) {
+                    s += "." + words[i];
+                    i++;
+                }
+                
+                System.out.println(full(s, w));
+                if (i < words.length) {
+                    s = words[i];
+                } else {
+                    s = "";
+                }
+                
                 i++;
             }
-
-            System.out.println(full(s, w));
-            if (i < words.length) {
-                s = words[i];
-            } else {
-                s = "";
+            
+            if (s.length() > 0) {
+                System.out.println(full(s, w));
             }
-
-            i++;
         }
-
-        if (s.length() > 0) {
-            System.out.println(full(s, w));
-        }
-
-        input.close();
     }
 
     public static String full(String s, int w) {
