@@ -11,17 +11,21 @@ import java.util.Scanner;
 
 public class CCC24J2 {
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        int dusa = input.nextInt();
-        for (int i = 0; input.hasNextInt(); i++) {
-            int yobi = input.nextInt();
-            if (yobi > dusa) {
-                System.out.println("NO");
-                return;
+        try (Scanner input = new Scanner(System.in)) {
+            int dusa = input.nextInt();
+            while (true)
+            {
+                int yobi = input.nextInt();
+                if (dusa>yobi)
+                {
+                    dusa = dusa + yobi;
+                }
+                else
+                {
+                    break;
+                }
             }
-            dusa += yobi;
         }
-        
 
     }
 }

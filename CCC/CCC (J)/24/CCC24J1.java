@@ -7,12 +7,12 @@ import java.util.*;
 
 public class CCC24J1 {
     public static void main(String[] args) {
-        Scanner input = new Scanner(System.in);
-        int r = input.nextInt();
-        int g = input.nextInt();
-        int b = input.nextInt();
-        int total = r * 3 + g * 4 + b * 5;
-        System.out.println(total);
-        input.close();
+        try (Scanner input = new Scanner(System.in)) {
+            int r = input.nextInt();
+            int g = input.nextInt();
+            int b = input.nextInt();
+            int total = r * 3 + g * 4 + b * 5;
+            System.out.println(total);
+        }
     }
 }
