@@ -24,7 +24,7 @@ public class scuffedj5 {
                     for(int i = -1; i <= 1; i++){
                         for(int j = -1; j <= 1; j++){
                             if((i!= 0 || j!= 0) && inBounds(r+i, c+j) && grid[r+i][c+j] == word[1]){
-                                count += recur(1, r+i, c+i, i, j, false);
+                                count += recur(1, r+i, c+j, i, j, false);
                             }
                         }
                     }
@@ -43,10 +43,10 @@ public class scuffedj5 {
         if(inBounds(r+rShift, c+cShift) && grid[r+rShift][c+cShift] == word[index+1]){
             count += recur(index+1, r+rShift, c+cShift, rShift, cShift, usedTurn);
         }
-        if(!usedTurn && inBounds(r-cShift, c+rShift) && grid[r-cShift][c+cShift] == word[index+1]){
+        if(!usedTurn && inBounds(r-cShift, c+rShift) && grid[r-cShift][c+rShift] == word[index+1]){
             count += recur(index+1, r-cShift, c+rShift, -cShift, rShift, true);
         }
-        if(!usedTurn && inBounds(r+cShift, c+-rShift) && grid[r+cShift][c+cShift] == word[index+1]){
+        if(!usedTurn && inBounds(r+cShift, c-rShift) && grid[r+cShift][c-rShift] == word[index+1]){
             count += recur(index+1, r+cShift, c-rShift, cShift, -rShift, true);
         }
         return count;
