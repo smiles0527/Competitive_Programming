@@ -5,7 +5,7 @@ public class scuffedj5 {
     static int numRows;
     static int numCols;
     static char[][] grid;
-~    public static void main(String[] args) {
+    public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         word = input.next().toCharArray();
         numRows = input.nextInt();
