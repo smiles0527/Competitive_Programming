@@ -63,6 +63,7 @@
     "memory": "cpp",
     "iosfwd": "cpp",
     "vector": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "ios": "cpp"
   }
 }
