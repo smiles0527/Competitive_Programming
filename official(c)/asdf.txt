@@ -1,0 +1,76 @@
+We start by noting that your boot’s chilling level, \(L\), is a continuous parameter but only certain “critical” values matter. In particular, when you are in room \(i\), the only levels you ever need to consider are those required by one or more tunnels incident to that room. Formally, let  
+\[
+T_i = \{ c \mid \text{there is a tunnel incident on room } i \text{ with temperature } c \}
+\]
+and include \(0\) in \(T_1\) since you start in room 1 with \(L = 0\).
+
+Now, we define the state space as  
+\[
+V = \{ (i, L) \mid i \in \{1,\dots,N\}, \, L \in T_i \}.
+\]
+In each room \(i\), suppose the relevant levels are  
+\[
+T_i = \{ L_{i,1}, L_{i,2}, \dots, L_{i,k_i} \} \quad \text{with} \quad L_{i,1} < L_{i,2} < \cdots < L_{i,k_i}.
+\]
+Changing the boot’s level within room \(i\) from \(L_{i,j}\) to \(L_{i,j+1}\) costs  
+\[
+|L_{i,j+1} - L_{i,j}| = L_{i,j+1} - L_{i,j},
+\]
+since the absolute difference gives the adjustment cost.
+
+For every tunnel connecting room \(i\) and room \(j\) with temperature \(c\), you are allowed to traverse the tunnel if and only if your boot level is exactly \(c\). We add an edge of cost 0 from the state \((i, c)\) to \((j, c)\).
+
+Thus, we construct a graph \(G = (V, E)\) where:
+- **Vertices:** Each vertex is a state \((i, L)\) with \(L \in T_i\).
+- **Edges within a room:** For each room \(i\) and for adjacent levels \(L_{i,j}\) and \(L_{i,j+1}\) in \(T_i\), add an edge with weight  
+  \[
+  L_{i,j+1} - L_{i,j}.
+  \]
+- **Edges for tunnels:** For each tunnel between room \(i\) and room \(j\) with temperature \(c\), add an edge from \((i, c)\) to \((j, c)\) with weight 0.
+
+Your objective is to find the minimum-cost path from the initial state \((1, 0)\) to any state \((N, L)\) with \(L \in T_N\). Mathematically, you wish to solve:
+\[
+\min_{P = \{v_1, v_2, \dots, v_k\}} \sum_{r=1}^{k-1} w(v_r, v_{r+1}),
+\]
+subject to:
+- \(v_1 = (1,0)\),
+- \(v_k = (N, L)\) for some \(L \in T_N\), and
+- \(w(v_r, v_{r+1})\) is the cost of transitioning between states (either the adjustment cost \(|L_1 - L_2|\) or 0 for tunnel traversal).
+
+The key mathematical insight here is that the cost function \(f(L_1,L_2) = |L_1 - L_2|\) is a metric (specifically the \(L_1\) distance on \(\mathbb{R}\)). This metric has the property that if you want to go from \(L\) to \(L'\) and there is a sorted sequence of intermediate levels \(L_{i,1}, L_{i,2}, \dots, L_{i,k_i}\), then:
+\[
+|L - L'| = \sum_{j} (L_{i,j+1} - L_{i,j}).
+\]
+Because of this, it is sufficient to consider edges only between consecutive levels in the sorted order.
+
+By reducing the continuous decision space (all possible boot levels) to the discrete set \(T_i\) in each room, we can apply standard shortest-path algorithms (e.g. Dijkstra’s algorithm) to compute:
+\[
+\min \{\, \text{Total Cost} \,\}
+\]
+which is exactly the minimum number of coins needed to adjust your boot’s level and traverse the tunnels from room 1 to room \(N\).
+
+In summary, the mathematical reasoning is:
+1. **State Reduction:** Only consider levels \(L \in T_i\) in each room \(i\), where
+   \[
+   T_i = \{ c \mid \exists \text{ tunnel incident on room } i \text{ with temperature } c \} \cup \{0 \text{ if } i=1\}.
+   \]
+2. **Cost within a room:** The adjustment cost is given by
+   \[
+   |L_{i,j+1} - L_{i,j}|,
+   \]
+   and by the triangle inequality,
+   \[
+   |L - L'| = \sum_{j} (L_{i,j+1} - L_{i,j}).
+   \]
+3. **Graph Formulation:** Construct a graph with vertices \((i,L)\) and edges corresponding to both level adjustments (with cost \(|L - L'|\)) and tunnel traversals (with cost 0).
+4. **Optimization:** Find the shortest path from \((1,0)\) to any \((N, L)\), which is equivalent to solving
+   \[
+   \min_{P \in \mathcal{P}} \sum_{e \in P} w(e),
+   \]
+   where \(\mathcal{P}\) is the set of all valid paths in the graph \(G\).
+
+This mathematical framework converts the original problem into a finite shortest path problem that can be solved efficiently. 
+
+**Q1:** How would the formulation change if the cost function for adjusting the boot’s level was nonlinear (e.g., quadratic instead of absolute difference)?  
+**Q2:** What implications arise if tunnel traversal is directional, meaning you can only move from room \(i\) to room \(j\) and not vice versa?  
+**Q3:** How can this state-space reduction be adapted if, in addition to level adjustments, there are other dynamic constraints in the dungeon?
