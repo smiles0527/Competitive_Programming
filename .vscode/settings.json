@@ -62,6 +62,7 @@
     "deque": "cpp",
     "memory": "cpp",
     "iosfwd": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "iostream": "cpp"
   }
 }
