@@ -32,7 +32,7 @@ It is guaranteed that the sum of N2
 
 import java.util.Scanner;
 
-public class USACOB1 {
+public class USACO24B1 {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         int t = input.nextInt();
