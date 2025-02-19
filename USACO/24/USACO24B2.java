@@ -47,5 +47,7 @@ public class USACO24B2 {
         }
 
         System.out.println(count);
+
+        input.close();
     }
 }

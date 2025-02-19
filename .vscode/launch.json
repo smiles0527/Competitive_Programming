@@ -3,6 +3,20 @@
   "configurations": [
     {
       "type": "java",
+      "name": "main",
+      "request": "launch",
+      "mainClass": "main",
+      "projectName": "VSC_78cb94f2"
+    },
+    {
+      "type": "java",
+      "name": "USACOB2",
+      "request": "launch",
+      "mainClass": "USACOB2",
+      "projectName": "github_315a3097"
+    },
+    {
+      "type": "java",
       "name": "CCC09J4",
       "request": "launch",
       "mainClass": "CCC09J4",
