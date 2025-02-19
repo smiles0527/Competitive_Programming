@@ -66,5 +66,6 @@
     "iostream": "cpp",
     "ios": "cpp",
     "set": "cpp"
-  }
+  },
+  "java.debug.settings.onBuildFailureProceed": true
 }
