@@ -60,6 +60,8 @@
     "__hash_table": "cpp",
     "unordered_map": "cpp",
     "deque": "cpp",
-    "memory": "cpp"
+    "memory": "cpp",
+    "iosfwd": "cpp",
+    "vector": "cpp"
   }
 }
