@@ -5,55 +5,35 @@ public class j3 {
         Scanner input = new Scanner(System.in);
 
         int n = input.nextInt();
+        input.nextLine();
 
-        for (int i = 0; i < n; i++) 
+        for (int i = 0; i < n; i++)
         {
             String str = input.next();
-            String answer = "";
+            String upper = "";
+
             int value = 0;
 
-            for (int j = 0; j < str.length(); j++)
+            for (char c : str.toCharArray())
             {
-                if (Character.isUpperCase(str.charAt(j)))
+                if (Character.isUpperCase(c))
                 {
-                    answer += str.charAt(j);
+                    upper += c;
                 }
             }
 
-            String dValue = "";
-
-            for (int j = 0; j < str.length(); j++)
+            String[] numbers = str.split("[^-0-9]+");
+            for (String num : numbers)
             {
-                if (Character.isDigit(str.charAt(j)) && !Character.isDigit(str.charAt(j)) && str.charAt(j-1) != '-')
+                if (!num.isEmpty())
                 {
-                    value -= str.charAt(j) - '0';
+                    value += Integer.parseInt(num);
                 }
-                if (Character.isDigit(str.charAt(j)) && !Character.isDigit(str.charAt(j-1)) && !Character.isDigit(str.charAt(j+1)))
-                {
-                    value -= str.charAt(j) - '0'; 
-                }
-                if (Character.isDigit(str.charAt(j)) && Character.isDigit(str.charAt(j+1)))
-                {
-                    dValue += str.charAt(j);
-                }
-                if (Character.isDigit(str.charAt(j)) && Character.isDigit(str.charAt(j+1)) && Character.isDigit(str.charAt(j-1)))
-                {
-                    dValue += str.charAt(j);
-                }
-                if (!Character.isDigit(str.charAt(j+1)) && !Character.isDigit(str.charAt(j-1)))
-                {
-                    value += Integer.parseInt(dValue);
-                    dValue = "";
-                }
+                
+            }   
 
-            }
+            System.out.println(upper + value);
 
-
-
-            System.out.println(answer + value);
         }
-
-
-        input.close();
     }
 }   
