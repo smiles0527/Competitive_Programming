@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Main {
+public class s1 {
     
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
@@ -15,5 +15,10 @@ public class Main {
 
         System.out.println(Math.min(per1, per2));
         input.close();
+
+
+
+
+        
     }
 }
