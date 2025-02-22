@@ -65,7 +65,8 @@
     "vector": "cpp",
     "iostream": "cpp",
     "ios": "cpp",
-    "set": "cpp"
+    "set": "cpp",
+    "tuple": "cpp"
   },
   "java.debug.settings.onBuildFailureProceed": true
 }
