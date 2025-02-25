@@ -1,48 +1,42 @@
 import java.util.Scanner;
 
-public class Main {
+public class bronze3 {
     public static void main(String[] args) {
-        // Scanner to take input
-        Scanner sc = new Scanner(System.in);
-        
-        // Read number of test cases
-        int T = sc.nextInt();
-        
-        // Loop through all test cases
-        while (T-- > 0) {
-            // Read N (size of array) and K (maximum allowed segments)
-            int N = sc.nextInt();
-            int K = sc.nextInt();
-            
-            // Create an array to store the sequence
-            int[] S = new int[N];
-            for (int i = 0; i < N; i++) {
-                S[i] = sc.nextInt();
+
+        Scanner input = new Scanner(System.in);
+
+        int t = input.nextInt();
+
+        while (t-- > 0) {
+
+            int n = input.nextInt();
+            int k = input.nextInt();
+
+
+            int[] arr = new int[n];
+            for (int i = 0; i < n; i++) {
+                arr[i] = input.nextInt();
             }
 
-            // We'll count how many parts we can divide the array into
-            int parts = 1;  // We start with one part
-            int lastPart = S[0];  // The first element is the starting part
-            
-            // Loop through the array to find splits
-            for (int i = 1; i < N; i++) {
-                // If current element is different from the last part, split into a new part
-                if (S[i] != lastPart) {
+            int parts = 1;
+            int prev = arr[0];
+
+
+            for (int i = 1; i < n; i++) {
+
+                if (arr[i] != prev) {
                     parts++;
-                    lastPart = S[i];  // Start new part
+                    prev = arr[i];
                 }
             }
 
-            // Output the result: If the number of parts is less than or equal to K, print YES
-            if (parts <= K) {
+            if (parts <= k) {
                 System.out.println("YES");
             } else {
                 System.out.println("NO");
             }
         }
 
-        // Close the scanner
-        sc.close();
+        input.close();
     }
 }
-r
