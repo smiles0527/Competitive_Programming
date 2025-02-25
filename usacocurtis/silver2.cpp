@@ -42,16 +42,11 @@ int dstack[MAXN];
 
 
 vector<int> children[MAXN];
-
-
 int fenwSize;
-
-
 inline void bit_update(int i, int delta) {
     for(; i < fenwSize; i = i | (i + 1))
         fenw[i] += delta;
 }
-
 inline int bit_query(int i) {
     int s = 0;
     for(; i >= 0; i = (i & (i + 1)) - 1)
@@ -71,8 +66,6 @@ int main(){
         par[i] = p;
         children[p].push_back(i);
     }
-    
-    
     int timer = 0;
     int stackTop = 0;
     dstack[stackTop++] = 0;
