@@ -1,9 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-
-
-
 inline void computeB(const int a[], int n, vector<int>& b) {
     vector<int> temp;
     temp.reserve(n);
@@ -20,8 +17,6 @@ inline void computeB(const int a[], int n, vector<int>& b) {
         b[i] = temp[t - 1 - i];
     }
 }
- 
-
 
 inline bool lexGreaterB(const vector<int>& b1, const vector<int>& b2) {
     int m = min(b1.size(), b2.size());
