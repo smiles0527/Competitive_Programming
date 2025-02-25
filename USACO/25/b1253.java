@@ -1,7 +1,7 @@
 
 import java.util.*;
 
-public class bronze1 {
+public class b1253 {
 
 
     public static void main(String[] args) {

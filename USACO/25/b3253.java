@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class bronze3 {
+public class b3253 {
     public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);
