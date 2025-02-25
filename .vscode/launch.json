@@ -3,6 +3,27 @@
   "configurations": [
     {
       "type": "java",
+      "name": "bronze1",
+      "request": "launch",
+      "mainClass": "bronze1",
+      "projectName": "codestuff_f91d4af3"
+    },
+    {
+      "type": "java",
+      "name": "bronze2",
+      "request": "launch",
+      "mainClass": "usacorachel.bronze2",
+      "projectName": "codestuff_f91d4af3"
+    },
+    {
+      "type": "java",
+      "name": "bronze1",
+      "request": "launch",
+      "mainClass": "usacorachel.bronze1",
+      "projectName": "codestuff_f91d4af3"
+    },
+    {
+      "type": "java",
       "name": "s2",
       "request": "launch",
       "mainClass": "s2",
