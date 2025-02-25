@@ -38,8 +38,6 @@ int main(){
         for (int i = 0; i < n; i++){
             cin >> a[i];
         }
-        
-        
         vector<int> b0 = computeB(a);
         
         
@@ -49,7 +47,6 @@ int main(){
             S[i] = max(a[i], S[i + 1]);
         }
         
-        
         int candidateIndex = -1;
         for (int i = 0; i < n - 1; i++){
             if(a[i] < S[i+1]){
@@ -58,12 +55,9 @@ int main(){
             }
         }
         
-        
         vector<int> bestB = b0;
         if(candidateIndex != -1) {
-            
             int candidateVal = S[candidateIndex+1];
-            
             int jCandidate = -1;
             for (int j = n - 1; j > candidateIndex; j--){
                 if(a[j] == candidateVal) {
@@ -72,19 +66,18 @@ int main(){
                 }
             }
             if(jCandidate != -1) {
-                
                 vector<int> candidate = a;
                 int temp = candidate[jCandidate];
-                candidate.erase(candidate.begin() + jCandidate);
-                candidate.insert(candidate.begin() + candidateIndex, temp);
                 
-                
+                for (int k = jCandidate; k > candidateIndex; k--) {
+                    candidate[k] = candidate[k-1];
+                }
+                candidate[candidateIndex] = temp;
                 vector<int> b1 = computeB(candidate);
                 if( lexGreater(b1, bestB) )
                     bestB = b1;
             }
         }
-        
         
         for (int i = 0; i < bestB.size(); i++){
             cout << bestB[i] << (i + 1 == bestB.size() ? "\n" : " ");
