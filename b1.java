@@ -40,14 +40,13 @@ public class b1 {
             }
         }
 
-        // Process each query
         for (int move = 0; move < m; move++) {
             int s1 = input.nextInt() - 1;
             int s2 = input.nextInt() - 1;
 
             int count = 0;
 
-            // Instead of scanning all pairs, just count the wins for the two selected players
+
             for (int l = 0; l < n; l++) {
                 for (int r = 0; r < n; r++) {
                     if ((winCount[l][s1] == 1 && winCount[l][s2] == 1) ||
