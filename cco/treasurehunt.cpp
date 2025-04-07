@@ -1,21 +1,65 @@
-//Day 1, Problem 1:Treasure Hunt
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <queue>
 using namespace std;
 
+typedef long long ll;
+
+struct Route {
+    int destination;
+    ll cost;
+};
+
 int main(){
-    int n, m;
-    cin >> n >> m;
-    vector<vector<char>> grid(n, vector<char>(m));
-    for(int i = 0; i < n; i++){
-        for(int j = 0; j < m; j++){
-            cin >> grid[i][j];
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    
+    int numIslands, numRoutes;
+    cin >> numIslands >> numRoutes;
+    
+    vector<ll> treasure(numIslands);
+    for (int i = 0; i < numIslands; i++)
+        cin >> treasure[i];
+    
+    vector<vector<Route>> routes(numIslands);
+    for (int i = 0; i < numRoutes; i++){
+        int islandA, islandB;
+        ll travelCost;
+        cin >> islandA >> islandB >> travelCost;
+        islandA--; islandB--; 
+        routes[islandA].push_back({islandB, travelCost});
+        routes[islandB].push_back({islandA, travelCost});
+    }
+
+    const ll NEG_INF = -1000000000000000000LL;
+    vector<ll> maxProfit(numIslands, NEG_INF);
+    
+    priority_queue<pair<ll, int>> process;
+    
+    for (int i = 0; i < numIslands; i++){
+        maxProfit[i] = treasure[i];
+        process.push({maxProfit[i], i});
+    }
+    
+    while (!process.empty()){
+        auto [currentProfit, island] = process.top();
+        process.pop();
+        if (currentProfit != maxProfit[island])
+            continue;  
+
+        for (const auto &route : routes[island]){
+            int nextIsland = route.destination;
+            ll potentialProfit = currentProfit - route.cost;
+            if (potentialProfit > maxProfit[nextIsland]){
+                maxProfit[nextIsland] = potentialProfit;
+                process.push({potentialProfit, nextIsland});
+            }
         }
     }
-    int x = 0, y = 0;
-    while(x < n && y < m){
-        if(grid[x][y] == 'N'){
-            x--;
-        }
+    
+    for (int i = 0; i < numIslands; i++){
+        cout << maxProfit[i] << "\n";
     }
-    cout << x << " " << y << endl;
+    
+    return 0;
 }
