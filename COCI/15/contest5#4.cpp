@@ -1,45 +1,43 @@
 #include <bits/stdc++.h>
-using namespace std;
-int main(){
-    ios::sync_with_stdio(false);
-    cin.tie(NULL);
 
-    int N, M;
-    cin >> N >> M;
-    vector<vector<bool>> adj(N+1, vector<bool>(N+1,false));
-    int a, b;
-    for(int i = 0; i < M; i++){
-        cin >> a >> b;
-        adj[a][b] = adj[b][a] = true;
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    long long N, X;
+    cin >> N >> X;
+
+    long long mx = (N - 1) * (N - 2) / 2;
+
+    if (mx < X) {
+        cout << -1 << "\n";
+        return 0;
     }
-    int u = 1;
-    vector<int> group(N+1);
-    group[u] = 0;
-    for(int v = 1; v <= N; v++){
-        if(v == u) continue;
-        group[v] = adj[u][v] ? 0 : 1;
-    }
-    long long cnt0 = 0, cnt1 = 0;
-    for(int i = 1; i <= N; i++){
-        for(int j = i+1; j <= N; j++){
-            if(adj[i][j]){
-                if(group[i] != group[j]){
-                    cout << "NE";
-                    return 0;
-                }
-                if(group[i] == 0) cnt0++;
-                else cnt1++;
-            }
+
+    vector<long long> excluded, included;
+    long long to_remove = mx - X;
+    for (long long i = 1; i < N - 1; i++) {
+        long long stored_water = (N - 1) - i;
+        if (to_remove >= stored_water) {
+            excluded.push_back(i);
+            to_remove -= stored_water;
+        } else {
+            included.push_back(i);
         }
     }
-    long long s0 = 0, s1 = 0;
-    for(int i = 1; i <= N; i++){
-        if(group[i] == 0) s0++;
-        else s1++;
+
+    // output
+    vector<long long> res;
+    for (auto x: excluded)
+        res.push_back(x);
+    res.push_back(N);
+    for (auto x: included)
+        res.push_back(x);
+    res.push_back(N - 1);
+    for (size_t i = 0; i < res.size(); i++) {
+        cout << res[i] << (i + 1 == res.size() ? "\n" : " ");
     }
-    if(cnt0 != s0*(s0-1LL)/2 || cnt1 != s1*(s1-1LL)/2)
-        cout << "NE";
-    else
-        cout << "DA";
     return 0;
 }

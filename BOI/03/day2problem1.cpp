@@ -2,39 +2,60 @@
 using namespace std;
 
 struct DSU {
-    vector<int> p, sz;
-    DSU(int n) : p(n), sz(n,1) { iota(p.begin(), p.end(), 0); }
-    int find(int x){ return p[x]==x ? x : p[x]=find(p[x]); }
-    void unite(int a,int b){
-        a=find(a); b=find(b);
-        if(a==b) return;
-        if(sz[a]<sz[b]) swap(a,b);
-        p[b]=a; sz[a]+=sz[b];
+    vector<int> root, rnk;
+    DSU(int n): root(n), rnk(n, 1) {
+        for(int i = 0; i < n; ++i) root[i] = i;
+    }
+    int find(int x) {
+        if (root[x] == x) return x;
+        return root[x] = find(root[x]);
+    }
+    void unite(int x, int y) {
+        int rx = find(x), ry = find(y);
+        if (rx == ry) return;
+        if (rnk[rx] > rnk[ry]) root[ry] = rx;
+        else if (rnk[rx] < rnk[ry]) root[rx] = ry;
+        else {
+            root[ry] = rx;
+            rnk[rx]++;
+        }
     }
 };
 
-int main(){
+int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int N,M; if(!(cin>>N>>M)) return 0;
-    DSU d(2*N+1);
-    auto enemy = [&](int x){ return x+N; };
+    int N, M;
+    cin >> N >> M;
+    DSU uf(N + 1);
+    vector<vector<int>> enemies(N + 1);
 
-    while(M--){
-        char t; int p,q; cin>>t>>p>>q;
-        if(t=='F'){
-            d.unite(p,q);
-            d.unite(enemy(p),enemy(q));
-        }else{
-            d.unite(p,enemy(q));
-            d.unite(enemy(p),q);
+    for (int i = 0; i < M; ++i) {
+        char t;
+        int a, b;
+        cin >> t >> a >> b;
+        if (t == 'F') {
+            uf.unite(a, b);
+        } else {
+            enemies[a].push_back(b);
+            enemies[b].push_back(a);
         }
     }
 
-    unordered_set<int> roots;
-    for(int i=1;i<=N;++i) roots.insert(d.find(i));
-    cout<<roots.size()<<'\n';
+    for (int i = 1; i <= N; ++i) {
+        for (int e : enemies[i]) {
+            for (int f : enemies[e]) {
+                uf.unite(i, f);
+            }
+        }
+    }
+
+    unordered_set<int> groups;
+    for (int i = 1; i <= N; ++i) {
+        groups.insert(uf.find(i));
+    }
+
+    cout << groups.size() << "\n";
     return 0;
 }
-        

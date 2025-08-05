@@ -1,25 +1,47 @@
 #include <bits/stdc++.h>
 using namespace std;
-int main(){
+
+int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    long long x,y;
-    cin>>x>>y;
-    if(y>x) swap(x,y);
-
-    vector<array<char,3>> ops;
-    long long t=y;
-    while(t>0){
-        if(t&1) ops.push_back({'A','C','C'});
-        t>>=1;
-        if(t>0) ops.push_back({'A','A','A'});
+    long long x, y;
+    cin >> x >> y;
+    string s;
+    if (x > y) {
+        s = "ABCD";
+    } else {
+        s = "BACD";
+        swap(x, y);
     }
 
-    cout<<ops.size()<<"\n";
-    for(auto &o:ops)
-        cout<<o[0]<<" "<<o[1]<<" "<<o[2]<<"\n";
-    cout<<"C\n";
+    vector<long long> reg(4);
+    reg[0] = x;
+    reg[1] = y;
+    reg[2] = 0;
+    reg[3] = 1;
+
+    vector<array<int,3>> moves;
+    auto perform_add = [&](int i, int j, int k) {
+        moves.push_back({i, j, k});
+        reg[k] = reg[i] + reg[j];
+    };
+
+    long long rem = y;
+    while (rem > 0) {
+        if (rem % 2 == 0) {
+            perform_add(0, 0, 0);
+            rem /= 2;
+        } else {
+            perform_add(0, 2, 2);
+            rem -= 1;
+        }
+    }
+
+    cout << moves.size() << "\n";
+    for (auto &m : moves) {
+        cout << s[m[0]] << " " << s[m[1]] << " " << s[m[2]] << "\n";
+    }
+    cout << s[2] << "\n";
     return 0;
 }
-    
