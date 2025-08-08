@@ -12,8 +12,8 @@ vector<vector<vector<int>>> constructAdj(vector<vector<int>> &edges, int V){
     }
     return adj;
 }
-int dijkstra(int V, vector<vector<int>> &edges, int src){
-    vector<vector<vector<int>>> constructAdj(edges, V);
+vector<int> dijkstra(int V, vector<vector<int>> &edges, int src){
+    vector<vector<vector<int>>> adj = constructAdj(edges, V);
     priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq;
     vector<int> dist(V, INT_MAX);
     pq.push({0, src});
