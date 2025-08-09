@@ -3,6 +3,13 @@
   "configurations": [
     {
       "type": "java",
+      "name": "j4v2",
+      "request": "launch",
+      "mainClass": "j4v2",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
       "name": "s1",
       "request": "launch",
       "mainClass": "s1",
