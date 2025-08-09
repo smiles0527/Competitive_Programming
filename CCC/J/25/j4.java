@@ -10,34 +10,19 @@ public class j4 {
         for (int i = 0; i < n; i++) {
             weather[i] = input.next().charAt(0);
         }
-        
-        int max = 0;
-        boolean hasP = false;
-        
-        for (int i = 0; i < n; i++) {
-            if (weather[i] == 'P') {
-                hasP = true;
-                
-                int before = 0;
-                for (int j = i-1; j >= 0 && weather[j] == 'S'; j--) {
-                    before++;
-                }
-                
-                int after = 0; 
-                for (int j = i+1; j < n && weather[j] == 'S'; j++) {
-                    after++;
-                }
-                
-                int count = before + 1 + after;
-                max = Math.max(max, count);
+      
+ 
+        int before = 0, rain = 0, best = 0;
+        for (int after = 0; after < n; after++){
+            if (weather[after] == 'P') rain++;
+            while(rain > 1){
+                if (weather[before] == 'P') rain--;
+                before++;
             }
+            best = Math.max(best, after - before + 1);
         }
-        
-        if (!hasP) {
-            max = n - 1;
-        }
-        
-        System.out.println(max);
+
+        System.out.println(best);
         input.close();
     }
 }
