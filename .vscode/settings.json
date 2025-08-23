@@ -124,8 +124,27 @@
     "unordered_set": "cpp",
     "valarray": "cpp",
     "variant": "cpp",
-    "algorithm": "cpp"
+    "algorithm": "cpp",
+    "atomic": "cpp",
+    "exception": "cpp",
+    "__bits": "cpp",
+    "__config": "cpp",
+    "__debug": "cpp",
+    "__errc": "cpp",
+    "__mutex_base": "cpp",
+    "__tuple": "cpp",
+    "bit": "cpp",
+    "system_error": "cpp",
+    "thread": "cpp",
+    "type_traits": "cpp",
+    "__nullptr": "cpp",
+    "__string": "cpp",
+    "chrono": "cpp",
+    "compare": "cpp",
+    "concepts": "cpp",
+    "numeric": "cpp",
+    "random": "cpp"
   },
   "java.debug.settings.onBuildFailureProceed": true,
-  "cmake.sourceDirectory": "C:/Users/iscur/OneDrive/My Surface docs/Desktop/codestuff/CCC/CCC (S)/25"
+  "cmake.sourceDirectory": "/Users/rachelxu/Desktop/Coding/Competitive_Programming/CCC/CCC (S)/25"
 }
