@@ -27,7 +27,7 @@ public class j3v2
                 num += Long.parseLong(matcher.group());
             }
             System.out.println(ans + num);
-            input.close();
         }
+        input.close();
     }
 }
