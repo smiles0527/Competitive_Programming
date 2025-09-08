@@ -3,6 +3,27 @@
   "configurations": [
     {
       "type": "java",
+      "name": "insertionSort",
+      "request": "launch",
+      "mainClass": "insertionSort",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "j5v3",
+      "request": "launch",
+      "mainClass": "j5v3",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "j4v4",
+      "request": "launch",
+      "mainClass": "j4v4",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
       "name": "j3v2",
       "request": "launch",
       "mainClass": "j3v2",

@@ -1,25 +1,26 @@
 import java.util.Scanner;
 
-public class j4v3 {
-
+public class j4v4 {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
-        int n = input.nextInt();
-        char[] weather = new char[n];
 
-        for (int i = 0; i < n; i++)
+        int M = input.nextInt();
+        char[] weather = new char[M];
+
+        for (int i = 0; i < M; i++)
         {
-            weather[i] = input.next().charAt(0);
+            String str = input.next();
+            weather[i] = str.charAt(0);
         }
+        boolean hasRain = false;
+        int rain = 0, before = 0, max = 0;
 
-        boolean alexRain = false;
-        int rain = 0, before = 0, best = 0;
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < M; i++)
         {
             if (weather[i] == 'P')
             {
-                alexRain = true; //PSPSSPPS
                 rain++;
+                hasRain = true;
             }
             while (rain>1)
             {
@@ -29,15 +30,14 @@ public class j4v3 {
                 }
                 before++;
             }
-            best = Math.max(best, i-before+1);
+            max = Math.max(max, i-before+1);
         }
 
-        if (!alexRain)
+        if (!hasRain)
         {
-            best--;
+            max--;
         }
-        System.out.println(best);
-
+        System.out.println(max);
         input.close();
     }
 }

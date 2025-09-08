@@ -4,32 +4,49 @@ public class j5v2 {
      public static void main(String[] args) 
      {
         Scanner input = new Scanner(System.in);
-        int r = input.nextInt();
-        int c = input.nextInt();
-        int m = input.nextInt();
+        int R = input.nextInt();
+        int C = input.nextInt();
+        int M = input.nextInt();
 
-        int[] prev = new int[c];
-        int[] cur = new int[c];
-
-        for (int i = 0; i < c; i++)
+        int[] arr = new int[C];
+        for (int c = 0; c < C; c++)
         {
-            prev[i] = i%m+1;
+            arr[c] = c%M+1;
         }
-        
-        for (int i = 1; i < r; i++)
+ 
+        for (int r = 1; r < R; r++)
         {
-            for (int j = 0; j < c; j++)
+            int[] temp = new int[C];
+            for (int c = 0; c < C; c++)
             {
-                int cost = (i*c+j)%m+1;
-                int good = prev[j];
+                int cur = (r*C + c)%M+1;
 
-                if (j>=1)
+                if (c>0 && c<C-1)
                 {
-                    good = Math.min(good, )
+                    temp[c] = cur + Math.min(arr[c-1], Math.min(arr[c], arr[c+1]));
+                }
+                else if (c<1)
+                {
+                    temp[c] = cur + Math.min(arr[c], arr[c+1]);
+                }
+                else
+                {
+                    temp[c] = cur + Math.min(arr[c-1], arr[c]);
                 }
             }
+            arr = temp;
         }
-     }
 
-     
+        int min = Integer.MAX_VALUE;
+
+        for (int i = 0; i < C;i++)
+        {
+            min = Math.min(min, arr[i]);
+        }
+        System.out.println(min);
+        input.close();
+     }
 }
+
+
+
