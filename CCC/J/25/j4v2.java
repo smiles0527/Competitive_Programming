@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class j4v2 {
     
-     public static vwoid main(String[] args) {
+     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         int n = input.nextInt();
 
