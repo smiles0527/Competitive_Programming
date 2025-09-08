@@ -89,7 +89,7 @@ int main() {
 			vert = component.back();
 		}
 	}
-	for (auto &u : component) if (u != vert) {
+	for (auto& u : component) if (u != vert) {
 		adj[u].push_back(vert);
 		adj[vert].push_back(u);
 		len[u].push_back(L);

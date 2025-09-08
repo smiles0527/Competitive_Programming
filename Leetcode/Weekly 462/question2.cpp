@@ -31,7 +31,7 @@ class Solution {
                         }
                     }
                 }
-
+                // connect inside each bucket
                 for (auto &bucket : buckets) {
                     for (int i = 1; i < (int)bucket.size(); ++i) {
                         unite(bucket[0], bucket[i]);

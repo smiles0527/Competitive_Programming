@@ -1,7 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 using ll = long long;
-const ll INF = 4e18;
+const ll INF = (ll)4e18;
 
 int main(){
     ios::sync_with_stdio(false);
@@ -10,18 +10,18 @@ int main(){
     int N, K;
     cin >> N >> K;
     vector<int> breed(N+1);
-    for(int i = 1; i <= N; ++i) 
-        cin >> breed[i];
+    for(int i = 1; i <= N; ++i) cin >> breed[i];
 
-    vector<string> canSend(K+1);
+    vector<string> S(K+1);
     for(int i = 1; i <= K; ++i){
-        cin >> canSend[i];
-        canSend[i] = ' ' + canSend[i];  // 1-index
+        cin >> S[i];
+        S[i] = ' ' + S[i];
     }
 
-    vector< set<int> > alive(K+1);
+    vector<vector<int>> pos(K+1);
+    pos.reserve(K+1);
     for(int i = 1; i <= N; ++i)
-        alive[breed[i]].insert(i);
+        pos[breed[i]].push_back(i);
 
     vector<ll> dist(N+1, INF);
     dist[1] = 0;
@@ -29,43 +29,70 @@ int main(){
     pq.emplace(0, 1);
 
     while(!pq.empty()){
-        auto [d, u] = pq.top();
-        pq.pop();
+        auto [d, u] = pq.top(); pq.pop();
         if(d != dist[u]) continue;
+        if(u == N) break;
         int pb = breed[u];
-
         for(int tb = 1; tb <= K; ++tb){
-            if(canSend[pb][tb] != '1') continue;
-            auto &st = alive[tb];
-
-            // scan to the right of u
-            auto it = st.lower_bound(u);
-            while(it != st.end()){
-                int v = *it;
-                ll nd = d + ll(abs(u - v));
+            if(S[pb][tb] != '1') continue;
+            auto &vlist = pos[tb];
+            int sz = (int)vlist.size();
+            if(sz == 0) continue;
+            int idx = int(lower_bound(vlist.begin(), vlist.end(), u) - vlist.begin());
+            if(idx < sz && vlist[idx] == u){
+                if(idx > 0){
+                    int v = vlist[idx-1];
+                    ll nd = d + ll(u - v);
+                    if(nd < dist[v]){
+                        dist[v] = nd;
+                        pq.emplace(nd, v);
+                    }
+                }
+                if(idx+1 < sz){
+                    int v = vlist[idx+1];
+                    ll nd = d + ll(v - u);
+                    if(nd < dist[v]){
+                        dist[v] = nd;
+                        pq.emplace(nd, v);
+                    }
+                }
+            } else {
+                if(idx > 0){
+                    int v = vlist[idx-1];
+                    ll nd = d + ll(u - v);
+                    if(nd < dist[v]){
+                        dist[v] = nd;
+                        pq.emplace(nd, v);
+                    }
+                }
+                if(idx < sz){
+                    int v = vlist[idx];
+                    ll nd = d + ll(v - u);
+                    if(nd < dist[v]){
+                        dist[v] = nd;
+                        pq.emplace(nd, v);
+                    }
+                }
+            }
+            {
+                int v = vlist[0];
+                ll nd = d + abs(u - v);
                 if(nd < dist[v]){
                     dist[v] = nd;
                     pq.emplace(nd, v);
-                    it = st.erase(it);
-                } else break;
+                }
             }
-            // scan to the left of u
-            it = st.lower_bound(u);
-            while(it != st.begin()){
-                auto jt = prev(it);
-                int v = *jt;
-                ll nd = d + ll(abs(u - v));
+            {
+                int v = vlist.back();
+                ll nd = d + abs(u - v);
                 if(nd < dist[v]){
                     dist[v] = nd;
                     pq.emplace(nd, v);
-                    st.erase(jt);
-                } else break;
+                }
             }
-            
         }
     }
 
-    ll ans = dist[N] < INF ? dist[N] : -1;
-    cout << ans << "\n";
+    cout << (dist[N] < INF ? dist[N] : -1) << "\n";
     return 0;
 }
