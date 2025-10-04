@@ -2,7 +2,7 @@ public class insertionSort
 {
     public static void insertSortInc(int[] arr)
     {
-        for (int i = 0; i < arr.length-1; i++)
+        for (int i = 0; i < arr.length - 1; i++)
         {
             int key = arr[i+1];
             int j;
@@ -15,7 +15,7 @@ public class insertionSort
     }
     public static void insertSortDec(int[] arr)
     {
-        for (int i = 0; i < arr.length-1; i++)
+        for (int i = 0; i < arr.length - 1; i++)
         {
             int key = arr[i+1];
             int j;
