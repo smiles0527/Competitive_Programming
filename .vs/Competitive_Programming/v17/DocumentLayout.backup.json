@@ -3,16 +3,20 @@
   "WorkspaceRootPath": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\MIT ACM\\skyscrapers.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:MIT ACM\\skyscrapers.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\CCC\\CCC (S)\\23\\MCR.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:CCC\\CCC (S)\\23\\MCR.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOIp3.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IOIp3.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\algos\\binarysearch.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:algos\\binarysearch.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOI08p1.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:IOI08p1.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\algos\\mergesort.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:algos\\mergesort.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,45 +26,58 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 3,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "skyscrapers.cpp",
-              "DocumentMoniker": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\MIT ACM\\skyscrapers.cpp",
-              "RelativeDocumentMoniker": "MIT ACM\\skyscrapers.cpp",
-              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\MIT ACM\\skyscrapers.cpp",
-              "RelativeToolTip": "MIT ACM\\skyscrapers.cpp",
-              "ViewState": "AgIAAC4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-09-08T02:25:27.305Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "IOIp3.cpp",
-              "DocumentMoniker": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOIp3.cpp",
-              "RelativeDocumentMoniker": "IOIp3.cpp",
-              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOIp3.cpp",
-              "RelativeToolTip": "IOIp3.cpp",
-              "ViewState": "AgIAACQAAAAAAAAAAAAAAB8AAAAUAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-09-07T21:16:39.908Z",
-              "EditorCaption": ""
-            },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "IOI08p1.cpp",
               "DocumentMoniker": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOI08p1.cpp",
               "RelativeDocumentMoniker": "IOI08p1.cpp",
-              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOI08p1.cpp",
-              "RelativeToolTip": "IOI08p1.cpp",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\IOI08p1.cpp*",
+              "RelativeToolTip": "IOI08p1.cpp*",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABQAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-09-07T19:09:50.163Z",
+              "WhenOpened": "2025-10-14T16:04:08.685Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "mergesort.cpp",
+              "DocumentMoniker": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\algos\\mergesort.cpp",
+              "RelativeDocumentMoniker": "algos\\mergesort.cpp",
+              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\algos\\mergesort.cpp",
+              "RelativeToolTip": "algos\\mergesort.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-14T05:01:08.11Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "binarysearch.cpp",
+              "DocumentMoniker": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\algos\\binarysearch.cpp",
+              "RelativeDocumentMoniker": "algos\\binarysearch.cpp",
+              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\algos\\binarysearch.cpp",
+              "RelativeToolTip": "algos\\binarysearch.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-14T05:00:59.693Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "MCR.cpp",
+              "DocumentMoniker": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\CCC\\CCC (S)\\23\\MCR.cpp",
+              "RelativeDocumentMoniker": "CCC\\CCC (S)\\23\\MCR.cpp",
+              "ToolTip": "C:\\Users\\iscur\\OneDrive\\My Surface docs\\Desktop\\Competitive_Programming\\CCC\\CCC (S)\\23\\MCR.cpp",
+              "RelativeToolTip": "CCC\\CCC (S)\\23\\MCR.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-04T17:39:49.95Z",
               "EditorCaption": ""
             }
           ]

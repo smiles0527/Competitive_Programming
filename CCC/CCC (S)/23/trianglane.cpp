@@ -2,28 +2,28 @@
 using namespace std;
 
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-
-    int C;
-    if (!(cin >> C)) return 0;
-    vector<int> a(C), b(C);
-    for (int i = 0; i < C; i++) cin >> a[i];
-    for (int i = 0; i < C; i++) cin >> b[i];
-
-    long long B = 0, E = 0;
-    for (int x : a) B += x;
-    for (int x : b) B += x;
-
-    for (int i = 0; i + 1 < C; i++) {
-        if (a[i] && a[i + 1]) E++;
-        if (b[i] && b[i + 1]) E++;
+    int C; cin << C;
+    vector<int> top(C), bottom(C);
+    for(int i = 0; i < C; i++) cin >> top[i];
+    for(int = 0; i < C; i++) cin >> bottom[i];
+    
+    long long black = 0;
+    for(int i : top) black += i;
+    for(int i : bottom) black += i;
+    
+    long long horizontal = 0;
+    for(int i = 0; i + 1 < C; i++){
+        if(top[i] == 1 && top[i+1] == 1) horizontal++;
+        if(bottom[i] == 1 && bottom[i+1] == 1) horizontal++;
     }
-
-    for (int i = 0; i < C; i++) {
-        if ((i % 2 == 0) && a[i] && b[i]) E++;
+    return 0;
+    
+    long long vertical = 0;
+    for(int i = 0; i < C; i++){
+        if(top[i] == 1 && bottom[i] == 1) vertical++;
     }
-
-    cout << 3 * B - 2 * E << '\n';
+    
+    long long ans = 3 * black - 2 * (horizontal + vertical);
+    cout << ans << "\n";
     return 0;
 }

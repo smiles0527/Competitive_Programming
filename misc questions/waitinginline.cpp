@@ -1,135 +1,58 @@
 #include <bits/stdc++.h>
 using namespace std;
+using ll=long long;
+using i128=__int128_t;
 
-using ll = long long;
-
-struct T{
-    ll L,R,S; int sz,pr; T *l,*r,*p;
-    T(ll a,ll b):L(a),R(b),S(b-a+1),sz(1),pr((rand()<<16)^rand()),l(0),r(0),p(0){}
+struct Nd{
+    Nd*l,*r; int pr; i128 k; ll v; int idx,sz; long long gsum; ll fl,llv; int fi,li;
+    Nd(i128 K,ll V,int I,int P):l(0),r(0),pr(P),k(K),v(V),idx(I),sz(1),gsum(0),fl(V),llv(V),fi(I),li(I){}
 };
-inline ll len(T* x){ return x? x->R-x->L+1:0; }
-inline ll sm(T* x){ return x? x->S:0; }
-inline int sz(T* x){ return x? x->sz:0; }
-inline void up(T* x){
-    if(!x) return;
-    x->sz=1+sz(x->l)+sz(x->r);
-    x->S=len(x)+sm(x->l)+sm(x->r);
-    if(x->l) x->l->p=x;
-    if(x->r) x->r->p=x;
+mt19937 rng(712367);
+
+inline long long gap(ll a,int ia,ll b,int ib){ if(a<0) return 0; long long g=(long long)(b-a)-(ib-ia); return g>0?g:0; }
+inline int SZ(Nd*t){ return t?t->sz:0; }
+inline long long G(Nd*t){ return t?t->gsum:0; }
+inline void firstlast(Nd*t,ll&fv,int&fi,ll&lv,int&li){
+    if(!t){ fv=-1; fi=-1; lv=-1; li=-1; return; }
+    fv=t->fl; fi=t->fi; lv=t->llv; li=t->li;
 }
-T* mg(T* a,T* b){
-    if(!a) return b; if(!b) return a;
-    if(a->pr>b->pr){
-        a->r=mg(a->r,b); if(a->r) a->r->p=a; up(a); b->p=0; return a;
-    }else{
-        b->l=mg(a,b->l); if(b->l) b->l->p=b; up(b); a->p=0; return b;
-    }
+inline void pu(Nd*t){
+    if(!t) return;
+    t->sz = 1 + SZ(t->l) + SZ(t->r);
+    ll lf,lr; int lfi,lri; firstlast(t->l,lf,lfi,lr,lri);
+    ll rf,rr; int rfi,rri; firstlast(t->r,rf,rfi,rr,rri);
+    t->fl = (t->l? lf : t->v); t->fi = (t->l? lfi : t->idx);
+    t->llv = (t->r? rr : t->v); t->li = (t->r? rri : t->idx);
+    long long gl = G(t->l), gr = G(t->r);
+    long long glx = t->l? gap(lr,lri,t->v,t->idx):0;
+    long long grx = t->r? gap(t->v,t->idx,rf,rfi):0;
+    t->gsum = gl + gr + glx + gr;
+    t->gsum = gl + gr + glx + grx;
 }
-pair<T*,T*> sp(T* t,int k){
-    if(!t) return {0,0};
-    if(sz(t->l)>=k){
-        auto pr=sp(t->l,k);
-        t->l=pr.second; if(t->l) t->l->p=t; up(t);
-        if(pr.first) pr.first->p=0; return {pr.first,t};
-    }else{
-        int left=sz(t->l)+1;
-        auto pr=sp(t->r,k-left);
-        t->r=pr.first; if(t->r) t->r->p=t; up(t);
-        if(pr.second) pr.second->p=0; return {t,pr.second};
-    }
+Nd* mg(Nd*a,Nd*b){
+    if(!a||!b) return a?a:b;
+    if(a->pr<b->pr){ a->r=mg(a->r,b); pu(a); return a; }
+    b->l=mg(a,b->l); pu(b); return b;
 }
-int rk(T* x){
-    int r=sz(x->l)+1;
-    while(x->p){ if(x==x->p->r) r+=sz(x->p->l)+1; x=x->p; }
-    return r;
+void sp(Nd*t,i128 k,Nd*&a,Nd*&b){
+    if(!t){ a=b=0; return; }
+    if(k<t->k){ sp(t->l,k,a,t->l); b=t; pu(b); }
+    else{ sp(t->r,k,t->r,b); a=t; pu(a); }
 }
-ll pref(T* x){
-    ll a=sm(x->l);
-    while(x->p){ if(x==x->p->r) a+=sm(x->p->l)+len(x->p); x=x->p; }
-    return a;
+Nd* ins(Nd*t,Nd* x){
+    if(!t) return x;
+    if(x->pr<t->pr){
+        sp(t,x->k,x->l,x->r); pu(x); return x;
+    }
+    if(x->k<t->k) t->l=ins(t->l,x); else t->r=ins(t->r,x);
+    pu(t); return t;
 }
-pair<T*,ll> kth(T* t,ll k){
-    while(t){
-        ll ls=sm(t->l);
-        if(k<=ls){ t=t->l; continue; }
-        k-=ls;
-        ll ln=len(t);
-        if(k<=ln) return {t,k-1};
-        k-=ln; t=t->r;
-    }
-    return {0,0};
+Nd* er(Nd*t,i128 k){
+    if(!t) return 0;
+    if(k==t->k){ Nd* u=mg(t->l,t->r); return u; }
+    if(k<t->k) t->l=er(t->l,k); else t->r=er(t->r,k);
+    pu(t); return t;
 }
-
-int main(){
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    srand(712367);
-
-    int N; cin>>N;
-    vector<pair<ll,ll>> v(N);
-    ll mxLab=0, mxPos=0;
-    for(int i=0;i<N;i++){
-        cin>>v[i].first>>v[i].second;
-        mxLab=max(mxLab,max(v[i].first,v[i].second));
-    }
-    int Q; cin>>Q;
-    vector<pair<char,ll>> q(Q);
-    for(int i=0;i<Q;i++){
-        cin>>q[i].first>>q[i].second;
-        if(q[i].first=='P') mxLab=max(mxLab,q[i].second);
-        else mxPos=max(mxPos,q[i].second);
-    }
-    ll MAX=min(1000000000LL, max(mxLab, mxPos + (ll)N));
-
-    T* rt=new T(1,MAX);
-    map<ll,T*> mp; mp[1]=rt;
-
-    auto findSeg = [&](ll x)->T*{
-        auto it=mp.upper_bound(x); --it;
-        return it->second;
-    };
-
-    auto cut = [&](ll x)->T*{
-        T* t=findSeg(x);
-        int i=rk(t);
-        auto a=sp(rt,i-1);
-        auto b=sp(a.second,1);
-        ll L=t->L,R=t->R;
-        mp.erase(L);
-        T *u=0,*w=0;
-        if(L<=x-1){ u=new T(L,x-1); mp[u->L]=u; }
-        if(x+1<=R){ w=new T(x+1,R); mp[w->L]=w; }
-        rt=mg(a.first, mg(u, mg(w, b.second)));
-        T* s=new T(x,x); mp[s->L]=s;
-        return s;
-    };
-
-    auto ins = [&](ll y,T* s){
-        T* t=findSeg(y);
-        int i=rk(t);
-        auto a=sp(rt,i-1);
-        auto b=sp(a.second,1);
-        ll L=t->L,R=t->R;
-        mp.erase(L);
-        T *u=0,*v=0;
-        if(L<=y-1){ u=new T(L,y-1); mp[u->L]=u; }
-        v=new T(y,R); mp[v->L]=v;
-        rt=mg(a.first, mg(u, mg(s, mg(v, b.second))));
-    };
-
-    for(auto [a,b]:v){
-        T* s=cut(a);
-        ins(b,s);
-    }
-
-    for(auto [c,x]:q){
-        if(c=='P'){
-            T* t=findSeg(x);
-            cout<<pref(t)+(x-t->L)+1<<"\n";
-        }else{
-            auto pr=kth(rt,x);
-            cout<<pr.first->L+pr.second<<"\n";
-        }
-    }
-    return 0;
-}
+Nd* minnode(Nd*t){ while(t->l) t=t->l; return t; }
+Nd* maxnode(Nd*t){ while(t->r) t=t->r; return t; }
+Nd* pred(Nd
