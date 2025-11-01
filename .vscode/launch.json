@@ -3,6 +3,55 @@
   "configurations": [
     {
       "type": "java",
+      "name": "bfs",
+      "request": "launch",
+      "mainClass": "bfs",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "dijkstra",
+      "request": "launch",
+      "mainClass": "dijkstra",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "binaryMerge",
+      "request": "launch",
+      "mainClass": "binaryMerge",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "binarySearchRecursive",
+      "request": "launch",
+      "mainClass": "binarySearchRecursive",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "mergeSort2",
+      "request": "launch",
+      "mainClass": "mergeSort2",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "insertSelect",
+      "request": "launch",
+      "mainClass": "insertSelect",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
+      "name": "hi",
+      "request": "launch",
+      "mainClass": "hi",
+      "projectName": "Competitive_Programming_a2ee5818"
+    },
+    {
+      "type": "java",
       "name": "test",
       "request": "launch",
       "mainClass": "test",
