@@ -1,91 +1,40 @@
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
-struct Node{ ll mn,lz; int idx; };
-vector<Node> st;
-int N,Q;
-void build(int p,int l,int r, vector<ll>& ps){
-    if(l==r){
-        st[p].mn=ps[l];
-        st[p].idx=l;
-        return;
-    }
-    int m=(l+r)>>1;
-    build(p<<1,l,m,ps);
-    build(p<<1|1,m+1,r,ps);
-    if(st[p<<1].mn<=st[p<<1|1].mn){
-        st[p].mn=st[p<<1].mn;
-        st[p].idx=st[p<<1].idx;
-    } else {
-        st[p].mn=st[p<<1|1].mn;
-        st[p].idx=st[p<<1|1].idx;
+
+vector<vector<vector<int>>> constructAdj(vector<int> &edges, int V){
+    vector<vector<vector<int>>> adj(V);
+    for(auto &edge: edges){
+        int u = edge[0];
+        int v = edge[1];
+        int wt = edge[2];
+        adj[u].push_back({v, wt});
+        adj[v].push_back({u, wt});
     }
 }
-inline void apply(int p,ll v){
-    st[p].mn+=v;
-    st[p].lz+=v;
-}
-inline void push(int p){
-    if(st[p].lz){
-        apply(p<<1,st[p].lz);
-        apply(p<<1|1,st[p].lz);
-        st[p].lz=0;
-    }
-}
-void upd(int p,int l,int r,int ql,int qr,ll v){
-    if(ql>r||qr<l) return;
-    if(ql<=l&&r<=qr){
-        apply(p,v);
-        return;
-    }
-    push(p);
-    int m=(l+r)>>1;
-    upd(p<<1,l,m,ql,qr,v);
-    upd(p<<1|1,m+1,r,ql,qr,v);
-    if(st[p<<1].mn<=st[p<<1|1].mn){
-        st[p].mn=st[p<<1].mn;
-        st[p].idx=st[p<<1].idx;
-    } else {
-        st[p].mn=st[p<<1|1].mn;
-        st[p].idx=st[p<<1|1].idx;
-    }
-}
-int main(){
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    cin>>N>>Q;
-    vector<int>B(N);
-    ll s=0;
-    for(int i=0;i<N;i++){cin>>B[i];s+=B[i];}
-    vector<pair<int,int>> ops(Q);
-    for(int i=0;i<Q;i++) cin>>ops[i].first>>ops[i].second;
-    if(s!=N-1){
-        for(int i=0;i<=Q;i++) cout<<"0 0\n";
-        return 0;
-    }
-    vector<ll>D(N);
-    for(int i=0;i<N;i++) D[i]= (ll)B[i]-1;
-    vector<ll> PS(N+1);
-    for(int i=1;i<=N;i++) PS[i]=PS[i-1]+D[i-1];
-    st.assign(4*(N+1), {});
-    build(1,1,N,PS);
-    auto answer=[&](){
-        int id=st[1].idx;
-        int k = (id==N?0:id);
-        cout<<"1 "<<k<<"\n";
-    };
-    answer();
-    for(auto &op:ops){
-        int x=op.first, y=op.second;
-        ll dx=D[x], dy=D[y];
-        ll delta=dy-dx;
-        if(delta){
-            upd(1,1,N,x+1,N,delta);
-            upd(1,1,N,y+1,N,-delta);
+
+vector<int> dijkskstra(int V, vector<vector<int>> &edges, int src){
+    vector<vector<vector<int>>> adj = constructAdj(edges, V);
+    priority_queue<vector<int>, vector<vector<int>>, greater<vector<int>>> pq;
+    vector<int> dist(V, INT_MAX);
+    pq.push({0, src});
+    dist[src] = 0;
+
+    while(!pq.empty()){
+        int u = pq.top()[1]; pq.pop();
+        for(auto x: adj[u]){
+            int v = x[0];
+            int wt = x[1];
+            if(dist[v] > dist[u] + wt){
+                dist[v] = dist[u] + wt;
+                pq.push({dist[v], v});
+            }
         }
-        swap(B[x],B[y]);
-        swap(D[x],D[y]);
-        answer();
     }
+    return dist;
+}
+
+int main(){
+    //insert driver code 
     return 0;
 }
+
