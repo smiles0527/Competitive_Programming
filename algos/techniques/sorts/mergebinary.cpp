@@ -1,5 +1,11 @@
-#include <iostream>
-#include <vector>
+/*
+The mergesort routine is the top-down recursive merge sort. It splits the array into halves, recursively sorts each half, then merges them. That is the canonical 
+𝑂(𝑛log⁡𝑛) divide-and-conquer version described in most algorithm texts.
+
+The binarysearch routine is the iterative binary search. No recursion, simple while-loop, classic  O(logn) search on a sorted array.
+*/
+
+#include <bits/stdc++.h>
 using namespace std;
 
 bool binarysearch(vector<int> &arr, int x){
@@ -42,7 +48,7 @@ void merge(vector<int> &arr, int left, int mid, int right){
             arr[k] = L[i];
             i++;
         } else {
-            arr[k] = R[j]
+            arr[k] = R[j];
             j++;
         }
         k++;
@@ -72,8 +78,6 @@ void mergesort(vector<int> &arr, int left, int right){
     mergesort(arr, mid + 1, right);
     merge(arr, left, mid, right);
 
-
-
 }
 
 
@@ -83,7 +87,7 @@ int main(){
     if(binarysearch(arr, 123)){
         cout << "yes" << '\n';
     } else{
-        cout << "no";hos
+        cout << "no";
     }
 
     return 0;
