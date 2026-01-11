@@ -1,0 +1,7 @@
+//Ignore .vs, .vscode
+.vs/
+.vscode/
+//Ignore build files
+build/
+*.exe
+*.out
