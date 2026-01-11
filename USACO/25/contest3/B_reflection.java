@@ -1,7 +1,8 @@
+package contest3;
 
 import java.util.*;
 
-public class b1253 {
+public class B_reflection {
 
 
     public static void main(String[] args) {
