@@ -9,3 +9,4 @@ build/
 *.py
 *.txt
 *.json
+temp
