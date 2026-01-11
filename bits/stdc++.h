@@ -32,6 +32,7 @@
 
 // C++
 #include <algorithm>
+#include <array>
 #include <bitset>
 #include <complex>
 #include <deque>

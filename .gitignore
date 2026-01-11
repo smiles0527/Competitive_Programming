@@ -5,3 +5,7 @@
 build/
 *.exe
 *.out
+
+*.py
+*.txt
+*.json
