@@ -1,6 +1,7 @@
+package contest3;
 import java.util.Scanner;
 
-public class b3253 {
+public class B_sequences {
     public static void main(String[] args) {
 
         Scanner input = new Scanner(System.in);

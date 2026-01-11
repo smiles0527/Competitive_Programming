@@ -1,6 +1,7 @@
+package contest3;
 import java.util.*;
 
-public class b2253 {
+public class B_mexes {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         int n = input.nextInt();

@@ -18,7 +18,7 @@ int main(){
     
     long long totalOps = 0;
     auto computeCost = [&](int count) -> int {
-        return min(count, 4 - count);
+        return m    in(count, 4 - count);
     };
     
     for (int i = 0; i < half; i++){
