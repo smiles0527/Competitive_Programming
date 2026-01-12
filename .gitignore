@@ -10,3 +10,4 @@ build/
 *.txt
 *.json
 temp
+.DS_store
