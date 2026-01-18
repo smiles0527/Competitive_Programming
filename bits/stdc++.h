@@ -63,6 +63,8 @@
 #include <typeinfo>
 #include <utility>
 #include <valarray>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #if __cplusplus >= 201103L
@@ -83,8 +85,6 @@
 #include <tuple>
 #include <typeindex>
 #include <type_traits>
-#include <unordered_map>
-#include <unordered_set>
 #endif
 
 // This is a preprocessor header for competitive programming
