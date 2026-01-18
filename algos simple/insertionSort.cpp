@@ -1,18 +1,35 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
 using namespace std;
 
-void insertSortInc()
-{
+void insertionSort(vector<int>& arr, int n){
+
+    for (int i = 1; i < n; i++)
+    {
+        int key = arr[i];
+        int j = i-1;
+
+        while (j>=0 && key < arr[j])
+        {
+             arr[j+1] = arr[j];
+             j--;
+        }
+        arr[j+1] = key;
+    }
 }
 
-void insertSortDec()
+void printArray(vector<int>& arr)
 {
+    for (int i : arr)
+    {
+        cout << i << " ";
+    }
 }
 
-void printArray()
-{
-}
+int main(){
+    vector<int> arr = {5, 11, 4, 7, 9};
 
-int main()
-{
+    insertionSort(arr, 5);
+    printArray(arr);
+
 }

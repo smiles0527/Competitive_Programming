@@ -83,7 +83,7 @@ int main(){
     if(binarysearch(arr, 123)){
         cout << "yes" << '\n';
     } else{
-        cout << "no";hos
+        cout << "no";
     }
 
     return 0;
