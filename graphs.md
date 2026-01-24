@@ -513,10 +513,6 @@ Shortest path A→E: backtrack E→C→A  ⇒  A - C - E
 * In *multi-source searches*, initializing the queue with several start nodes at distance zero allows efficient nearest-facility queries, such as finding the closest hospital from multiple candidate sites; without this, repeated single-source BFS runs would be less efficient.
 * In *topological sorting of DAGs*, a BFS-like procedure processes vertices of indegree zero using a queue, producing a valid ordering; without this method, scheduling tasks with dependency constraints may require less efficient recursive DFS approaches.
 
-**Implementation**
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/bfs)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/bfs)
 
 *Implementation tip:* For dense graphs or when memory locality matters, an adjacency **matrix** can be used, but the usual adjacency **list** representation is more space- and time-efficient for sparse graphs.
 
@@ -708,11 +704,6 @@ A
 * For *backtracking and state-space search*, DFS systematically explores decision trees and reverses when hitting dead ends, as in solving puzzles like Sudoku or N-Queens; without DFS, these problems would be approached less efficiently with blind trial-and-error.
 * With *edge classification in directed graphs*, DFS timestamps allow edges to be labeled as tree, back, forward, or cross, which helps analyze structure and correctness; without this classification, reasoning about graph algorithms such as detecting cycles or proving properties becomes more difficult.
 
-**Implementation**
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/dfs)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/dfs)
-
 *Implementation tips:*
 
 * For **very deep** or skewed graphs, prefer the **iterative** form to avoid recursion limits.
@@ -874,11 +865,6 @@ Shortest path A→E: A → C → B → E  (total cost 4)
 * As a *label-setting baseline*, Dijkstra provides the reference solution against which heuristics like A*, ALT landmarks, or contraction hierarchies are compared; without this baseline, heuristic correctness and performance cannot be properly evaluated.
 * For *grid pathfinding with terrain costs*, Dijkstra handles non-negative cell costs when no admissible heuristic is available; without it, finding a least-effort path across weighted terrain would require less efficient exhaustive search.
 
-**Implementation**
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/dijkstra)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/dijkstra)
-
 *Implementation tip:* If your PQ has no decrease-key, **push duplicates** on improvement and, when popping a vertex, **skip it** if it’s already finalized or if the popped key doesn’t match `dist[u]`. This “lazy” approach is simple and fast in practice.
 
 #### Bellman–Ford Algorithm
@@ -1023,11 +1009,6 @@ Bellman–Ford would perform a $V$-th pass and still find an improvement (e.g., 
 * In solving *difference constraints* of the form $x_v - x_u \leq w$, the algorithm checks feasibility by detecting whether any negative cycles exist; without this check, inconsistent scheduling or timing systems may go unnoticed.
 * As a *robust baseline*, Bellman–Ford verifies results of faster algorithms or initializes methods like Johnson’s for all-pairs shortest paths; without it, correctness guarantees in sparse-graph all-pairs problems would be weaker.
 * For *graphs with penalties or credits*, where some transitions decrease accumulated cost, Bellman–Ford models these adjustments accurately; without it, such systems, like transport discounts or energy recovery paths, cannot be represented properly.
-
-##### Implementation
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/bellman_ford)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/bellman_ford)
 
 *Implementation tip:* For **all-pairs** on sparse graphs with possible negative edges, use **Johnson’s algorithm**: run Bellman–Ford once from a super-source to reweight edges (no negatives), then run **Dijkstra** from each vertex.
 
@@ -1218,11 +1199,6 @@ For **sliding puzzles (e.g., 8/15-puzzle)**:
 * In *state hashing*, equivalent states must hash identically so duplicates are merged properly; without this, search in puzzles or planning domains may blow up due to treating the same state as multiple distinct ones.
 * While *neighbor order* does not affect correctness, it influences performance and the aesthetics of the returned path trace; without considering this, two identical problems might yield very different expansion sequences or outputs.
 
-**Implementation**
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/a_star)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/a_star)
-
 *Implementation tip:* If your PQ lacks decrease-key, **push duplicates** with improved keys and ignore stale entries when popped (check if popped `g` matches current `g[u]`). This is simple and fast in practice.
 
 ### Minimal Spanning Trees
@@ -1369,11 +1345,6 @@ A
 * In *map generalization and simplification*, the MST preserves a connectivity backbone with minimal redundancy, reducing complexity while maintaining essential routes; without this, simplified maps may show excessive or unnecessary detail.
 * In *circuit design and VLSI*, MSTs minimize interconnect length under simple wiring models, supporting efficient layouts; without this method, chip designs may consume more area and power due to avoidable wiring overhead.
 
-##### Implementation
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/prim)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/prim)
-
 *Implementation tip:*
 For **dense graphs** ($E \approx V^2$), skip heaps: store `key` in an array and, at each step, scan all non-MST vertices to pick the minimum `key` in $O(V)$. Overall $O(V^2)$ but often **faster in practice** on dense inputs due to low overhead.
 
@@ -1513,11 +1484,6 @@ A
 * As an *approximation for the metric traveling salesman problem*, building an MST and performing a preorder walk (with shortcutting) yields a tour at most twice the optimal length; without this approach, near-optimal solutions would be harder to compute efficiently.
 * In *circuit and VLSI layout*, Kruskal’s algorithm finds minimal interconnect length under simplified wiring models; without this, designs may require more area and energy due to unnecessarily long connections.
 * For *maze generation*, a randomized Kruskal process selects edges in random order while maintaining acyclicity, producing mazes that remain connected without loops; without this structure, generated mazes could contain cycles or disconnected regions.
-
-**Implementation**
-
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/kruskal)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/kruskal)
 
 *Implementation tip:*
 On huge graphs that **stream from disk**, you can **external-sort** edges by weight, then perform a single pass with DSU. For reproducibility across platforms, **stabilize** sorting by `(weight, min(u,v), max(u,v))`.
