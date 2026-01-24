@@ -11,3 +11,20 @@ build/
 *.json
 temp
 .DS_store
+
+# CMake generated files
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+compile_commands.json
+
+# Build artifacts
+*.o
+*.a
+*.so
+*.dll
+*.dSYM/
+
+# IDE
+.idea/
