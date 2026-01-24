@@ -341,7 +341,7 @@ If $f(n)$ is the actual complexity and $g(n)$ is the Big O function, then $f(n) 
 
 For example, $O(n)$ means running time doesn't exceed linear growth in the worst case.
 
-<img width="1750" height="1110" alt="0902bace-952d-4c80-9533-5706e28ef3e9" src="https://github.com/user-attachments/assets/152fe1b7-3e0b-4a6d-b2d1-abf248ca90cf" />
+See `Algorithms/resources/data_structures_advanced.mmd` for a visual decision tree.
 
 ##### Big Omega Notation (Ω-notation)
 
@@ -351,7 +351,7 @@ If $f(n) = Ω(g(n))$, then $f(n)$ grows at least as fast as $g(n)$. In other wor
 
 For example, $Ω(n)$ implies running time is at minimum proportional to input size in the best case.
 
-<img width="1707" height="1103" alt="d189ece7-e9c2-4797-8e0d-720336c4ba4a" src="https://github.com/user-attachments/assets/9984cad4-e131-4d52-bcad-8206b03e625f" />
+See `Algorithms/resources/data_structures_advanced.mmd` for lower bound representation.
 
 ##### Theta Notation (Θ-notation)
 
@@ -359,7 +359,7 @@ Theta notation represents the average-case scenario for time or space complexity
 
 Stating $f(n) = Θ(g(n))$ means $f(n)$ grows at the same rate as $g(n)$ on average. This indicates complexity is both at most and at least proportional to $g(n)$.
 
-<img width="1707" height="1103" alt="ef39373a-8e6a-4e5b-832f-698b4dde7c7e" src="https://github.com/user-attachments/assets/bb11e34a-da8f-45a6-9eab-cbc05676a334" />
+See `Algorithms/resources/data_structures_advanced.mmd` for tight bound representation.
 
 These notations address growth rate as input size becomes large. While they provide high-level understanding, actual running time depends on input characteristics, implementation efficiency, and the hardware and software environment. Big O notation doesn't account for these practical factors.
 
