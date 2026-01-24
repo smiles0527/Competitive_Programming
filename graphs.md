@@ -515,8 +515,7 @@ Shortest path A→E: backtrack E→C→A  ⇒  A - C - E
 
 **Implementation**
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/bfs)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/bfs)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/bfs)
 
 *Implementation tip:* For dense graphs or when memory locality matters, an adjacency **matrix** can be used, but the usual adjacency **list** representation is more space- and time-efficient for sparse graphs.
 
@@ -710,8 +709,7 @@ A
 
 **Implementation**
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/dfs)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/dfs)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/dfs)
 
 *Implementation tips:*
 
@@ -876,8 +874,7 @@ Shortest path A→E: A → C → B → E  (total cost 4)
 
 **Implementation**
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/dijkstra)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/dijkstra)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/dijkstra)
 
 *Implementation tip:* If your PQ has no decrease-key, **push duplicates** on improvement and, when popping a vertex, **skip it** if it’s already finalized or if the popped key doesn’t match `dist[u]`. This “lazy” approach is simple and fast in practice.
 
@@ -1026,8 +1023,7 @@ Bellman–Ford would perform a $V$-th pass and still find an improvement (e.g., 
 
 ##### Implementation
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/bellman_ford)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/bellman_ford)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/bellman_ford)
 
 *Implementation tip:* For **all-pairs** on sparse graphs with possible negative edges, use **Johnson’s algorithm**: run Bellman–Ford once from a super-source to reweight edges (no negatives), then run **Dijkstra** from each vertex.
 
@@ -1220,8 +1216,7 @@ For **sliding puzzles (e.g., 8/15-puzzle)**:
 
 **Implementation**
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/a_star)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/a_star)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/a_star)
 
 *Implementation tip:* If your PQ lacks decrease-key, **push duplicates** with improved keys and ignore stale entries when popped (check if popped `g` matches current `g[u]`). This is simple and fast in practice.
 
@@ -1371,8 +1366,7 @@ A
 
 ##### Implementation
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/prim)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/prim)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/prim)
 
 *Implementation tip:*
 For **dense graphs** ($E \approx V^2$), skip heaps: store `key` in an array and, at each step, scan all non-MST vertices to pick the minimum `key` in $O(V)$. Overall $O(V^2)$ but often **faster in practice** on dense inputs due to low overhead.
@@ -1516,8 +1510,7 @@ A
 
 **Implementation**
 
-* [C++](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/cpp/kruskal)
-* [Python](https://github.com/djeada/Algorithms-And-Data-Structures/tree/master/src/graphs/python/kruskal)
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/kruskal)
 
 *Implementation tip:*
 On huge graphs that **stream from disk**, you can **external-sort** edges by weight, then perform a single pass with DSU. For reproducibility across platforms, **stabilize** sorting by `(weight, min(u,v), max(u,v))`.
@@ -1662,6 +1655,10 @@ Here `indeg[X]=indeg[Y]=1` initially; `Q` starts empty ⇒ `order=[]` and `len(o
 * For *dependency resolution* in package managers or container systems, topological sorting installs components in an order that respects their dependencies; without it, software may be installed in the wrong sequence and break.
 * In *dynamic programming on DAGs*, problems like longest path, shortest path, or path counting are solved efficiently by processing vertices in topological order; without this ordering, subproblems may be computed before their dependencies are solved.
 * For *circuit evaluation or spreadsheets*, topological order ensures that each cell or net is evaluated only after its referenced inputs; without it, computations could use undefined or incomplete values.
+
+**Implementation**
+
+* [C++](https://github.com/smiles0527/Competitive_Programming/blob/main/Algorithms/Graphs/topological_sort)
 
 *Implementation tips:*
 
