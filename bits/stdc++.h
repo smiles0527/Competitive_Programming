@@ -87,6 +87,13 @@
 #include <type_traits>
 #endif
 
+#if __cplusplus >= 201703L
+#include <optional>
+#include <variant>
+#include <any>
+#include <string_view>
+#endif
+
 // This is a preprocessor header for competitive programming
 #include <iostream>
 #include <string>
