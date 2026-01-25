@@ -7,13 +7,15 @@
 #include <utility>
 #include <vector>
 
+using namespace std;
+
 namespace {
 
 template <typename T>
-void heapify(std::vector<T> &arr, std::size_t curr, std::size_t offset) {
-  auto parent = [](std::size_t i) { return i >> 1; };
-  auto left_child = [](std::size_t i) { return i << 1; };
-  auto right_child = [](std::size_t i) { return (i << 1) + 1; };
+void heapify(vector<T> &arr, size_t curr, size_t offset) {
+  auto parent = [](size_t i) { return i >> 1; };
+  auto left_child = [](size_t i) { return i << 1; };
+  auto right_child = [](size_t i) { return (i << 1) + 1; };
 
   if (curr + offset > arr.size()) {
     return;
@@ -23,21 +25,21 @@ void heapify(std::vector<T> &arr, std::size_t curr, std::size_t offset) {
   heapify(arr, right_child(curr), offset);
 
   if (curr > 1 && arr[curr + offset - 1] < arr[parent(curr) + offset - 1]) {
-    std::swap(arr[curr + offset - 1], arr[parent(curr) + offset - 1]);
+    swap(arr[curr + offset - 1], arr[parent(curr) + offset - 1]);
   }
 }
 
 } // namespace
 
 template <typename T>
-void heap_sort(std::vector<T> &arr) {
-  for (std::size_t i = 0; i < arr.size(); ++i) {
+void heap_sort(vector<T> &arr) {
+  for (size_t i = 0; i < arr.size(); ++i) {
     heapify(arr, 1, i);
   }
 }
 
 // Explicit template instantiations
-template void heap_sort<int>(std::vector<int> &arr);
-template void heap_sort<float>(std::vector<float> &arr);
-template void heap_sort<double>(std::vector<double> &arr);
-template void heap_sort<char>(std::vector<char> &arr);
+template void heap_sort<int>(vector<int> &arr);
+template void heap_sort<float>(vector<float> &arr);
+template void heap_sort<double>(vector<double> &arr);
+template void heap_sort<char>(vector<char> &arr);

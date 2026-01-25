@@ -7,13 +7,15 @@
 #include <utility>
 #include <vector>
 
+using namespace std;
+
 namespace {
 
 template <typename T>
-void quick_sort_impl(std::vector<T> &arr, std::size_t start, std::size_t end) {
+void quick_sort_impl(vector<T> &arr, size_t start, size_t end) {
   while (end > start) {
-    std::size_t i = start;
-    std::size_t j = end;
+    size_t i = start;
+    size_t j = end;
 
     while (i < j) {
       while (arr[i] < arr[start] && i < j) {
@@ -24,10 +26,10 @@ void quick_sort_impl(std::vector<T> &arr, std::size_t start, std::size_t end) {
         --j;
       }
       if (i < j) {
-        std::swap(arr[i], arr[j]);
+        swap(arr[i], arr[j]);
       }
     }
-    std::swap(arr[start], arr[j]);
+    swap(arr[start], arr[j]);
 
     // Tail-call optimization: recurse on smaller partition
     if (j - start > end - (j + 1)) {
@@ -45,14 +47,14 @@ void quick_sort_impl(std::vector<T> &arr, std::size_t start, std::size_t end) {
 } // namespace
 
 template <typename T>
-void quick_sort(std::vector<T> &arr) {
+void quick_sort(vector<T> &arr) {
   if (!arr.empty()) {
     quick_sort_impl(arr, 0, arr.size());
   }
 }
 
 // Explicit template instantiations
-template void quick_sort<int>(std::vector<int> &arr);
-template void quick_sort<float>(std::vector<float> &arr);
-template void quick_sort<double>(std::vector<double> &arr);
-template void quick_sort<char>(std::vector<char> &arr);
+template void quick_sort<int>(vector<int> &arr);
+template void quick_sort<float>(vector<float> &arr);
+template void quick_sort<double>(vector<double> &arr);
+template void quick_sort<char>(vector<char> &arr);
