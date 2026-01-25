@@ -32,9 +32,9 @@ Comprehensive guides organized by topic for systematic learning:
 | USACO | Bronze → Platinum | [Solutions](USACO/) |
 | CCC | Junior → Senior | [Solutions](CCC/) |
 | CodeForces | Div. 1-3 | [Solutions](CodeForces/) |
-| IOI | International | [Solutions](IOI/) |
+| IOI | International Olympiad in Informatics | [Solutions](IOI/) |
 | CSES | Introductory | [Solutions](CSES%20question%20set/) |
-| CCO | Canadian Computing | [Solutions](CCO/) |
+| CCO | Canadian Computing Olympiad | [Solutions](CCO/) |
 | Other Competitions | Various | [Solutions](Trivial%20Competitions/) |
 
 ## Repository Structure
@@ -101,46 +101,15 @@ Competitive_Programming-1/
 └── z_misc questions/             # Miscellaneous practice
 ```
 
-## Algorithm Implementations
-
-All algorithm implementations follow a consistent structure:
-- **Single file format**: Each algorithm is consolidated into a standalone `.cpp` file
-- **C++17 standard**: Uses modern C++17 features (`std::optional`, `std::nullopt`, etc.)
-- **bits/stdc++.h**: Competitive programming header for convenience
-- **Clean implementations**: No external dependencies beyond standard library
-
 ## Key Resources
 
 ### Main Template
-The [Algorithms/template.cpp](Algorithms/template.cpp) contains a production-ready CP template with:
+The [Algorithms/template.cpp](Algorithms/template.cpp) contains my CP template with:
 - Fast I/O optimization
 - Common macros and utilities
 - Type aliases for competitive programming
 - Binary search templates
 - Debugging macros
 
-### Algorithm Library
-Each algorithm category includes:
-- **Sorting** (5 algorithms): Bubble, insertion, merge, quick, selection sort
-- **Searching** (5 algorithms): Binary, exponential, interpolation, jump, linear search
-- **Backtracking** (9 problems): Permutations, combinations, N-Queens, knight tour, graph coloring
-- **Strategies** (15 patterns): LRU cache, sliding window, two-pointer, backtracking patterns
-- **Data Structures** (9 implementations): Trees, heaps, hash tables, linked lists
-
-All implementations include comprehensive documentation in the Notes/ directory with links to source code.
-
-## Getting Started
-
-1. **Learn the basics**: Start with [Notes/basics.md](Notes/basics.md)
-2. **Study algorithms**: Follow the reading order in documentation
-3. **Practice**: Solve problems from USACO, CCC, or CodeForces
-4. **Use the template**: Copy [Algorithms/template.cpp](Algorithms/template.cpp) for contests
-
-## Build Information
-
-- **Language**: C++17
-- **Compiler**: g++ (MinGW-w64) with `-std=c++17` flag
-- **Platform**: Windows with MSYS2/MinGW-w64
-- **Headers**: Uses `bits/stdc++.h` for competitive programming convenience
 
 
