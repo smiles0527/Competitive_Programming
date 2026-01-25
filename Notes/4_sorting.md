@@ -992,3 +992,4 @@ Before using any table like this, remember what it can and can’t tell you. Big
 | **Radix Sort**     | $O(nk)$       | $O(nk)$       | $O(nk)$       | $O(n + k)$  | Yes     | Uses Counting Sort     |
 
 **Use insertion sort for tiny or nearly-sorted arrays, quick sort for general high speed (with good pivot strategy), heap sort for worst-case guarantees, and counting/radix when your keys make it possible.**
+  
