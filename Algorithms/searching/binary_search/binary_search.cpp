@@ -18,12 +18,12 @@ using namespace std;
  * @note The array must be sorted in ascending order.
  */
 template <typename T>
-optional<size_t> binary_search(const vector<T> &arr, const T &target);
+std::optional<size_t> binary_search(const vector<T> &arr, const T &target);
 
 template <typename T>
-optional<size_t> binary_search(const vector<T> &arr, const T &target) {
+std::optional<size_t> binary_search(const vector<T> &arr, const T &target) {
   if (arr.empty()) {
-    return nullopt;
+    return std::nullopt;
   }
 
   size_t low = 0;
@@ -43,11 +43,11 @@ optional<size_t> binary_search(const vector<T> &arr, const T &target) {
     }
   }
 
-  return nullopt;
+  return std::nullopt;
 }
 
 // Explicit template instantiations
-template optional<size_t> binary_search<int>(const vector<int> &arr, const int &target);
-template optional<size_t> binary_search<float>(const vector<float> &arr, const float &target);
-template optional<size_t> binary_search<double>(const vector<double> &arr, const double &target);
-template optional<size_t> binary_search<char>(const vector<char> &arr, const char &target);
+template std::optional<size_t> binary_search<int>(const vector<int> &arr, const int &target);
+template std::optional<size_t> binary_search<float>(const vector<float> &arr, const float &target);
+template std::optional<size_t> binary_search<double>(const vector<double> &arr, const double &target);
+template std::optional<size_t> binary_search<char>(const vector<char> &arr, const char &target);

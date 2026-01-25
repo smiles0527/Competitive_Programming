@@ -17,20 +17,20 @@ using namespace std;
  * @note Space complexity: O(1)
  */
 template <typename T>
-optional<size_t> linear_search(const vector<T> &arr, const T &target);
+std::optional<size_t> linear_search(const vector<T> &arr, const T &target);
 
 template <typename T>
-optional<size_t> linear_search(const vector<T> &arr, const T &target) {
+std::optional<size_t> linear_search(const vector<T> &arr, const T &target) {
   for (size_t i = 0; i < arr.size(); ++i) {
     if (arr[i] == target) {
       return i;
     }
   }
-  return nullopt;
+return std::nullopt;
 }
 
 // Explicit template instantiations
-template optional<size_t> linear_search<int>(const vector<int> &arr, const int &target);
-template optional<size_t> linear_search<float>(const vector<float> &arr, const float &target);
-template optional<size_t> linear_search<double>(const vector<double> &arr, const double &target);
-template optional<size_t> linear_search<char>(const vector<char> &arr, const char &target);
+template std::optional<size_t> linear_search<int>(const vector<int> &arr, const int &target);
+template std::optional<size_t> linear_search<float>(const vector<float> &arr, const float &target);
+template std::optional<size_t> linear_search<double>(const vector<double> &arr, const double &target);
+template std::optional<size_t> linear_search<char>(const vector<char> &arr, const char &target);

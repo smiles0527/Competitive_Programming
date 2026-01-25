@@ -17,11 +17,11 @@ using namespace std;
  * @note Space complexity: O(1)
  * @note The array must be sorted in ascending order.
  */
-optional<size_t> interpolation_search(const vector<int> &arr, int target);
+std::optional<size_t> interpolation_search(const vector<int> &arr, int target);
 
-optional<size_t> interpolation_search(const vector<int> &arr, int target) {
+std::optional<size_t> interpolation_search(const vector<int> &arr, int target) {
   if (arr.empty()) {
-    return nullopt;
+    return std::nullopt;
   }
 
   size_t low = 0;
@@ -33,7 +33,7 @@ optional<size_t> interpolation_search(const vector<int> &arr, int target) {
       if (arr[low] == target) {
         return low;
       }
-      return nullopt;
+      return std::nullopt;
     }
 
     // Estimate position using interpolation formula
@@ -56,5 +56,5 @@ optional<size_t> interpolation_search(const vector<int> &arr, int target) {
     }
   }
 
-  return nullopt;
+  return std::nullopt;
 }
