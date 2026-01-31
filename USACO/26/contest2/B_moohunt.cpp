@@ -1,7 +1,47 @@
 
 #include <bits/stdc++.h>
 using namespace std;
+/*
+  A board can be represented as a bitmask:
+  bit i = 1 --> cell i is M
+  bit i = 0 --> cell i is O
 
+  For a move (x, y, z) to score:
+  - x must be M
+  - y and z must be O
+
+  So, let b_i = 1 if cell is M. So a move scores if:
+
+  bx(1-by)(1-bz) = bx - bxby - bxbz + bxbybz
+  
+  each move thus contributes:
+  +1 to subset {x}
+  -1 to {x, y}
+  -1 to {x, z}
+  +1 to {x, y, z}
+  we store all of these values in an array a[mask] intended by bitmamsk
+
+  We must iterate through every possible subset T of the superset mask and compute the cumulative
+  sum of their corresponding values (Sum over Subsets DP)
+
+  the idea is like this:
+      for each bit b:
+        for each mask containing b:
+          a[mask] += a[mask without b]
+  
+  after this, a[mask] equals the score of that board
+
+  Finally, we
+  - find the maximum score
+  - count how many masks achieve it
+  
+  Complexity: 
+  2^N (with N<=20) for states
+  Time: O(N * 2^N)
+  Space: O(2^N)
+
+
+ */
 void solve() {
     int N, K; cin >> N >> K;
 
