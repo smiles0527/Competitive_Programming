@@ -4,6 +4,46 @@ using ll long long;
 static const int MOD = 1e9+7;
 static const int KMAX = 50;
 
+/*
+Each tool has four choices
+Discard it, or assign it to arm 1, arm 2, or arm 3.
+
+Only track what affects validity
+
+How many tools are activated (k is at most 50)
+
+The sum on each arm modulo M
+
+Dynamic programming over a set of tools
+For a group of tools, count the number of ways to reach:
+activated = j
+arm1_sum_mod = r1
+arm2_sum_mod = r2
+arm3_sum_mod = r3
+
+Make the DP work on ranges
+Store these DPs in a segment tree.
+
+Leaf = DP for one tool
+
+Internal node = merge DPs of children by convolution
+This allows range queries and point updates.
+
+Enforce “each arm nonempty” using inclusion–exclusion
+
+Count ways where all 3 arms are allowed
+
+Subtract ways where one specific arm is unused (3 choices)
+
+Add back ways where only one arm is used (3 choices)
+
+Final answer for a query
+Take the DP for the range and read the entry:
+exactly k activated tools and all arm sums mod M equal 0
+Apply inclusion–exclusion result modulo 1e9+7
+
+ */
+
 int add(int a,int b){ a+=b; if(a>=MOD) a-=MOD; return a; }
 int sub(int a,int b){ a-=b; if(a<=0) a+=MOD; return a; }
 int mul(ll a, ll b){ return int((a*b)%MOD); }
