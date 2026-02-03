@@ -1,7 +1,8 @@
 #include <bits/stdc++.h>
 using namespace std;
-
+//silver
 int SleepyCowHerding() {
+
     int n;
     cin >> n;
     vector<int> arr(n);
