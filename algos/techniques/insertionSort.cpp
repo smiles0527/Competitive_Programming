@@ -18,7 +18,7 @@ void insertSortInc(vector<int>& arr)
     }
 }
 
-void insertSortDec(vector<int>& arr)
+void insertSortDec(vector<int> arr)
 {
     for (int i = 1; i < arr.size(); i++)
     {
