@@ -2,5 +2,6 @@
 using namespace std;
 
 int main(){
-  cout << "neovim!!!!!" << '\n';
+  int n; cin >> n; cout << n;
+  
 }
