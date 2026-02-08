@@ -1,10 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
+
 int main(){
-    long long A, B, X, Y;
-    cin >> A >> B >> X >> Y;
-    long long c1 = 2 * (A + X + max(B, Y));
-    long long c2 = 2 * (max(A, X) + B + Y);
-    cout << min(c1, c2);
-    return 0;
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+
+  int a, b, c, d; cin >> a >> b >> c >> d;
+
+  long long i = 2 * ((a+c) + max(b, d));
+  long long j = 2 * (max(a, c) + (b+d));
+  cout << min(i, j);
 }
