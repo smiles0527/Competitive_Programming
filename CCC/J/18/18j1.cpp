@@ -7,8 +7,15 @@ using namespace std;
 int main(){
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
+		
+	int a, b, c, d;
+	cin >> a >> b >> c >> d;
+		
+	if((a == 8 || a == 9) && (d == 8 || d == 9) && b == c){
+		cout << "ignore";
+		return 0;
+	}
 
-	int r, s; cin >> r >> s;
-	cout << r*8+s*3-28;
-
+	cout << "answer";
+	
 }

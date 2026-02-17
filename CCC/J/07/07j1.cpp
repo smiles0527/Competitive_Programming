@@ -7,8 +7,7 @@ using namespace std;
 int main(){
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
+	
 
-	int r, s; cin >> r >> s;
-	cout << r*8+s*3-28;
-
+	int a,b,c;cin>>a>>b>>c;cout<<a+b+c-min({a,b,c})-max({a,b,c});	
 }

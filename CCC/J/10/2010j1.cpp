@@ -1,22 +1,20 @@
 #include <bits/stdc++.h>
 using namespace std;
+#define ll long long
+#define FOR(i,a,b) for(int i = (a); i < (b); i++)
+#define ii pair<int, int>
 
 int main(){
-    int n;
-    cin >> n;
-    int sum = 0;
-    int x = n;
-    int y = 0;
-    while (x>5){
-        x--;
-        y++;
-    }
-    while (x<=5 && y <= 5 && x>=y){
-        sum++;
-        x--;
-        y++;
-    }
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
 
-    cout << sum << endl;
+	int n; cin >> n;
+	int ans = 0;
+	for(int i = 0; i <= 5; i++){
+		int b = n-i;
+		if(0<=b && b<=5 && i >=b) ans++;
+	}
+
+	cout << ans;
 
 }

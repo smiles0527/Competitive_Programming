@@ -7,8 +7,14 @@ using namespace std;
 int main(){
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
+	
+	int s, m, l; cin >> s >> m >> l;
 
-	int r, s; cin >> r >> s;
-	cout << r*8+s*3-28;
+	if(s + 2*m + 3*l >= 10){
+		cout << "happy";
+		return 0;
+	}
+
+	cout << "sad";
 
 }

@@ -8,7 +8,9 @@ int main(){
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 
-	int r, s; cin >> r >> s;
-	cout << r*8+s*3-28;
+	int a, e; cin >> a >> e;
+	if(a >= 3 && e <= 4) cout << "TroyMartian\n";
+	if(a <= 6 && e >=2) cout << "VladSaturnian\n";
+	if(a <= 2 && e <=3) cout << "GraemeMercurian\n";
 
 }
