@@ -1,17 +1,19 @@
 #include <bits/stdc++.h>
 using namespace std;
+#define ll long long
+#define FOR(i,a,b) for(int i = (a); i < (b); i++)
+#define ii pair<int, int>
 
-int main() {
-  ios::sync_with_stdio(false);
-  cin.tie(nullptr);
-
-  int B;
-  cin >> B;
-  int sl = 100;
-
-  int P = 5 * B - 400;
-
-  if (P == sl) { cout << 0; return 0; }
-
-  cout << (P > sl ? 1 : -1);
+int main(){
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	
+	int b, c; cin >> b >> c;
+	int p = 5*b-400;
+	
+	cout << p << '\n';
+	if(p>100) cout << -1;
+	else if(p==100) cout << 0;
+	else cout << 1;
+	
 }

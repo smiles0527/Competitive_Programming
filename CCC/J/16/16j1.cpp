@@ -7,8 +7,15 @@ using namespace std;
 int main(){
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
-
-	int r, s; cin >> r >> s;
-	cout << r*8+s*3-28;
-
+	
+	int cnt = 0;
+	for(int i = 0; i < 6; i++){
+		char a; cin >> a;
+		if(a == 'W') cnt++;
+	}	
+	if(cnt >= 5) cout << 1;
+	else if (cnt >= 3) cout << 2;
+	else if (cnt >= 1) cout << 3;
+	else cout << -1;
+	
 }

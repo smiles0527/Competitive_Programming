@@ -8,7 +8,6 @@ int main(){
 	ios::sync_with_stdio(false);
 	cin.tie(nullptr);
 
-	int r, s; cin >> r >> s;
-	cout << r*8+s*3-28;
-
+	int n; cin >> n; int s = 0; while((s+1)*(s+1)<=n)s++; cout << "The largest square has side length " << s << ".\n"; return 0;
+	
 }
