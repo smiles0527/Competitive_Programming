@@ -6,14 +6,14 @@ int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-	int d, e; 
-	cin >> d >> e;
-	while(e--){
-		char ch; int n;
-		cin >> ch >> n;
-		if(ch == '+') d += n;
-		else d -= n;
+	int d; cin >> d;
+	while(true){
+		int y; cin >> y;
+		if(d > y) d += y;
+		else{
+			cout << d; 
+			return 0;
+		}
 	}
-	cout << d;
 
 }
