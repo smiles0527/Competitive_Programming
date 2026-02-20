@@ -6,7 +6,6 @@ build/
 *.exe
 *.out
 
-*.py
 *.txt
 *.json
 temp
@@ -28,3 +27,11 @@ compile_commands.json
 
 # IDE
 .idea/
+
+/timecomplexity.py
+/__init__.py
+/test_randomize_array.py
+Algorithms/resources/time_complexity.py
+Algorithms/strategies/bst_to_list/tests/__init__.py
+Algorithms/strategies/bst_to_list/__init__.py
+Algorithms/strategies/bst_to_list/tests/test_randomize_array.py
