@@ -1,20 +1,26 @@
 #include <bits/stdc++.h>
 using namespace std;
-
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2")
+#define pb push_back
+#define f first
+#define s second
+typedef long long ll;
+typedef pair<ll,ll> ii;
+typedef vector<ll> vi;
+typedef vector<ii> vii;
+const int MOD = 1e9+7;
 int main(){
     ios::sync_with_stdio(false);
-    cin.tie(NULL);
+    cin.tie(nullptr);
+    
+    ll n; cin >> n;
+    cout << n << ' ';
 
-    long long n; cin >> n; 
-    cout << n << " ";
-    while(n != 1){
-        if(n % 2 == 0){
-            n /= 2;
-            cout << n << " ";
-        } else{
-            n = n*3+1;
-            cout << n << " ";
-        }
+    while (n != 1) {
+        if (n & 1) n = 3 * n + 1;
+        else n /= 2;
+        cout << n << ' ';
     }
     return 0;
 }
