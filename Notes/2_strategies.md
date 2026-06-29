@@ -37,6 +37,8 @@ Arrays are the default starting point because they’re simple and fast. The “
 * In sorted arrays, *binary search* provides a fast way to find elements or their positions, working in $O(\log n)$. Be cautious with mid-point calculations in languages that may experience integer overflow due to fixed-size integer types.
 * The *two-pointer* technique uses two indices, typically starting from opposite ends of the array, to solve problems involving pairs or triplets, like finding two numbers that sum to a target. It helps optimize both time and space efficiency.
 * The *sliding window* technique is effective for solving subarray or substring problems, such as finding the longest substring without repeating characters. It maintains a dynamic subset of the array while iterating, improving overall efficiency.
+
+![Sliding window of size 3 scanning the array left to right, tracking the running window sum and the best seen](resources/gifs/sliding_window.gif)
 * *Prefix sums* enable fast range sum queries after preprocessing the array in $O(n)$. Likewise, difference arrays allow efficient range updates without the need to modify individual elements one by one.
 * In-place operations modify the array directly without using extra memory. This method saves space but requires careful handling to avoid unintended side effects on other parts of the program.
 * When dealing with duplicates, it’s important to adjust the algorithm to handle them appropriately. For example, the two-pointer technique may need to skip duplicates to prevent redundant results or errors.

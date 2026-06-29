@@ -87,6 +87,10 @@ Bubble sort is one of the simplest sorting algorithms. It is often used as an **
 
 The name comes from the way **larger elements "bubble up"** to the top (end of the list), just as bubbles rise in water.
 
+![Bubble sort: each pass compares adjacent bars (yellow) and swaps the larger one forward; the sorted tail grows from the right (green)](resources/gifs/sorting.gif)
+
+> **See it run:** [VisuAlgo — Sorting](https://visualgo.net/en/sorting).
+
 The basic idea:
 
 * Compare **adjacent elements**.

@@ -714,6 +714,27 @@ Even n=50 is astronomical.
 
 Sort by finish time, take the next interval that starts after the last chosen ends.
 
+The contrast is stark on a timeline. Seven short intervals (B–H) fit back-to-back when you sort by finish time, but the single long interval A — the one an earliest-*start* rule grabs first — blocks the entire day:
+
+```mermaid
+gantt
+    accTitle: Interval scheduling by earliest finish time
+    accDescr: Eight intervals on a timeline from 1 to 10. The earliest-finish greedy selects the seven non-overlapping short intervals B(2-3), C(3-4), D(4-5), E(5-6), F(6-7), G(7-8), H(8-9). The single long interval A(1-10), which an earliest-start rule would grab first, overlaps all of them and yields only one.
+
+    dateFormat X
+    axisFormat %S
+    section Earliest finish picks 7
+    B :active, 2, 3
+    C :active, 3, 4
+    D :active, 4, 5
+    E :active, 5, 6
+    F :active, 6, 7
+    G :active, 7, 8
+    H :active, 8, 9
+    section Earliest start picks 1
+    A blocks all :crit, 1, 10
+```
+
 This is the “always finish as early as possible” strategy. It’s not about being fast for its own sake, it’s about keeping the remaining timeline as wide as possible for future intervals. The *do* is: treat the finish time as the critical decision point. The *don’t* is: prioritize long intervals or early starts; those can block many later choices.
 
 ```
@@ -951,6 +972,31 @@ Total added cost = (mass under T_p) + (mass under T_q) = p + q
 
 So the final cost is the sum of merge weights.
 
+Building the tree for the six frequencies above (0.05, 0.07, 0.12, 0.15, 0.25, 0.36) by always merging the two smallest yields the tree below. Frequent symbols land near the root with short codes; rare ones sink deep with long codes — exactly the length-vs-frequency trade Huffman optimizes:
+
+```mermaid
+flowchart TD
+    accTitle: Huffman tree for six symbols
+    accDescr: Huffman tree built by repeatedly merging the two lowest-frequency nodes for frequencies 0.05, 0.07, 0.12, 0.15, 0.25, 0.36. Internal nodes show combined weight. Leaf codes (left=0, right=1) are f=11, e=10, d=00, c=010, a=0110, b=0111 - common symbols get short codes, rare symbols get long ones.
+
+    root["1.00"] --> n3["0.39"]
+    root --> n4["0.61"]
+    n3 --> d["d · 0.15<br/>code 00"]
+    n3 --> n2["0.24"]
+    n2 --> c["c · 0.12<br/>code 010"]
+    n2 --> n1["0.12"]
+    n1 --> a["a · 0.05<br/>code 0110"]
+    n1 --> b["b · 0.07<br/>code 0111"]
+    n4 --> e["e · 0.25<br/>code 10"]
+    n4 --> f["f · 0.36<br/>code 11"]
+
+    classDef internal fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef leaf fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class root,n1,n2,n3,n4 internal
+    class a,b,c,d,e,f leaf
+```
+
 That’s a beautiful side effect: Huffman is not just “construct a tree,” it’s “pay a known fee at each merge.” The algorithm is like repeatedly choosing the cheapest “depth increase” to apply.
 
 ```
@@ -1118,6 +1164,26 @@ E_j = \max(x[j], E_{j-1}+x[j])
 $$
 
 and track the best seen.
+
+There are only ever two options at index $j$ — and the choice is local:
+
+```mermaid
+flowchart TD
+    accTitle: Kadane's choice at each index j
+    accDescr: At index j, the best subarray ending at j is either x[j] alone (restart) or the previous best plus x[j] (extend). Take whichever is larger, then update the global maximum. Extending wins exactly when the previous running best is positive, which is the same as dropping any negative running prefix.
+
+    start["at index j<br/>previous best = E[j-1]"] --> q{"E[j-1] + x[j] &gt; x[j] ?"}
+    q -->|"yes (E[j-1] &gt; 0)"| ext["extend<br/>E[j] = E[j-1] + x[j]"]
+    q -->|"no (drop prefix)"| rst["restart<br/>E[j] = x[j]"]
+    ext --> upd["update global max"]
+    rst --> upd
+
+    classDef cond fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    classDef act fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class q cond
+    class start,ext,rst,upd act
+```
 
 Here `E_j` is the best sum of a subarray that **must end at j**. That’s the key: “ending here” makes the choice local and greedy-friendly. Either you (1) start at `j` (take only `x[j]`), or (2) extend the best ending at `j-1`. There’s no third option if contiguity is mandatory. The *do* is: read the recurrence as “restart vs extend.” The *don’t* is: treat it like magic DP, this one is literally just the two possible ways to end at `j`.
 

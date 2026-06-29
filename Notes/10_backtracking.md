@@ -112,6 +112,26 @@ factorial(5)
 
 The leaves represent the base case, and the tree unwinds as each recursive call returns.
 
+Recursion has two phases. The chain below is the **downward** calls stacking up; the value after each `=` is what that call **returns** on the way back up — the real multiplication happens during the unwind, bottoming out at the base case (yellow):
+
+```mermaid
+flowchart TD
+    accTitle: The two phases of factorial(5)
+    accDescr: factorial(5) calls down through factorial(4), 3, 2, 1 to factorial(0), the base case returning 1. The calls then unwind upward, multiplying at each return - factorial(1)=1, factorial(2)=2, factorial(3)=6, factorial(4)=24, factorial(5)=120. Each node shows the value it returns.
+
+    f5["factorial(5) = 120"] --> f4["factorial(4) = 24"]
+    f4 --> f3["factorial(3) = 6"]
+    f3 --> f2["factorial(2) = 2"]
+    f2 --> f1["factorial(1) = 1"]
+    f1 --> f0["factorial(0) = 1<br/>base case"]
+
+    classDef frame fill:#dbeafe,stroke:#2563eb,stroke-width:1px,color:#1e3a5f
+    classDef base fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+
+    class f5,f4,f3,f2,f1 frame
+    class f0 base
+```
+
 **Important Considerations:**
 
 * When using recursion, ensure **termination** by designing the recursive function such that all possible paths eventually reach a base case. This prevents infinite recursion.
@@ -164,6 +184,23 @@ Tree:
      B   C
         / \
        D   E
+```
+
+```mermaid
+flowchart TD
+    accTitle: DFS traversal order on a small tree
+    accDescr: Depth-first search from A visits A first, then its child B (a leaf, so it backtracks), then C, then C's children D and E. The number after each node is its visit position - A is 1, B is 2, C is 3, D is 4, E is 5.
+
+    a["A · 1"] --> b["B · 2"]
+    a --> c["C · 3"]
+    c --> d["D · 4"]
+    c --> e["E · 5"]
+
+    classDef root fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef node fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class a root
+    class b,c,d,e node
 ```
 
 Traversal using DFS starting from node 'A':
@@ -258,6 +295,33 @@ function backtrack(partial):
             place(candidate, partial)          // extend partial with candidate
             backtrack(partial)
             unplace(candidate, partial)        // undo extension (backtrack)
+```
+
+Every backtracking algorithm is this one control-flow shape. The **place → recurse → unplace** cycle (green) is the heart of it; only the diamond tests change per problem:
+
+```mermaid
+flowchart TD
+    accTitle: The backtracking control-flow skeleton
+    accDescr: backtrack(partial) first checks if the partial solution is complete; if so it records it and returns. Otherwise it loops over candidates: when no candidates remain it returns to the previous level; for each candidate it checks validity, and if valid it places the candidate, recurses, then unplaces it to undo the choice before trying the next. The place-recurse-unplace cycle is the core of every backtracking algorithm.
+
+    enter(["backtrack(partial)"]) --> comp{"is_complete?"}
+    comp -->|yes| sol["handle_solution<br/>return"]
+    comp -->|no| loop{"another candidate?"}
+    loop -->|none left| back["return to<br/>previous level"]
+    loop -->|candidate| valid{"is_valid?"}
+    valid -->|no| loop
+    valid -->|yes| place["place(candidate)"]
+    place --> recurse["backtrack(partial)"]
+    recurse --> unplace["unplace(candidate)<br/>undo the choice"]
+    unplace --> loop
+
+    classDef startcap fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef cond fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    classDef act fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class enter startcap
+    class comp,loop,valid cond
+    class sol,back,place,recurse,unplace act
 ```
 
 Pieces you supply per problem:
@@ -359,6 +423,38 @@ One of the possible solutions for placing 4 queens on a $4 \times 4$ chessboard 
 ##### Approach Using Backtracking
 
 Backtracking is an ideal algorithmic approach for solving the N-Queens problem due to its constraint satisfaction nature. The algorithm incrementally builds the solution and backtracks when a partial solution violates the constraints.
+
+The search tree below follows the branch that fixes a queen at $(0,0)$ on a $4 \times 4$ board. Most candidate squares are killed the instant they're considered (red) by the column or diagonal rule; even the two *valid* placements (green) lead nowhere, so the search unwinds (yellow) and tries a different square in row 0. This is the whole idea: fail fast, rewind, retry.
+
+```mermaid
+flowchart TD
+    accTitle: N-Queens search tree starting from a queen at (0,0)
+    accDescr: On a 4x4 board with a queen fixed at row 0 column 0, the search places one queen per row. Row 1 candidates in columns 0 and 1 are pruned by the column and diagonal rules; columns 2 and 3 are valid but both paths reach dead ends where every row-2 or row-3 square is pruned, forcing the search to backtrack to row 0 and try column 1.
+
+    q00["queen (0,0)"]
+    q00 -->|"col 0, 1"| p1["pruned: column / diagonal"]
+    q00 -->|"col 2"| q12["queen (1,2)"]
+    q00 -->|"col 3"| q13["queen (1,3)"]
+
+    q12 --> p2["row 2: every square pruned"]
+    p2 --> bt1["dead end — backtrack"]
+
+    q13 -->|"col 1"| q21["queen (2,1)"]
+    q13 -->|"col 0, 2"| p3["pruned: column / diagonal"]
+    q21 --> p4["row 3: every square pruned"]
+    p4 --> bt2["dead end — backtrack"]
+
+    bt1 --> retry["backtrack to row 0 — try col 1"]
+    bt2 --> retry
+
+    classDef valid fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef pruned fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef backtrack fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+
+    class q00,q12,q13,q21 valid
+    class p1,p2,p3,p4 pruned
+    class bt1,bt2,retry backtrack
+```
 
 High-Level Steps:
 
@@ -641,6 +737,33 @@ else:
 One small but important detail: this code’s `is_valid` only allows stepping onto `'.'`, so `S` and `G` are treated as labels in the diagram, not actual characters in the grid. In practice, you either keep the grid as dots and track `start`/`goal` separately (like this code does), or you expand `is_valid` to allow stepping onto `'G'` as well. The version here is consistent because the grid itself is all `'.'` and `'#'`, and the goal is a coordinate.
 
 ##### Recursive Function `explore(x, y)`
+
+The same skeleton, specialized for a grid. Notice the **undo** step (red) — unmarking the cell on failure is what lets other paths reuse it later:
+
+```mermaid
+flowchart TD
+    accTitle: Maze explore(x, y) - mark, explore, undo
+    accDescr: explore(x,y) returns False if the cell is out of bounds, a wall, or already visited. If it is the goal, it appends the cell and returns True. Otherwise it marks the cell visited and adds it to the path, then tries the four directions (down, up, right, left) in order. If any direction returns True it propagates success upward; if all four fail it unmarks the cell, pops it from the path, and returns False.
+
+    enter(["explore(x, y)"]) --> invalid{"out of bounds,<br/>wall, or visited?"}
+    invalid -->|yes| f1["return False"]
+    invalid -->|no| goal{"reached goal?"}
+    goal -->|yes| t1["append to path<br/>return True"]
+    goal -->|no| mark["mark visited<br/>append to path"]
+    mark --> dirs{"try a direction:<br/>down, up, right, left"}
+    dirs -->|"some call returns True"| t2["return True<br/>propagate up"]
+    dirs -->|"all four fail"| undo["unmark cell<br/>pop from path<br/>return False"]
+
+    classDef startcap fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef cond fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    classDef good fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef bad fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+
+    class enter startcap
+    class invalid,goal,dirs cond
+    class mark,t1,t2 good
+    class f1,undo bad
+```
 
 I. **Base Cases:**
 

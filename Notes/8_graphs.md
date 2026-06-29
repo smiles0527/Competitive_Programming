@@ -96,6 +96,19 @@ An adjacency matrix represents a graph $G$ with $V$ vertices as a two-dimensiona
 
 Here, the matrix indicates a graph with vertices A to D. For instance, vertex A connects with vertices B and D, hence the respective 1s in the matrix.
 
+The same 4-cycle drawn as a graph:
+
+```mermaid
+flowchart TD
+    accTitle: Undirected 4-cycle graph A-B-C-D-A
+    accDescr: Four vertices connected in a cycle with edges A-B, B-C, C-D, and D-A. This same graph is the running example for both the adjacency matrix and adjacency list representations.
+
+    A --- B
+    B --- C
+    C --- D
+    D --- A
+```
+
 **Matrix:**
 
 ```
@@ -479,6 +492,37 @@ Graph (undirected) with start at **A**:
 Edges: A–B, A–C, B–D, C–E
 ```
 
+The same graph, colored by BFS distance from **A**. BFS expands in rings — distance 0, then 1, then 2 — and the first time it reaches a vertex is always along a shortest (fewest-edge) path:
+
+```mermaid
+flowchart TD
+    accTitle: BFS level expansion from vertex A
+    accDescr: Undirected graph with edges A-B, A-C, B-D, C-E. Breadth-first search from A discovers A at distance 0, then B and C at distance 1, then D and E at distance 2. Vertices are colored by their BFS distance, and each is first reached along a shortest path.
+
+    a["A · dist 0"]
+    b["B · dist 1"]
+    c["C · dist 1"]
+    d["D · dist 2"]
+    e["E · dist 2"]
+
+    a --- b
+    a --- c
+    b --- d
+    c --- e
+
+    classDef lvl0 fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef lvl1 fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef lvl2 fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+
+    class a lvl0
+    class b,c lvl1
+    class d,e lvl2
+```
+
+![BFS: the frontier expands outward from A ring by ring, settling each vertex at its shortest distance](resources/gifs/bfs.gif)
+
+> **See it run:** step through BFS/DFS on your own graphs at [VisuAlgo — BFS/DFS](https://visualgo.net/en/dfsbfs).
+
 *Queue/Visited evolution (front → back):*
 
 ```
@@ -618,6 +662,10 @@ DFS_iter(G, i):
 
 Same graph as the BFS section, start at **A**; assume neighbor order: `B` before `C`, and for `B` the neighbor `D`; for `C` the neighbor `E`.
 
+![DFS: dives deep along one branch (A to B to D), hits a dead end, backtracks, then explores the next branch (A to C to E)](resources/gifs/dfs.gif)
+
+> **See it run:** [VisuAlgo — BFS/DFS](https://visualgo.net/en/dfsbfs).
+
 ```
 #
            ┌─────────┐
@@ -687,6 +735,23 @@ Step | Action                       | Stack                 | Visited
 ```
 
 *DFS tree (tree edges shown), with preorder: A, B, D, C, E*
+
+```mermaid
+flowchart TD
+    accTitle: DFS tree from A, preorder A B D C E
+    accDescr: Depth-first search from A explores deep first, going A to B to D, then backtracks and takes A to C to E. The number after each vertex is its preorder visit position.
+
+    a["A · 1"] --> b["B · 2"]
+    b --> d["D · 3"]
+    a --> c["C · 4"]
+    c --> e["E · 5"]
+
+    classDef root fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef node fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class a root
+    class b,c,d,e node
+```
 
 ```
 A
@@ -806,6 +871,19 @@ reconstruct(parent, t):
 
 Weighted, undirected graph; start at **A**. Edge weights are on the links.
 
+```mermaid
+flowchart LR
+    accTitle: Weighted graph for Dijkstra starting at A
+    accDescr: Undirected weighted graph with edges A-B weight 4, A-C weight 1, C-B weight 2, B-E weight 1, C-D weight 4, and D-E weight 3. Dijkstra computes the shortest distance from A to every vertex.
+
+    A ---|4| B
+    A ---|1| C
+    C ---|2| B
+    B ---|1| E
+    C ---|4| D
+    D ---|3| E
+```
+
 ```
 #
           ┌────────┐
@@ -825,6 +903,10 @@ Weighted, undirected graph; start at **A**. Edge weights are on the links.
 Edges: A–B(4), A–C(1), C–B(2), B–E(1), C–D(4), D–E(3)
 ```
 
+![Dijkstra: tentative distances shrink as the settled set grows outward from A by increasing distance](resources/gifs/dijkstra.gif)
+
+> **See it run:** [VisuAlgo — Single-Source Shortest Path](https://visualgo.net/en/sssp).
+
 *Priority queue / Finalized evolution (front = smallest key):*
 
 ```
@@ -837,6 +919,25 @@ Step | Pop (u,dist) | Relaxations (v: new dist, parent)          | PQ after push
 4    | (E,4)        | D:7 via E  (no improve; current 5)         | [(B,4), (D,5)]                   | {A,C,B,E}
 5    | (B,4) stale  | (ignore; B already finalized)              | [(D,5)]                          | {A,C,B,E}
 6    | (D,5)        | ,                                           | []                               | {A,C,B,E,D}
+```
+
+The shortest-path tree Dijkstra produces — each node labeled with its final distance from A, each edge with the weight used:
+
+```mermaid
+flowchart TD
+    accTitle: Dijkstra shortest-path tree from A
+    accDescr: Final shortest-path tree rooted at A. Node labels show total distance from A - A is 0, C is 1, B is 3, E is 4, D is 5 - and edge labels show the weight used. The shortest path from A to E is A-C-B-E with total cost 4.
+
+    A["A · 0"] -->|1| C["C · 1"]
+    C -->|2| B["B · 3"]
+    B -->|1| E["E · 4"]
+    C -->|4| D["D · 5"]
+
+    classDef src fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef done fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class A src
+    class B,C,D,E done
 ```
 
 *Distances and parents (final):*
@@ -1454,6 +1555,24 @@ union(x, y):
 Undirected, weighted graph (we’ll draw the key edges clearly and list the rest).
 Start with all vertices as separate sets: `{A} {B} {C} {D} {E} {F}`.
 
+```mermaid
+flowchart TD
+    accTitle: Weighted graph for the minimum spanning tree example
+    accDescr: Undirected weighted graph on six vertices A through F with eleven edges. Kruskal's algorithm selects five edges of total weight 12 to connect all vertices; that minimum spanning tree is shown separately below.
+
+    A ---|4| B
+    A ---|4| C
+    A ---|7| F
+    B ---|2| C
+    B ---|5| D
+    B ---|3| E
+    C ---|5| D
+    C ---|5| E
+    D ---|6| E
+    D ---|2| F
+    E ---|1| F
+```
+
 ```
 Top row:       A────────4────────B────────2────────C
                │                 │                 │
@@ -1489,6 +1608,24 @@ E–F(1), B–C(2), D–F(2), B–E(3), A–B(4)    ⇒  Total = 1 + 2 + 2 + 3 +
 ```
 
 *Clean MST view (tree edges only):*
+
+```mermaid
+flowchart TD
+    accTitle: Minimum spanning tree with total weight 12
+    accDescr: The five edges chosen by Kruskal's algorithm - E-F weight 1, B-C weight 2, D-F weight 2, B-E weight 3, A-B weight 4 - form a tree connecting all six vertices with the minimum total weight of 12.
+
+    A -->|4| B
+    B -->|2| C
+    B -->|3| E
+    E -->|1| F
+    F -->|2| D
+
+    classDef root fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef node fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class A root
+    class B,C,D,E,F node
+```
 
 ```
 A
@@ -1631,6 +1768,28 @@ Step | Pop u | Emit order            | Decrease indeg[...]   | Newly 0 → Enque
 *A valid topological order:*
 
 `A, B, C, E, D, F, G` (others like `B, A, C, E, D, F, G` are also valid.)
+
+The DAG below shows each vertex's initial indegree. Green vertices (indegree 0) are immediately ready to emit; Kahn's algorithm emits one, decrements its neighbors' indegrees, and repeats:
+
+```mermaid
+flowchart TD
+    accTitle: DAG for topological sort with initial indegrees
+    accDescr: Directed acyclic graph with edges A to C, B to C, C to D, C to E, E to D, B to G, plus isolated vertex F. Green vertices A, B, F start with indegree 0. Kahn's algorithm repeatedly emits an indegree-0 vertex and decrements its neighbors, producing the order A, B, C, E, D, F, G.
+
+    A["A · in 0"] --> C["C · in 2"]
+    B["B · in 0"] --> C
+    C --> D["D · in 2"]
+    C --> E["E · in 1"]
+    E --> D
+    B --> G["G · in 1"]
+    F["F · in 0"]
+
+    classDef ready fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef waiting fill:#dbeafe,stroke:#2563eb,stroke-width:1px,color:#1e3a5f
+
+    class A,B,F ready
+    class C,D,E,G waiting
+```
 
 **Cycle detection (why it fails on cycles)**
 

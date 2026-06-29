@@ -56,6 +56,37 @@ The recursive computation of Fibonacci numbers $F(n) = F(n - 1) + F(n - 2)$ invo
 
 Fibonacci is the classic demo not because it’s deep, but because it’s obvious. It teaches the key emotional lesson: recursion can feel elegant while quietly doing ridiculous repeated work, DP keeps the elegance and removes the waste.
 
+The call tree below makes the waste visible. Same-colored nodes are the *same subproblem* recomputed from scratch: $F(3)$ is solved twice (red), $F(2)$ three times (yellow). Memoization keeps the tree shape but computes each colored value only once.
+
+```mermaid
+flowchart TD
+    accTitle: Recursion tree for naive fib(5)
+    accDescr: The call tree for fib(5). fib(3) is computed twice and fib(2) three times. Identical subproblems are recomputed in a plain recursion, which is the redundant work memoization eliminates by caching each result on first computation.
+
+    f5["fib(5)"] --> f4["fib(4)"]
+    f5 --> f3a["fib(3)"]
+    f4 --> f3b["fib(3)"]
+    f4 --> f2a["fib(2)"]
+    f3a --> f2b["fib(2)"]
+    f3a --> f1a["fib(1)"]
+    f3b --> f2c["fib(2)"]
+    f3b --> f1b["fib(1)"]
+    f2a --> f1c["fib(1)"]
+    f2a --> f0a["fib(0)"]
+    f2b --> f1d["fib(1)"]
+    f2b --> f0b["fib(0)"]
+    f2c --> f1e["fib(1)"]
+    f2c --> f0c["fib(0)"]
+
+    classDef dup3 fill:#fee2e2,stroke:#dc2626,stroke-width:2px,color:#7f1d1d
+    classDef dup2 fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    classDef leaf fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class f3a,f3b dup3
+    class f2a,f2b,f2c dup2
+    class f1a,f1b,f1c,f1d,f1e,f0a,f0b,f0c leaf
+```
+
 ### Techniques
 
 There are two primary methods for implementing dynamic programming algorithms:
@@ -94,6 +125,29 @@ def fibonacci(n, memo={}):
 * **Time Complexity**: $O(n)$, since each number up to $n$ is computed once.
 * **Space Complexity**: $O(n)$, due to the memoization structure.
 
+Compare this to the naive recursion tree above: with a cache, each distinct value is computed once (green) and every later occurrence is an O(1) lookup (yellow) instead of a full re-expansion. The exponential tree collapses to a thin spine:
+
+```mermaid
+flowchart TD
+    accTitle: Memoized fib(5) - repeats become cache hits
+    accDescr: With memoization, fib(5) computes each distinct subproblem once. fib(4), fib(3), fib(2), fib(1), fib(0) are each computed a single time (green); the second fib(3), the second fib(2), and the duplicate fib(1) are O(1) cache lookups (yellow) rather than re-expanded subtrees.
+
+    f5["fib(5)"] --> f4["fib(4)"]
+    f5 --> c3["fib(3) — cache hit"]
+    f4 --> f3["fib(3)"]
+    f4 --> c2["fib(2) — cache hit"]
+    f3 --> f2["fib(2)"]
+    f3 --> c1["fib(1) — cache hit"]
+    f2 --> f1["fib(1)"]
+    f2 --> f0["fib(0)"]
+
+    classDef compute fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+    classDef cached fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+
+    class f5,f4,f3,f2,f1,f0 compute
+    class c1,c2,c3 cached
+```
+
 One practical note when learning: top-down DP is often easier to write correctly first, because you start from the real question (“solve $n$”) and naturally reach for smaller questions. If you can write the recurrence cleanly, memoization is usually your fastest path to a working solution.
 
 #### 2. Tabulation (Bottom-Up Approach)
@@ -125,6 +179,29 @@ def fibonacci(n):
 
 * The **time complexity** is $O(n)$, since the algorithm iterates from 2 to $n$, computing each Fibonacci number sequentially.
 * The **space complexity** is $O(n)$, due to the storage required for the table that holds the Fibonacci numbers up to $n$.
+
+Tabulation flips the direction: instead of recursing down from $n$, it seeds the base cases and builds **upward**, each cell reading the two below it. The arrows show the fill order and dependencies:
+
+```mermaid
+flowchart LR
+    accTitle: Bottom-up tabulation order for Fibonacci
+    accDescr: Tabulation seeds dp[0]=0 and dp[1]=1, then computes each dp[i] from dp[i-1] and dp[i-2] in increasing order up to dp[n]. Every value is computed exactly once, left to right.
+
+    d0["dp[0]=0"] --> d2["dp[2]"]
+    d1["dp[1]=1"] --> d2
+    d1 --> d3["dp[3]"]
+    d2 --> d3
+    d2 --> d4["dp[4]"]
+    d3 --> d4
+    d3 --> d5["dp[5]"]
+    d4 --> d5
+
+    classDef base fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef cell fill:#dcfce7,stroke:#16a34a,stroke-width:1px,color:#14532d
+
+    class d0,d1 base
+    class d2,d3,d4,d5 cell
+```
 
 A nice way to make tabulation feel natural is to ask: “What’s the smallest thing I must know before I can know the next thing?” That question basically *is* the loop order.
 
@@ -162,10 +239,36 @@ LCS(i - 1, j - 1) + 1 & \text{if } x_i = y_j \
 
 We can implement the LCS problem using either memoization or tabulation. With tabulation, we build a two-dimensional table $LCS[0..m][0..n]$ iteratively.
 
+The whole algorithm hinges on one branch at each cell — do the current characters match?
+
+```mermaid
+flowchart TD
+    accTitle: LCS state transition
+    accDescr: For the longest common subsequence, dp[i][j] depends on whether characters A[i] and B[j] match. If they match, dp[i][j] equals the diagonal cell dp[i-1][j-1] plus 1. If they differ, dp[i][j] is the maximum of the cell above (dp[i-1][j]) and the cell to the left (dp[i][j-1]).
+
+    q{"A[i] == B[j] ?"}
+    q -->|match| m["dp[i-1][j-1] + 1<br/>take the diagonal, add 1"]
+    q -->|mismatch| mm["max( dp[i-1][j], dp[i][j-1] )<br/>best of up vs left"]
+
+    classDef cond fill:#fef9c3,stroke:#ca8a04,stroke-width:2px,color:#713f12
+    classDef match fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+    classDef miss fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+
+    class q cond
+    class m match
+    class mm miss
+```
+
 * The **time complexity** is $O(mn)$, as the algorithm processes a grid or matrix of size $m \times n$, iterating through each cell.
 * The **space complexity** is $O(mn)$, due to the table storing intermediate results, but this can be reduced to $O(n)$ by optimizing the storage to only keep necessary data for the current and previous rows.
 
 The reason LCS is such a beloved DP example is that the “choices” are easy to explain: if characters match, you take the diagonal; if they don’t, you take the best of left/top. That clear decision structure is exactly what good DP feels like: simple local rules that reliably build a global answer.
+
+Watching the table fill makes the recurrence concrete — each cell is the diagonal + 1 on a character match, otherwise the larger of the cell above and the cell to the left:
+
+![LCS table filling cell by cell: diagonal plus one on a match, otherwise the max of up and left](resources/gifs/dp_lcs_fill.gif)
+
+> **See it run:** [USFCA — LCS dynamic programming](https://www.cs.usfca.edu/~galles/visualization/DPLCS.html).
 
 #### State Representation
 
@@ -189,7 +292,26 @@ dp[i - 1][w] & \text{if } w_i > w \
 
 **Implementation**:
 
-We fill the table $dp[0..n][0..W]$ iteratively based on the state transition.
+We fill the table $dp[0..n][0..W]$ iteratively based on the state transition. Every cell reads only from the **previous row**, which is exactly why the table can be collapsed to a single row of size $W$:
+
+```mermaid
+flowchart LR
+    accTitle: 0/1 knapsack state-transition dependency
+    accDescr: The cell dp[i][w] is the maximum of two values from the previous row: dp[i-1][w] when item i is skipped, and dp[i-1][w - w_i] + v_i when item i is taken. Because every cell depends only on the previous row, the table can be reduced from O(nW) to O(W) space.
+
+    skip["dp[i-1][w]<br/>skip item i"]
+    take["dp[i-1][w - w_i] + v_i<br/>take item i"]
+    cur["dp[i][w]<br/>= max(skip, take)"]
+
+    skip --> cur
+    take --> cur
+
+    classDef prev fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a5f
+    classDef now fill:#dcfce7,stroke:#16a34a,stroke-width:2px,color:#14532d
+
+    class skip,take prev
+    class cur now
+```
 
 * The **time complexity** is $O(nW)$, where $n$ is the number of items and $W$ is the capacity of the knapsack, as the algorithm iterates through both items and weights.
 * The **space complexity** is $O(nW)$, but this can be optimized to $O(W)$ because each row in the table depends only on the values from the previous row, allowing for space reduction.
