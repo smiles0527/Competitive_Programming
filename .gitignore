@@ -6,6 +6,10 @@ build/
 *.exe
 *.out
 
+web/
+.claude/
+.gitignore
+
 *.txt
 *.json
 temp

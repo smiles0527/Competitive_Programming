@@ -1,5 +1,7 @@
 # Competitive Programming Solutions
 
+> **Live interactive labs:** [smiles0527.github.io/algo-labs](https://smiles0527.github.io/algo-labs). Visualize sorting, graph, dynamic programming, and bitwise algorithms step by step, or paste your own C++ solution to have it traced and checked against a problem.
+
 A comprehensive collection of solutions to competitive programming problems from top-tier programming contests. This repository includes solutions in **C++** from contests such as IOI, USACO, CCC, CodeForces, and more, along with detailed algorithm explanations and data structure implementations.
 
 ## About
