@@ -41,3 +41,4 @@ Algorithms/strategies/bst_to_list/__init__.py
 Algorithms/strategies/bst_to_list/tests/test_randomize_array.py
 
 CodeForces/
+CSES/temp.cpp
