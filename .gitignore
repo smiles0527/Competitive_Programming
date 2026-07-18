@@ -39,3 +39,5 @@ Algorithms/resources/time_complexity.py
 Algorithms/strategies/bst_to_list/tests/__init__.py
 Algorithms/strategies/bst_to_list/__init__.py
 Algorithms/strategies/bst_to_list/tests/test_randomize_array.py
+
+CodeForces/
