@@ -14,6 +14,9 @@ web/
 *.json
 temp
 .DS_store
+.preview-server.log
+.preview-server-error.log
+website/editor-gateway/wrangler.toml
 
 # CMake generated files
 CMakeFiles/
