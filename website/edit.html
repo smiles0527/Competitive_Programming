@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Edit Competitive Programming Editorials</title>
+  <style>
+    :root {
+      --ink: #121212;
+      --muted: #777;
+      --line: #dedede;
+      --paper: #fff;
+      --soft: #f7f7f5;
+      --accent: #2867c7;
+      --danger: #a32b2b;
+      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; }
+    body { color: var(--ink); background: var(--paper); font: 13px/1.45 var(--sans); }
+    button, select, input, textarea { font: inherit; }
+    button, select {
+      min-height: 34px;
+      border: 1px solid #aaa;
+      border-radius: 0;
+      background: #fff;
+      color: var(--ink);
+    }
+    button { padding: 0 14px; cursor: pointer; }
+    button:hover:not(:disabled) { border-color: #333; }
+    button:disabled { cursor: not-allowed; color: #aaa; background: #fafafa; }
+    button.primary { color: #fff; background: var(--ink); border-color: var(--ink); }
+    select { padding: 0 30px 0 10px; }
+    .app { display: grid; grid-template-rows: 60px 42px minmax(0, 1fr); height: 100%; }
+    .topbar, .toolbar { display: flex; align-items: center; gap: 10px; padding: 0 18px; border-bottom: 1px solid var(--line); }
+    .topbar { justify-content: space-between; }
+    .selectors, .actions, .tabs { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    #collection { width: 110px; }
+    #section { width: 190px; }
+    #file { width: 240px; }
+    .label { color: var(--muted); font-size: 11px; letter-spacing: .45px; text-transform: uppercase; }
+    .status { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .status.error { color: var(--danger); }
+    .status.saved { color: #24633a; }
+    .toolbar { justify-content: space-between; background: var(--soft); }
+    .tab { min-height: 28px; padding: 0 10px; border: 0; background: transparent; color: var(--muted); }
+    .tab.active { color: var(--ink); box-shadow: inset 0 -2px var(--ink); }
+    .workspace { display: grid; grid-template-columns: minmax(360px, 48%) minmax(440px, 52%); min-height: 0; }
+    .editor-pane { display: grid; grid-template-rows: 34px minmax(0, 1fr); min-width: 0; border-right: 1px solid var(--line); }
+    .pane-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; letter-spacing: .35px; }
+    textarea {
+      width: 100%; height: 100%; resize: none; border: 0; outline: 0;
+      padding: 22px 24px 80px; color: #202020; background: #fbfbfa;
+      font: 13px/1.62 var(--mono); tab-size: 4;
+    }
+    textarea:read-only { color: #666; }
+    .preview-pane { min-width: 0; min-height: 0; }
+    iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
+    @media (max-width: 860px) {
+      .app { grid-template-rows: auto auto minmax(0,1fr); }
+      .topbar { align-items: stretch; flex-direction: column; padding: 12px; }
+      .selectors { flex-wrap: wrap; }
+      .selectors select { flex: 1; width: auto !important; }
+      .actions { justify-content: flex-end; }
+      .workspace { display: block; overflow: auto; }
+      .editor-pane { height: 62vh; border-right: 0; border-bottom: 1px solid var(--line); }
+      .preview-pane { height: 75vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="selectors">
+        <span class="label">collection</span>
+        <select id="collection" aria-label="Problem collection"></select>
+        <span class="label">section</span>
+        <select id="section" aria-label="Section"></select>
+        <span class="label">editorial</span>
+        <select id="file" aria-label="Editorial"></select>
+      </div>
+      <div class="actions">
+        <button id="exit">Exit editor</button>
+        <span id="status" class="status">Local draft mode</span>
+        <button id="login">Sign in with GitHub</button>
+        <button id="logout" hidden>Sign out</button>
+        <button id="save" class="primary" disabled>Download drafts</button>
+      </div>
+    </header>
+    <div class="toolbar">
+      <div class="tabs" role="tablist" aria-label="File type">
+        <button id="markdown-tab" class="tab active" role="tab">Editorial Markdown</button>
+        <button id="code-tab" class="tab" role="tab">C++ solution</button>
+      </div>
+      <span id="path" class="status"></span>
+    </div>
+    <div class="workspace">
+      <section class="editor-pane" aria-label="Source editor">
+        <div class="pane-heading"><span>source</span><span>Ctrl+S to save</span></div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </section>
+      <section class="preview-pane" aria-label="Live preview">
+        <iframe id="render" src="editor-render.html" sandbox="allow-scripts" title="Live editorial preview"></iframe>
+      </section>
+    </div>
+  </div>
+
+  <script src="site-config.js"></script>
+  <script>
+    const config = window.EDITORIAL_SITE_CONFIG || { collections: [], editor: {} };
+    const apiBase = String(config.editor?.apiBase || '').replace(/\/$/, '');
+    const configured = apiBase.startsWith('https://') && !apiBase.includes('REPLACE-WITH');
+    const els = Object.fromEntries(['collection','section','file','exit','status','login','logout','save','path','editor','render','markdown-tab','code-tab'].map(id => [id, document.getElementById(id)]));
+    const state = { session: sessionStorage.getItem('editorial-editor-session') || '', local: false, localToken: '', markdown: '', code: '', mdSha: '', cppSha: '', tab: 'markdown', dirty: false };
+
+    function setStatus(message, kind = '') {
+      els.status.textContent = message;
+      els.status.className = `status ${kind}`;
+    }
+    function selectedCollection() {
+      return config.collections.find(collection => collection.id === els.collection.value) || config.collections[0];
+    }
+    function resolveRepoPath(section, file) {
+      const parts = [selectedCollection().repositoryPath, section];
+      for (const part of file.split('/')) part === '..' ? parts.pop() : part !== '.' && parts.push(part);
+      return parts.join('/');
+    }
+    function currentPaths() {
+      const md = resolveRepoPath(els.section.value, els.file.value);
+      return { md, cpp: md.replace(/\.md$/, '.cpp') };
+    }
+    function localUrl(path) { return `../${path.split('/').map(encodeURIComponent).join('/')}`; }
+    function currentText() { return state.tab === 'markdown' ? state.markdown : state.code; }
+    function storeCurrentText() {
+      if (state.tab === 'markdown') state.markdown = els.editor.value;
+      else state.code = els.editor.value;
+    }
+    function render() {
+      els.render.contentWindow?.postMessage({ type: 'render', markdown: state.markdown, code: state.code }, '*');
+    }
+    function selectTab(tab) {
+      storeCurrentText(); state.tab = tab; els.editor.value = currentText();
+      els['markdown-tab'].classList.toggle('active', tab === 'markdown');
+      els['code-tab'].classList.toggle('active', tab === 'code');
+      els.path.textContent = tab === 'markdown' ? currentPaths().md : currentPaths().cpp;
+    }
+    async function api(path, options = {}) {
+      const headers = new Headers(options.headers || {});
+      if (state.session) headers.set('Authorization', `Bearer ${state.session}`);
+      const response = await fetch(`${apiBase}${path}`, { ...options, headers });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
+      return body;
+    }
+    async function localApi(path, options = {}) {
+      const headers = new Headers(options.headers || {});
+      if (state.localToken) headers.set('X-Local-Editor-Token', state.localToken);
+      const response = await fetch(path, { ...options, headers, cache: 'no-store' });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.error || `Local request failed (${response.status})`);
+      return body;
+    }
+    async function detectLocalMode() {
+      if (!['127.0.0.1', 'localhost'].includes(location.hostname)) return;
+      try {
+        const status = await localApi('/__editor/status');
+        if (status.mode !== 'local' || !status.token) return;
+        state.local = true; state.localToken = status.token;
+        state.session = ''; sessionStorage.removeItem('editorial-editor-session');
+        els.login.hidden = true; els.logout.hidden = true;
+        els.save.textContent = 'Save locally';
+        setStatus('Local repository mode');
+      } catch {}
+    }
+    async function loadSection() {
+      const collection = selectedCollection();
+      const response = await fetch(`${collection.path}/${encodeURIComponent(els.section.value)}/preview.html`);
+      const documentText = await response.text();
+      const parsed = new DOMParser().parseFromString(documentText, 'text/html');
+      const options = [...parsed.querySelectorAll('#editorial option')];
+      els.file.replaceChildren(...options.map(option => new Option(option.textContent, option.value)));
+      await loadFiles();
+    }
+    async function loadFiles() {
+      state.dirty = false; els.save.disabled = true; setStatus(state.local ? 'Loading local files' : state.session ? 'Loading' : 'Local draft mode');
+      const paths = currentPaths();
+      try {
+        if (state.local) {
+          const [md, cpp] = await Promise.all([
+            localApi(`/__editor/file?path=${encodeURIComponent(paths.md)}`),
+            localApi(`/__editor/file?path=${encodeURIComponent(paths.cpp)}`)
+          ]);
+          state.markdown = md.content; state.mdSha = md.sha;
+          state.code = cpp.content; state.cppSha = cpp.sha;
+        } else if (state.session) {
+          const [md, cpp] = await Promise.all([
+            api(`/api/file?path=${encodeURIComponent(paths.md)}`),
+            api(`/api/file?path=${encodeURIComponent(paths.cpp)}`)
+          ]);
+          state.markdown = md.content; state.mdSha = md.sha;
+          state.code = cpp.content; state.cppSha = cpp.sha;
+        } else {
+          const [md, cpp] = await Promise.all([fetch(localUrl(paths.md)), fetch(localUrl(paths.cpp))]);
+          state.markdown = await md.text(); state.code = await cpp.text();
+          state.mdSha = ''; state.cppSha = '';
+        }
+        els.editor.value = currentText(); els.path.textContent = state.tab === 'markdown' ? paths.md : paths.cpp;
+        els.editor.readOnly = false;
+        render(); setStatus(state.local ? 'Local repository mode' : state.session ? 'Ready to edit' : 'Local draft mode');
+      } catch (error) { setStatus(error.message, 'error'); }
+    }
+    async function establishSession() {
+      const fragment = new URLSearchParams(location.hash.slice(1));
+      if (fragment.has('session')) {
+        state.session = fragment.get('session'); sessionStorage.setItem('editorial-editor-session', state.session);
+        history.replaceState(null, '', location.pathname + location.search);
+      }
+      if (!state.session) return;
+      try {
+        const me = await api('/api/me');
+        els.login.hidden = true; els.logout.hidden = false; els.editor.readOnly = false;
+        els.save.textContent = 'Save and publish';
+        setStatus(`Signed in as ${me.login}`); els.save.disabled = !state.dirty;
+      } catch {
+        state.session = ''; sessionStorage.removeItem('editorial-editor-session');
+        els.editor.readOnly = false; els.save.textContent = 'Download drafts';
+        setStatus('Session expired. Continuing in local draft mode.', 'error');
+      }
+    }
+    async function save() {
+      if (!state.dirty) return;
+      storeCurrentText(); els.save.disabled = true;
+      const paths = currentPaths();
+      if (state.local) {
+        setStatus('Saving locally');
+        try {
+          const result = await localApi('/__editor/save', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ files: [
+              { path: paths.md, content: state.markdown, sha: state.mdSha },
+              { path: paths.cpp, content: state.code, sha: state.cppSha }
+            ] })
+          });
+          state.mdSha = result.files[0].sha; state.cppSha = result.files[1].sha;
+          state.dirty = false; setStatus('Saved to the local repository', 'saved');
+        } catch (error) { setStatus(error.message, 'error'); els.save.disabled = false; }
+        return;
+      }
+      if (!state.session) {
+        download(paths.md, state.markdown);
+        setTimeout(() => download(paths.cpp, state.code), 150);
+        state.dirty = false;
+        setStatus('Drafts downloaded. The repository was not changed.', 'saved');
+        return;
+      }
+      setStatus('Publishing');
+      try {
+        const result = await api('/api/save', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            files: [
+              { path: paths.md, content: state.markdown, sha: state.mdSha },
+              { path: paths.cpp, content: state.code, sha: state.cppSha }
+            ],
+            message: `Update ${paths.md.replace(/^CSES\//, '')}`
+          })
+        });
+        state.mdSha = result.files[0].sha; state.cppSha = result.files[1].sha;
+        state.dirty = false; setStatus('Saved. Public update is deploying.', 'saved');
+        waitUntilPublished(paths, state.markdown, state.code);
+      } catch (error) { setStatus(error.message, 'error'); els.save.disabled = false; }
+    }
+    async function waitUntilPublished(paths, markdown, code) {
+      const deadline = Date.now() + 3 * 60_000;
+      while (Date.now() < deadline) {
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        try {
+          const stamp = Date.now();
+          const [md, cpp] = await Promise.all([
+            fetch(`${localUrl(paths.md)}?published=${stamp}`, { cache: 'no-store' }).then(response => response.text()),
+            fetch(`${localUrl(paths.cpp)}?published=${stamp}`, { cache: 'no-store' }).then(response => response.text())
+          ]);
+          if (md === markdown && cpp === code) {
+            if (!state.dirty) setStatus('Published live', 'saved');
+            return;
+          }
+        } catch {}
+      }
+      if (!state.dirty) setStatus('Saved. GitHub Pages is still deploying.', 'saved');
+    }
+    function download(path, content) {
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
+      link.href = url; link.download = path.split('/').pop(); link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function populateSections(preferred) {
+      const collection = selectedCollection();
+      els.section.replaceChildren(...collection.sections.map(([value, label]) => new Option(label, value)));
+      els.section.value = preferred || collection.defaultSection || collection.sections[0][0];
+      if (!els.section.value) els.section.selectedIndex = 0;
+      return loadSection();
+    }
+    for (const collection of config.collections) els.collection.add(new Option(collection.label, collection.id));
+    const initial = new URLSearchParams(location.search);
+    els.collection.value = initial.get('collection') || config.collections[0]?.id;
+    if (!els.collection.value) els.collection.selectedIndex = 0;
+    els.collection.addEventListener('change', () => populateSections());
+    els.section.addEventListener('change', loadSection);
+    els.file.addEventListener('change', loadFiles);
+    els.editor.addEventListener('input', () => { storeCurrentText(); state.dirty = true; els.save.disabled = false; render(); setStatus(state.local ? 'Unsaved local changes' : state.session ? 'Unsaved changes' : 'Unsaved local draft'); });
+    els['markdown-tab'].addEventListener('click', () => selectTab('markdown'));
+    els['code-tab'].addEventListener('click', () => selectTab('code'));
+    els.login.addEventListener('click', () => {
+      if (configured) location.href = `${apiBase}/auth/start`;
+      else setStatus('Local draft mode');
+    });
+    els.exit.addEventListener('click', () => {
+      if (state.dirty && !confirm('Discard unsaved changes and exit the editor?')) return;
+      const query = new URLSearchParams({ collection: els.collection.value, section: els.section.value });
+      state.dirty = false;
+      location.href = `index.html?${query}`;
+    });
+    els.logout.addEventListener('click', () => { state.session = ''; sessionStorage.removeItem('editorial-editor-session'); location.reload(); });
+    els.save.addEventListener('click', save);
+    addEventListener('keydown', event => { if (event.ctrlKey && event.key.toLowerCase() === 's') { event.preventDefault(); save(); } });
+    addEventListener('beforeunload', event => { if (state.dirty) { event.preventDefault(); event.returnValue = ''; } });
+    els.render.addEventListener('load', render);
+
+    if (!configured) els.login.hidden = true;
+    detectLocalMode().then(() => state.local ? populateSections(initial.get('section')) : establishSession().then(() => populateSections(initial.get('section'))));
+  </script>
+</body>
+</html>

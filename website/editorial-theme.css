@@ -1,0 +1,27 @@
+/* Tokyo Night syntax palette on a light editorial background. */
+.code-pane { background: #ffffff !important; }
+.code-pane .hljs { color: #1f2335; background: transparent !important; }
+.code-pane .hljs-comment, .code-pane .hljs-quote { color: #8990a3; font-style: italic; }
+.code-pane .hljs-keyword, .code-pane .hljs-selector-tag, .code-pane .hljs-literal,
+.code-pane .hljs-section, .code-pane .hljs-link { color: #7c3aed; font-weight: 600; }
+.code-pane .hljs-type, .code-pane .hljs-title.class_, .code-pane .hljs-built_in { color: #0891b2; }
+.code-pane .hljs-title.function_, .code-pane .hljs-function .hljs-title { color: #2563eb; }
+.code-pane .hljs-string, .code-pane .hljs-regexp, .code-pane .hljs-addition,
+.code-pane .hljs-attribute, .code-pane .hljs-meta .hljs-string { color: #15803d; }
+.code-pane .hljs-number, .code-pane .hljs-symbol, .code-pane .hljs-bullet { color: #c2410c; }
+.code-pane .hljs-variable, .code-pane .hljs-template-variable, .code-pane .hljs-params,
+.code-pane .hljs-property { color: #be185d; }
+.code-pane .hljs-meta, .code-pane .hljs-doctag, .code-pane .hljs-operator,
+.code-pane .hljs-punctuation { color: #0e7490; }
+.copy-code {
+  margin-left: auto;
+  border: 1px solid #d8dbe5;
+  border-radius: 5px;
+  background: #fff;
+  color: #565a6e;
+  padding: 5px 10px;
+  font: 11px/1.2 var(--sans, sans-serif);
+  cursor: pointer;
+}
+.copy-code:hover { border-color: #2e7de9; color: #2e7de9; }
+.copy-code:focus-visible { outline: 2px solid #2e7de9; outline-offset: 2px; }

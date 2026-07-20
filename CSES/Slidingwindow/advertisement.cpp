@@ -1,84 +1,103 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-const ll NEG = LLONG_MIN/4;
 
-int M;
-vector<ll> A, B;                       // node line: A*x + B
+using ll = long long;
 
-void liInsert(int nd,int l,int r,ll a,ll b){
-    int m=(l+r)>>1;
-    if(a*(ll)m+b > A[nd]*(ll)m+B[nd]){ swap(a,A[nd]); swap(b,B[nd]); }
-    if(l==r) return;
-    if(a*(ll)l+b > A[nd]*(ll)l+B[nd]) liInsert(2*nd,l,m,a,b);
-    else if(a*(ll)r+b > A[nd]*(ll)r+B[nd]) liInsert(2*nd+1,m+1,r,a,b);
-}
-void rInsert(int nd,int l,int r,int ql,int qr,ll a,ll b){
-    if(qr<l||r<ql) return;
-    if(ql<=l&&r<=qr){ liInsert(nd,l,r,a,b); return; }
-    int m=(l+r)>>1;
-    rInsert(2*nd,l,m,ql,qr,a,b);
-    rInsert(2*nd+1,m+1,r,ql,qr,a,b);
-}
-ll qry(int nd,int l,int r,int x){
-    ll res = A[nd]*(ll)x + B[nd];
-    if(l==r) return res;
-    int m=(l+r)>>1;
-    if(x<=m) return max(res, qry(2*nd,l,m,x));
-    return max(res, qry(2*nd+1,m+1,r,x));
+struct Line {
+    ll a = 0, b = 0;
+
+    ll get(int x) {
+        return a * x + b;
+    }
+};
+
+int m;
+vector<Line> tr;
+
+void ins(Line z, int p, int l, int r) {
+    int mid = (l + r) / 2;
+    bool le = z.get(l) > tr[p].get(l);
+    bool md = z.get(mid) > tr[p].get(mid);
+
+    if (md) swap(z, tr[p]);
+    if (l == r) return;
+
+    if (le != md) ins(z, p * 2, l, mid);
+    else ins(z, p * 2 + 1, mid + 1, r);
 }
 
-int main(){
+void add(Line z, int ql, int qr, int p, int l, int r) {
+    if (qr < l || r < ql) return;
+
+    if (ql <= l && r <= qr) {
+        ins(z, p, l, r);
+        return;
+    }
+
+    int mid = (l + r) / 2;
+    add(z, ql, qr, p * 2, l, mid);
+    add(z, ql, qr, p * 2 + 1, mid + 1, r);
+}
+
+void add(Line z, int l, int r) {
+    l = max(l, 0);
+    r = min(r, m - 1);
+    if (l <= r) add(z, l, r, 1, 0, m - 1);
+}
+
+ll qry(int x, int p, int l, int r) {
+    ll ans = tr[p].get(x);
+    if (l == r) return ans;
+
+    int mid = (l + r) / 2;
+    if (x <= mid) ans = max(ans, qry(x, p * 2, l, mid));
+    else ans = max(ans, qry(x, p * 2 + 1, mid + 1, r));
+
+    return ans;
+}
+
+int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
+
     int n, k;
     cin >> n >> k;
-    vector<int> h(n+1);
-    for(int i = 1; i <= n; i++) cin >> h[i];
 
-    vector<int> L(n+1), R(n+1), st;      // nearest strictly-smaller bounds
-    for(int i = 1; i <= n; i++){
-        while(!st.empty() && h[st.back()] >= h[i]) st.pop_back();
-        L[i] = (st.empty()? 0 : st.back()) + 1;
-        st.pb(i);
-    }
-    st.clear();
-    for(int i = n; i >= 1; i--){
-        while(!st.empty() && h[st.back()] >= h[i]) st.pop_back();
-        R[i] = (st.empty()? n+1 : st.back()) - 1;
-        st.pb(i);
+    vector<int> a(n), l(n), r(n), s;
+    for (int i = 0; i < n; i++) cin >> a[i];
+
+    for (int i = 0; i < n; i++) {
+        while (!s.empty() && a[s.back()] >= a[i]) s.pop_back();
+        l[i] = s.empty() ? 0 : s.back() + 1;
+        s.push_back(i);
     }
 
-    M = n - k + 1;
-    A.assign(4*M+4, 0);
-    B.assign(4*M+4, NEG);
+    s.clear();
 
-    for(int i = 1; i <= n; i++){
-        ll H = h[i]; int l = L[i], r = R[i];
-        int t1 = min(l, r-k+1), t2 = max(l, r-k+1);
-        int lo, hi;
-        lo = max(1, l-k+1); hi = min(t1, M);                  // ramp up
-        if(lo<=hi) rInsert(1,1,M,lo,hi, H, H*(ll)(k-l));
-        lo = max(1, t1+1); hi = min(t2, M);                   // plateau
-        if(lo<=hi) rInsert(1,1,M,lo,hi, 0, H*(ll)min(k, r-l+1));
-        lo = max(1, t2+1); hi = min(r, M);                    // ramp down
-        if(lo<=hi) rInsert(1,1,M,lo,hi, -H, H*(ll)(r+1));
+    for (int i = n - 1; i >= 0; i--) {
+        while (!s.empty() && a[s.back()] >= a[i]) s.pop_back();
+        r[i] = s.empty() ? n - 1 : s.back() - 1;
+        s.push_back(i);
     }
 
-    string out;
-    for(int x = 1; x <= M; x++){
-        out += to_string(qry(1,1,M,x));
-        out += ' ';
+    m = n - k + 1;
+    tr.resize(4 * m + 5);
+
+    for (int i = 0; i < n; i++) {
+        int x = l[i], y = r[i];
+        int p = min(x, y - k + 1);
+        int q = max(x, y - k + 1);
+        ll h = a[i];
+
+        add({h, h * (k - x)}, x - k + 1, p - 1);
+        add({0, h * min(k, y - x + 1)}, p, q);
+        add({-h, h * (y + 1)}, q + 1, y);
     }
-    cout << out << "\n";
-    return 0;
+
+    for (int i = 0; i < m; i++) {
+        if (i) cout << ' ';
+        cout << qry(i, 1, 0, m - 1);
+    }
+
+    cout << '\n';
 }

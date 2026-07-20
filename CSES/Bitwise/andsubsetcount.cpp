@@ -1,45 +1,52 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
 
-const int LOG = 18, U = 1 << LOG;          // a_i <= n < 2^18
-static ll F[U];
+using ll = long long;
+
+const int mod = 1000000007;
 
 int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
 
-    int n; cin >> n;
-    for (int i = 0; i < n; i++) { int a; cin >> a; F[a]++; }   // frequency
+    int n;
+    cin >> n;
 
-    // superset-sum: F[m] = #{ a_i : a_i superset of m } = g(m)
-    for (int b = 0; b < LOG; b++)
-        for (int m = 0; m < U; m++)
-            if (!(m & (1 << b))) F[m] += F[m | (1 << b)];
+    int m = 1;
+    while (m <= n) m <<= 1;
 
-    vector<ll> pw(n + 1);
+    vector<int> f(m), pw(n + 1), ans(m);
+    for (int i = 0; i < n; i++) {
+        int x;
+        cin >> x;
+        f[x]++;
+    }
+
+    for (int b = 1; b < m; b <<= 1) {
+        for (int mask = 0; mask < m; mask++) {
+            if (!(mask & b)) f[mask] += f[mask | b];
+        }
+    }
+
     pw[0] = 1;
-    for (int i = 1; i <= n; i++) pw[i] = pw[i-1] * 2 % MOD;
+    for (int i = 1; i <= n; i++) pw[i] = (ll)pw[i - 1] * 2 % mod;
 
-    for (int m = 0; m < U; m++) F[m] = (pw[F[m]] - 1 + MOD) % MOD;   // F(m) = 2^g(m) - 1
+    for (int mask = 0; mask < m; mask++) {
+        ans[mask] = pw[f[mask]] - 1;
+        if (ans[mask] < 0) ans[mask] += mod;
+    }
 
-    // inverse superset-sum: recover exact(m) from F(m) = sum_{j superset m} exact(j)
-    for (int b = 0; b < LOG; b++)
-        for (int m = 0; m < U; m++)
-            if (!(m & (1 << b))) F[m] = (F[m] - F[m | (1 << b)] % MOD + MOD) % MOD;
+    for (int b = 1; b < m; b <<= 1) {
+        for (int mask = 0; mask < m; mask++) {
+            if (mask & b) continue;
+            ans[mask] -= ans[mask | b];
+            if (ans[mask] < 0) ans[mask] += mod;
+        }
+    }
 
-    string out; out.reserve(12 * (n + 1));
-    for (int k = 0; k <= n; k++) { if (k) out += ' '; out += to_string(F[k]); }
-    out += '\n';
-    cout << out;
-    return 0;
+    for (int i = 0; i <= n; i++) {
+        if (i) cout << ' ';
+        cout << ans[i];
+    }
+    cout << '\n';
 }

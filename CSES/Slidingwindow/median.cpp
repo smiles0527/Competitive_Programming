@@ -1,51 +1,57 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int main(){
+
+void bal(multiset<int>& l, multiset<int>& r, int t) {
+    while ((int)l.size() > t) {
+        auto it = prev(l.end());
+        r.insert(*it);
+        l.erase(it);
+    }
+
+    while ((int)l.size() < t) {
+        auto it = r.begin();
+        l.insert(*it);
+        r.erase(it);
+    }
+}
+
+int main() {
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
+
     int n, k;
     cin >> n >> k;
-    vector<int> v(n);
-    for(int i = 0; i < n; i++) cin >> v[i];
 
-    multiset<int> lo, hi;            // lo: smaller half (top = median), hi: larger half
-    // int t = (k + 1) / 2;             // target size of lo
-    auto rebalance = [&](){
-        int t = ((int)(lo.size()+hi.size()) + 1) / 2;   // lower-median split for current count
-        while((int)lo.size() > t){ auto it = prev(lo.end()); hi.insert(*it); lo.erase(it); }
-        while((int)lo.size() < t){ auto it = hi.begin(); lo.insert(*it); hi.erase(it); }
-    };
-    auto add = [&](int x){
-        if(lo.empty() || x <= *lo.rbegin()) lo.insert(x);
-        else hi.insert(x);
-        rebalance();
-    };
-    auto rem = [&](int x){
-        auto it = lo.find(x);
-        if(it != lo.end()) lo.erase(it);
-        else hi.erase(hi.find(x));
-        rebalance();
-    };
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
 
-    string out;
-    for(int i = 0; i < n; i++){
-        add(v[i]);
-        if(i >= k) rem(v[i-k]);
-        if(i >= k-1){
-            out += to_string(*lo.rbegin());
-            out += ' ';
+    multiset<int> l, r;
+    int t = (k + 1) / 2;
+
+    for (int i = 0; i < k; i++) l.insert(a[i]);
+    bal(l, r, t);
+
+    cout << *prev(l.end());
+
+    for (int i = k; i < n; i++) {
+        int x = a[i - k];
+
+        auto it = l.find(x);
+        if (it != l.end()) l.erase(it);
+        else r.erase(r.find(x));
+
+        if (l.empty()) {
+            if (r.empty() || a[i] <= *r.begin()) l.insert(a[i]);
+            else r.insert(a[i]);
+        } else if (a[i] <= *prev(l.end())) {
+            l.insert(a[i]);
+        } else {
+            r.insert(a[i]);
         }
+
+        bal(l, r, t);
+        cout << ' ' << *prev(l.end());
     }
-    cout << out << "\n";
-    return 0;
+
+    cout << '\n';
 }
