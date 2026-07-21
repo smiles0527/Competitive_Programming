@@ -162,30 +162,30 @@
     <span class="spacer"></span>
     <label for="editorial">editorial</label>
     <select id="editorial" aria-label="Choose editorial">
-      <option value="weirdalgorithm.md">weird algorithm</option>
-      <option value="missingnumber.md">missing number</option>
-      <option value="repetitions.md">repetitions</option>
-      <option value="increasingarray.md">increasing array</option>
-      <option value="permutations.md">permutations</option>
-      <option value="numberspiral.md">number spiral</option>
-      <option value="twoknights.md">two knights</option>
-      <option value="twosets.md">two sets</option>
-      <option value="bitstrings.md">bit strings</option>
-      <option value="trailingzeros.md">trailing zeros</option>
-      <option value="coinpiles.md">coin piles</option>
-      <option value="palindromereorder.md">palindrome reorder</option>
-      <option value="graycode.md">gray code</option>
-      <option value="hanoi.md">tower of hanoi</option>
-      <option value="creatingstrings.md">creating strings</option>
-      <option value="appledivision.md">apple division</option>
-      <option value="chessboardqueens.md">chessboard and queens</option>
-      <option value="raab1.md">raab game I</option>
-      <option value="mexgrid.md">mex grid construction</option>
-      <option value="knightmoves.md">knight moves grid</option>
-      <option value="gridcoloring1.md">grid coloring I</option>
-      <option value="digitqueries.md">digit queries</option>
-      <option value="stringreorder.md">string reorder</option>
-      <option value="gridpathdescription.md">grid path description</option>
+      <option value="editorials/weirdalgorithm.md">weird algorithm</option>
+      <option value="editorials/missingnumber.md">missing number</option>
+      <option value="editorials/repetitions.md">repetitions</option>
+      <option value="editorials/increasingarray.md">increasing array</option>
+      <option value="editorials/permutations.md">permutations</option>
+      <option value="editorials/numberspiral.md">number spiral</option>
+      <option value="editorials/twoknights.md">two knights</option>
+      <option value="editorials/twosets.md">two sets</option>
+      <option value="editorials/bitstrings.md">bit strings</option>
+      <option value="editorials/trailingzeros.md">trailing zeros</option>
+      <option value="editorials/coinpiles.md">coin piles</option>
+      <option value="editorials/palindromereorder.md">palindrome reorder</option>
+      <option value="editorials/graycode.md">gray code</option>
+      <option value="editorials/hanoi.md">tower of hanoi</option>
+      <option value="editorials/creatingstrings.md">creating strings</option>
+      <option value="editorials/appledivision.md">apple division</option>
+      <option value="editorials/chessboardqueens.md">chessboard and queens</option>
+      <option value="editorials/raab1.md">raab game I</option>
+      <option value="editorials/mexgrid.md">mex grid construction</option>
+      <option value="editorials/knightmoves.md">knight moves grid</option>
+      <option value="editorials/gridcoloring1.md">grid coloring I</option>
+      <option value="editorials/digitqueries.md">digit queries</option>
+      <option value="editorials/stringreorder.md">string reorder</option>
+      <option value="editorials/gridpathdescription.md">grid path description</option>
     </select>
   </header>
   <div class="workspace">
@@ -200,13 +200,13 @@
     </section>
   </div>
   <script>
-    const file = new URLSearchParams(location.search).get('file') || 'weirdalgorithm.md';
+    const file = new URLSearchParams(location.search).get('file') || 'editorials/weirdalgorithm.md';
     const picker = document.getElementById('editorial');
     picker.value = file;
     picker.addEventListener('change', () => {
       location.search = new URLSearchParams({ file: picker.value });
     });
-    const codeFile = file.replace(/\.md$/, '.cpp');
+    const codeFile = file.replace(/^editorials\//, '').replace(/\.md$/, '.cpp');
     document.getElementById('code-name').textContent = codeFile;
 
     Promise.all([
@@ -215,6 +215,9 @@
     ]).then(([markdown, code]) => {
         const content = document.getElementById('content');
         content.innerHTML = marked.parse(markdown);
+        for (const link of content.querySelectorAll('a[href^="../"][href$=".cpp"]')) {
+          link.href = link.getAttribute('href').slice(3);
+        }
         const embeddedHeading = [...content.querySelectorAll('h3')]
           .find(heading => heading.textContent.trim() === 'Accepted C++17 implementation');
         if (embeddedHeading) {

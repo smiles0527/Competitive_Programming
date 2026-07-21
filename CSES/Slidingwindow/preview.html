@@ -163,17 +163,17 @@
     <span class="spacer"></span>
     <label for="editorial">editorial</label>
     <select id="editorial" aria-label="Choose editorial">
-      <option value="sum.md">sum</option>
-      <option value="minimum.md">minimum</option>
-      <option value="xor.md">xor</option>
-      <option value="or.md">or</option>
-      <option value="distinctvalues.md">distinct values</option>
-      <option value="mode.md">mode</option>
-      <option value="mex.md">mex</option>
-      <option value="median.md">median</option>
-      <option value="cost.md">cost</option>
-      <option value="inversions.md">inversions</option>
-      <option value="advertisement.md">advertisement</option>
+      <option value="editorials/sum.md">sum</option>
+      <option value="editorials/minimum.md">minimum</option>
+      <option value="editorials/xor.md">xor</option>
+      <option value="editorials/or.md">or</option>
+      <option value="editorials/distinctvalues.md">distinct values</option>
+      <option value="editorials/mode.md">mode</option>
+      <option value="editorials/mex.md">mex</option>
+      <option value="editorials/median.md">median</option>
+      <option value="editorials/cost.md">cost</option>
+      <option value="editorials/inversions.md">inversions</option>
+      <option value="editorials/advertisement.md">advertisement</option>
     </select>
   </header>
   <div class="workspace">
@@ -188,13 +188,13 @@
     </section>
   </div>
   <script>
-    const file = new URLSearchParams(location.search).get('file') || 'sum.md';
+    const file = new URLSearchParams(location.search).get('file') || 'editorials/sum.md';
     const picker = document.getElementById('editorial');
     picker.value = file;
     picker.addEventListener('change', () => {
       location.search = new URLSearchParams({ file: picker.value });
     });
-    const codeFile = file.replace(/\.md$/, '.cpp');
+    const codeFile = file.replace(/^editorials\//, '').replace(/\.md$/, '.cpp');
     document.getElementById('code-name').textContent = codeFile;
 
     Promise.all([
@@ -203,6 +203,9 @@
     ]).then(([markdown, code]) => {
         const content = document.getElementById('content');
         content.innerHTML = marked.parse(markdown);
+        for (const link of content.querySelectorAll('a[href^="../"][href$=".cpp"]')) {
+          link.href = link.getAttribute('href').slice(3);
+        }
         const embeddedHeading = [...content.querySelectorAll('h3')]
           .find(heading => heading.textContent.trim() === 'Accepted C++17 implementation');
         if (embeddedHeading) {

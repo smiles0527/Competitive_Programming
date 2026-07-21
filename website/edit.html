@@ -129,7 +129,8 @@
     }
     function currentPaths() {
       const md = resolveRepoPath(els.section.value, els.file.value);
-      return { md, cpp: md.replace(/\.md$/, '.cpp') };
+      const cpp = md.replace('/editorials/', '/').replace(/\.md$/, '.cpp');
+      return { md, cpp };
     }
     function localUrl(path) { return `../${path.split('/').map(encodeURIComponent).join('/')}`; }
     function currentText() { return state.tab === 'markdown' ? state.markdown : state.code; }

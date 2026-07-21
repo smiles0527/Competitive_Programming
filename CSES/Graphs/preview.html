@@ -164,31 +164,31 @@
     <span class="spacer"></span>
     <label for="editorial">editorial</label>
     <select id="editorial" aria-label="Choose editorial">
-      <option value="countingrooms.md">counting rooms</option>
-      <option value="buildingroads.md">building roads</option>
-      <option value="buildingteams.md">building teams</option>
-      <option value="courseschedule.md">course schedule</option>
-      <option value="shortestroutes1.md">shortest routes I</option>
-      <option value="shortestroutes2.md">shortest routes II</option>
-      <option value="roadreparation.md">road reparation</option>
-      <option value="roadconstruction.md">road construction</option>
-      <option value="flightdiscount.md">flight discount</option>
-      <option value="investigation.md">investigation</option>
-      <option value="flightroutes.md">flight routes</option>
-      <option value="cyclefinding.md">cycle finding</option>
-      <option value="highscore.md">high score</option>
-      <option value="gameroutes.md">game routes</option>
-      <option value="longestflightroute.md">longest flight route</option>
-      <option value="roundtrip2.md">round trip II</option>
-      <option value="flightroutescheck.md">flight routes check</option>
-      <option value="labyrinth.md">labyrinth</option>
-      <option value="monsters.md">monsters</option>
-      <option value="maildelivery.md">mail delivery</option>
-      <option value="teleporters.md">teleporters path</option>
-      <option value="debrujin.md">de Bruijn sequence</option>
-      <option value="planets1.md">planets queries I</option>
-      <option value="planetscycles.md">planets cycles</option>
-      <option value="planets2.md">planets queries II</option>
+      <option value="editorials/countingrooms.md">counting rooms</option>
+      <option value="editorials/buildingroads.md">building roads</option>
+      <option value="editorials/buildingteams.md">building teams</option>
+      <option value="editorials/courseschedule.md">course schedule</option>
+      <option value="editorials/shortestroutes1.md">shortest routes I</option>
+      <option value="editorials/shortestroutes2.md">shortest routes II</option>
+      <option value="editorials/roadreparation.md">road reparation</option>
+      <option value="editorials/roadconstruction.md">road construction</option>
+      <option value="editorials/flightdiscount.md">flight discount</option>
+      <option value="editorials/investigation.md">investigation</option>
+      <option value="editorials/flightroutes.md">flight routes</option>
+      <option value="editorials/cyclefinding.md">cycle finding</option>
+      <option value="editorials/highscore.md">high score</option>
+      <option value="editorials/gameroutes.md">game routes</option>
+      <option value="editorials/longestflightroute.md">longest flight route</option>
+      <option value="editorials/roundtrip2.md">round trip II</option>
+      <option value="editorials/flightroutescheck.md">flight routes check</option>
+      <option value="editorials/labyrinth.md">labyrinth</option>
+      <option value="editorials/monsters.md">monsters</option>
+      <option value="editorials/maildelivery.md">mail delivery</option>
+      <option value="editorials/teleporters.md">teleporters path</option>
+      <option value="editorials/debrujin.md">de Bruijn sequence</option>
+      <option value="editorials/planets1.md">planets queries I</option>
+      <option value="editorials/planetscycles.md">planets cycles</option>
+      <option value="editorials/planets2.md">planets queries II</option>
     </select>
   </header>
   <div class="workspace">
@@ -205,13 +205,13 @@
   <script>
     mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'neutral' });
 
-    const file = new URLSearchParams(location.search).get('file') || 'countingrooms.md';
+    const file = new URLSearchParams(location.search).get('file') || 'editorials/countingrooms.md';
     const picker = document.getElementById('editorial');
     picker.value = file;
     picker.addEventListener('change', () => {
       location.search = new URLSearchParams({ file: picker.value });
     });
-    const codeFile = file.replace(/\.md$/, '.cpp');
+    const codeFile = file.replace(/^editorials\//, '').replace(/\.md$/, '.cpp');
     document.getElementById('code-name').textContent = codeFile;
 
     Promise.all([
@@ -220,6 +220,9 @@
     ]).then(([markdown, code]) => {
         const content = document.getElementById('content');
         content.innerHTML = marked.parse(markdown);
+        for (const link of content.querySelectorAll('a[href^="../"][href$=".cpp"]')) {
+          link.href = link.getAttribute('href').slice(3);
+        }
         content.classList.remove('loading');
         const source = document.getElementById('source-code');
         source.textContent = code;

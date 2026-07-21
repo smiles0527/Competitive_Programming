@@ -163,17 +163,17 @@
     <span class="spacer"></span>
     <label for="editorial">editorial</label>
     <select id="editorial" aria-label="Choose editorial">
-      <option value="countingbits.md">counting bits</option>
-      <option value="xorsubarray.md">maximum xor subarray</option>
-      <option value="xorsubset.md">maximum xor subset</option>
-      <option value="numbersubsetxors.md">number of subset xors</option>
-      <option value="ksubsetxors.md">k subset xors</option>
-      <option value="allsubarrayxors.md">all subarray xors</option>
-      <option value="xorpyramidpeak.md">xor pyramid peak</option>
-      <option value="xorpyramiddiagonal.md">xor pyramid diagonal</option>
-      <option value="xorpyramidrow.md">xor pyramid row</option>
-      <option value="sosbitproblem.md">SOS bit problem</option>
-      <option value="andsubsetcount.md">and subset count</option>
+      <option value="editorials/countingbits.md">counting bits</option>
+      <option value="editorials/xorsubarray.md">maximum xor subarray</option>
+      <option value="editorials/xorsubset.md">maximum xor subset</option>
+      <option value="editorials/numbersubsetxors.md">number of subset xors</option>
+      <option value="editorials/ksubsetxors.md">k subset xors</option>
+      <option value="editorials/allsubarrayxors.md">all subarray xors</option>
+      <option value="editorials/xorpyramidpeak.md">xor pyramid peak</option>
+      <option value="editorials/xorpyramiddiagonal.md">xor pyramid diagonal</option>
+      <option value="editorials/xorpyramidrow.md">xor pyramid row</option>
+      <option value="editorials/sosbitproblem.md">SOS bit problem</option>
+      <option value="editorials/andsubsetcount.md">and subset count</option>
     </select>  </header>
   <div class="workspace">
     <aside class="code-pane" aria-label="Accepted C++ solution">
@@ -187,13 +187,13 @@
     </section>
   </div>
   <script>
-    const file = new URLSearchParams(location.search).get('file') || 'countingbits.md';
+    const file = new URLSearchParams(location.search).get('file') || 'editorials/countingbits.md';
     const picker = document.getElementById('editorial');
     picker.value = file;
     picker.addEventListener('change', () => {
       location.search = new URLSearchParams({ file: picker.value });
     });
-    const codeFile = file.replace(/\.md$/, '.cpp');
+    const codeFile = file.replace(/^editorials\//, '').replace(/\.md$/, '.cpp');
     document.getElementById('code-name').textContent = codeFile;
 
     Promise.all([
@@ -202,6 +202,9 @@
     ]).then(([markdown, code]) => {
         const content = document.getElementById('content');
         content.innerHTML = marked.parse(markdown);
+        for (const link of content.querySelectorAll('a[href^="../"][href$=".cpp"]')) {
+          link.href = link.getAttribute('href').slice(3);
+        }
         const embeddedHeading = [...content.querySelectorAll('h3')]
           .find(heading => heading.textContent.trim() === 'Accepted C++17 implementation');
         if (embeddedHeading) {

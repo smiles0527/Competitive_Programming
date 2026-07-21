@@ -51,7 +51,7 @@
       const query = new URLSearchParams({ collection: collection.id, section });
       history.replaceState(null, '', `?${query}`);
       const previewQuery = new URLSearchParams({ v: Date.now() });
-      if (requestedEditorial) previewQuery.set('file', `${requestedEditorial}.md`);
+      if (requestedEditorial) previewQuery.set('file', `editorials/${requestedEditorial}.md`);
       frame.src = `${collection.path}/${encodeURIComponent(section)}/preview.html?${previewQuery}`;
       requestedEditorial = null;
     }
@@ -81,7 +81,7 @@
       try {
         const file = new URL(frame.contentWindow.location.href).searchParams.get('file');
         if (!file) return;
-        const editorial = file.replace(/\.md$/, '');
+        const editorial = file.split('/').pop().replace(/\.md$/, '');
         const query = new URLSearchParams({
           collection: collectionPicker.value,
           section: sectionPicker.value,
