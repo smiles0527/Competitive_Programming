@@ -9,7 +9,8 @@ window.EDITORIAL_SITE_CONFIG = {
       sections: [
         ["introductory", "Introductory Problems"],
         ["Slidingwindow", "Sliding Window Problems"],
-        ["Bitwise", "Bitwise Operations"]
+        ["Bitwise", "Bitwise Operations"],
+        ["Graphs", "Graph Algorithms"]
       ]
     }
   ],

@@ -25,3 +25,14 @@
 }
 .copy-code:hover { border-color: #2e7de9; color: #2e7de9; }
 .copy-code:focus-visible { outline: 2px solid #2e7de9; outline-offset: 2px; }
+
+.editorial-pane .mermaid {
+  margin: 24px 0;
+  padding: 18px;
+  overflow-x: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 7px;
+  background: #fff;
+  text-align: center;
+}
+.editorial-pane .mermaid svg { max-width: 100%; height: auto; }
