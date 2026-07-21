@@ -1,25 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
-using ll = long long;
 
-#define ii pair<int, int>
-#define f first
-#define s second
-#define mp make_pair
-
-//URDL
-#include <bits/stdc++.h>
-using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
+using ii = pair<int, int>;
 
 int n, m;
 vector<string> grid;
@@ -30,55 +12,62 @@ string stepdir = "DURL";
 char par[1000][1000];
 bool vis[1000][1000];
 
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n >> m;
-	grid.resize(n);
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-	ii A{-1, -1}, B{-1, -1};
-	for(int i = 0; i < n; i++){
-		cin >> grid[i];
-		for(int j = 0; j < m; j++){
-			if(grid[i][j] == 'A') A = {i, j};
-			if(grid[i][j] == 'B') B = {i, j};
-		}
-	}
+    cin >> n >> m;
+    grid.resize(n);
 
-	queue<ii> q; q.push(A);
-	vis[A.f][A.s] = true;
-	
-	while(!q.empty()){
-		ii cur= q.front(); q.pop();
-		for(int k = 0; k < 4; k++){
-			int nr = cur.f + dr[k];	
-			int nc = cur.s + dc[k];
-			if(nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
-			if(vis[nr][nc]) continue;
-			if(grid[nr][nc] == '#') continue;
-			vis[nr][nc] = true;
-			par[nr][nc] = stepdir[k];
-			q.push({nr, nc});
-		}
-	}
-	if(!vis[B.f][B.s]){
-		cout << "NO\n";
-		return 0;
-	}
-	
-	string path;
-	int r = B.f, c = B.s;
-	while(!(r==A.f && c==A.s)){
-		char ch = par[r][c];
-		path.push_back(ch);
-		if(ch == 'D') r -= 1;
-		else if(ch == 'U') r += 1;
-		else if(ch == 'R') c -= 1;
-		else if(ch == 'L') c += 1;
-	}
-	reverse(path.begin(), path.end());
+    ii A{-1, -1}, B{-1, -1};
+    for (int i = 0; i < n; i++) {
+        cin >> grid[i];
+        for (int j = 0; j < m; j++) {
+            if (grid[i][j] == 'A') A = {i, j};
+            if (grid[i][j] == 'B') B = {i, j};
+        }
+    }
 
-	cout << "YES\n";
-	cout << path.size() << '\n';
-	cout << path; return 0;
+    queue<ii> q;
+    q.push(A);
+    vis[A.first][A.second] = true;
+
+    while (!q.empty()) {
+        ii cur = q.front();
+        q.pop();
+        for (int k = 0; k < 4; k++) {
+            int nr = cur.first + dr[k];
+            int nc = cur.second + dc[k];
+            if (nr < 0 || nr >= n || nc < 0 || nc >= m) continue;
+            if (vis[nr][nc]) continue;
+            if (grid[nr][nc] == '#') continue;
+            vis[nr][nc] = true;
+            par[nr][nc] = stepdir[k];
+            q.push({nr, nc});
+        }
+    }
+    if (!vis[B.first][B.second]) {
+        cout << "NO\n";
+        return 0;
+    }
+
+    string path;
+    int r = B.first, c = B.second;
+    while (!(r == A.first && c == A.second)) {
+        char ch = par[r][c];
+        path.push_back(ch);
+        if (ch == 'D')
+            r -= 1;
+        else if (ch == 'U')
+            r += 1;
+        else if (ch == 'R')
+            c -= 1;
+        else if (ch == 'L')
+            c += 1;
+    }
+    reverse(path.begin(), path.end());
+
+    cout << "YES\n";
+    cout << path.size() << '\n';
+    cout << path;
 }
