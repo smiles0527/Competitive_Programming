@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>All Editorials</title>
+  <style>
+    :root { --ink:#111; --muted:#777; --line:#e4e4e4; --soft:#f7f7f5; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: var(--ink); background: #fff; font: 14px/1.5 var(--sans); }
+    header { border-bottom: 1px solid var(--line); }
+    .bar, main { width: min(1040px, calc(100% - 40px)); margin: 0 auto; }
+    .bar { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    a { color: inherit; }
+    .back { color: var(--muted); text-decoration: none; font-size: 12px; }
+    .back:hover { color: var(--ink); }
+    main { padding: 58px 0 100px; }
+    h1 { margin: 0; font-size: clamp(30px, 5vw, 48px); letter-spacing: -1.5px; }
+    .intro { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 42px; }
+    .count { color: var(--muted); }
+    input { width: 100%; height: 46px; margin-bottom: 36px; padding: 0 14px; border: 1px solid #aaa; border-radius: 0; color: var(--ink); background: #fff; font: 14px var(--sans); }
+    input:focus { outline: 2px solid #222; outline-offset: 2px; }
+    .group { margin: 0 0 42px; }
+    .group-head { display: flex; align-items: baseline; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+    h2 { margin: 0; font-size: 17px; }
+    .group-count { color: var(--muted); font-size: 12px; }
+    .list { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .item { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; padding: 15px 2px; border-bottom: 1px solid var(--line); text-decoration: none; }
+    .item:nth-child(odd) { margin-right: 22px; }
+    .item:hover .name { text-decoration: underline; text-underline-offset: 3px; }
+    .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .arrow { color: #aaa; }
+    .empty, .loading { padding: 48px 0; color: var(--muted); }
+    @media (max-width: 650px) { .list { grid-template-columns: 1fr; } .item:nth-child(odd) { margin-right: 0; } .intro { align-items: start; flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <header><div class="bar"><a class="back" href="index.html">← Home</a><span>all editorials</span></div></header>
+  <main>
+    <div class="intro"><h1>Every editorial</h1><span id="total" class="count"></span></div>
+    <input id="search" type="search" autocomplete="off" placeholder="Search by problem or category" aria-label="Search editorials">
+    <div id="catalog" class="loading">Loading editorials…</div>
+  </main>
+  <script src="site-config.js"></script>
+  <script>
+    const catalog = document.getElementById('catalog');
+    const search = document.getElementById('search');
+    const total = document.getElementById('total');
+    let entries = [];
+
+    async function loadCatalog() {
+      const groups = await Promise.all(window.EDITORIAL_SITE_CONFIG.collections.flatMap(collection =>
+        collection.sections.map(async ([section, sectionLabel]) => {
+          const response = await fetch(`${collection.path}/${encodeURIComponent(section)}/preview.html?v=${Date.now()}`, { cache: 'no-store' });
+          if (!response.ok) return [];
+          const source = new DOMParser().parseFromString(await response.text(), 'text/html');
+          return [...source.querySelectorAll('#editorial option')].map(option => ({
+            collection: collection.id,
+            collectionLabel: collection.label,
+            section,
+            sectionLabel,
+            name: option.textContent.trim(),
+            slug: option.value.split('/').pop().replace(/\.md$/, '')
+          }));
+        })
+      ));
+      entries = groups.flat();
+      total.textContent = `${entries.length} editorials`;
+      render();
+    }
+
+    function render() {
+      const query = search.value.trim().toLowerCase();
+      const visible = entries.filter(item => `${item.name} ${item.sectionLabel} ${item.collectionLabel}`.toLowerCase().includes(query));
+      catalog.className = '';
+      catalog.replaceChildren();
+      if (!visible.length) {
+        const empty = document.createElement('div');
+        empty.className = 'empty'; empty.textContent = query ? 'No editorials match that search.' : 'No editorials are published yet.';
+        catalog.appendChild(empty); return;
+      }
+      const grouped = new Map();
+      for (const item of visible) {
+        const key = `${item.collection}|${item.section}`;
+        if (!grouped.has(key)) grouped.set(key, []);
+        grouped.get(key).push(item);
+      }
+      for (const items of grouped.values()) {
+        const group = document.createElement('section'); group.className = 'group';
+        const head = document.createElement('div'); head.className = 'group-head';
+        const heading = document.createElement('h2'); heading.textContent = items[0].sectionLabel;
+        const count = document.createElement('span'); count.className = 'group-count'; count.textContent = `${items.length} ${items.length === 1 ? 'editorial' : 'editorials'}`;
+        const list = document.createElement('div'); list.className = 'list';
+        head.append(heading, count); group.append(head, list);
+        for (const item of items) {
+          const link = document.createElement('a'); link.className = 'item';
+          link.href = `browse.html?${new URLSearchParams({ collection: item.collection, section: item.section, editorial: item.slug })}`;
+          const name = document.createElement('span'); name.className = 'name'; name.textContent = item.name;
+          const arrow = document.createElement('span'); arrow.className = 'arrow'; arrow.textContent = '→';
+          link.append(name, arrow); list.appendChild(link);
+        }
+        catalog.appendChild(group);
+      }
+    }
+
+    search.addEventListener('input', render);
+    loadCatalog().catch(() => { catalog.className = 'empty'; catalog.textContent = 'The editorial catalogue could not be loaded.'; });
+  </script>
+</body>
+</html>

@@ -56,6 +56,18 @@
       font: 13px/1.62 var(--mono); tab-size: 4;
     }
     textarea:read-only { color: #666; }
+    dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 1px solid #aaa; color: var(--ink); background: #fff; }
+    dialog::backdrop { background: rgba(0,0,0,.28); }
+    .dialog-head, .dialog-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 17px; }
+    .dialog-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; padding: 20px; }
+    .field { display: grid; gap: 6px; }
+    .field.wide { grid-column: 1 / -1; }
+    .field label { color: var(--muted); font-size: 11px; letter-spacing: .35px; text-transform: uppercase; }
+    .field input, .field select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #aaa; background: #fff; }
+    .field textarea { min-height: 92px; height: 92px; padding: 9px 10px; border: 1px solid #aaa; background: #fff; font: inherit; resize: vertical; }
+    .field small { color: var(--muted); }
+    .dialog-actions { justify-content: flex-end; border-top: 1px solid var(--line); border-bottom: 0; }
     .preview-pane { min-width: 0; min-height: 0; }
     iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
     @media (max-width: 860px) {
@@ -82,6 +94,7 @@
         <select id="file" aria-label="Editorial"></select>
       </div>
       <div class="actions">
+        <button id="new-editorial">New editorial</button>
         <button id="exit">Exit editor</button>
         <span id="status" class="status">Local draft mode</span>
         <button id="login">Sign in with GitHub</button>
@@ -107,13 +120,29 @@
     </div>
   </div>
 
+  <dialog id="create-dialog">
+    <form id="create-form" method="dialog">
+      <div class="dialog-head"><h2>Create editorial</h2><button id="create-close" type="button" aria-label="Close">Close</button></div>
+      <div class="dialog-body">
+        <div class="field wide"><label for="create-title">Problem name</label><input id="create-title" required placeholder="Counting Rooms"></div>
+        <div class="field"><label for="create-source">Source</label><input id="create-source" required placeholder="CSES 1192: Counting Rooms"></div>
+        <div class="field"><label for="create-url">Problem URL</label><input id="create-url" type="url" placeholder="https://cses.fi/problemset/task/1192/"></div>
+        <div class="field"><label for="create-slug">File name</label><input id="create-slug" required pattern="[a-z0-9][a-z0-9_-]*" placeholder="countingrooms"><small>Creates this .md and .cpp pair.</small></div>
+        <div class="field"><label for="create-limits">Limits</label><input id="create-limits" placeholder="1 <= n,m <= 1000"></div>
+        <div class="field wide"><label for="create-section">Category</label><select id="create-section"></select></div>
+        <div class="field wide"><label for="create-task">Question</label><textarea id="create-task" required placeholder="Describe exactly what must be computed or constructed."></textarea></div>
+      </div>
+      <div class="dialog-actions"><button id="create-cancel" type="button">Cancel</button><button class="primary" value="create">Create files</button></div>
+    </form>
+  </dialog>
+
   <script src="site-config.js"></script>
   <script>
     const config = window.EDITORIAL_SITE_CONFIG || { collections: [], editor: {} };
     const apiBase = String(config.editor?.apiBase || '').replace(/\/$/, '');
     const configured = apiBase.startsWith('https://') && !apiBase.includes('REPLACE-WITH');
-    const els = Object.fromEntries(['collection','section','file','exit','status','login','logout','save','path','editor','render','markdown-tab','code-tab'].map(id => [id, document.getElementById(id)]));
-    const state = { session: sessionStorage.getItem('editorial-editor-session') || '', local: false, localToken: '', markdown: '', code: '', mdSha: '', cppSha: '', tab: 'markdown', dirty: false };
+    const els = Object.fromEntries(['collection','section','file','new-editorial','exit','status','login','logout','save','path','editor','render','markdown-tab','code-tab','create-dialog','create-form','create-close','create-cancel','create-title','create-source','create-url','create-slug','create-limits','create-section','create-task'].map(id => [id, document.getElementById(id)]));
+    const state = { session: sessionStorage.getItem('editorial-editor-session') || '', local: false, localToken: sessionStorage.getItem('editorial-local-token') || '', markdown: '', code: '', mdSha: '', cppSha: '', tab: 'markdown', dirty: false };
 
     function setStatus(message, kind = '') {
       els.status.textContent = message;
@@ -167,12 +196,18 @@
       if (!['127.0.0.1', 'localhost'].includes(location.hostname)) return;
       try {
         const status = await localApi('/__editor/status');
-        if (status.mode !== 'local' || !status.token) return;
-        state.local = true; state.localToken = status.token;
+        if (status.mode !== 'local') return;
+        if (!status.authorized) {
+          const next = location.pathname.split('/').pop() + location.search;
+          location.replace(`manage.html?${new URLSearchParams({ next })}`);
+          return false;
+        }
+        state.local = true;
         state.session = ''; sessionStorage.removeItem('editorial-editor-session');
         els.login.hidden = true; els.logout.hidden = true;
         els.save.textContent = 'Save locally';
         setStatus('Local repository mode');
+        return true;
       } catch {}
     }
     async function loadSection() {
@@ -181,8 +216,60 @@
       const documentText = await response.text();
       const parsed = new DOMParser().parseFromString(documentText, 'text/html');
       const options = [...parsed.querySelectorAll('#editorial option')];
+      if (state.local) {
+        const catalog = await localApi('/__editor/catalog');
+        const known = new Set(options.map(option => option.value));
+        for (const item of catalog.items.filter(item => item.collection === collection.repositoryPath && item.section === els.section.value)) {
+          const value = `editorials/${item.slug}.md`;
+          if (!known.has(value)) options.push(new Option(`${item.title} (unlisted)`, value));
+        }
+      }
       els.file.replaceChildren(...options.map(option => new Option(option.textContent, option.value)));
       await loadFiles();
+    }
+    function editorialTemplate(values) {
+      const source = values.url ? `[${values.source}](${values.url})` : values.source;
+      const limits = values.limits || 'Add the official constraints.';
+      return `# ${values.title}\n\n## Problem\n\n- **Source:** ${source}\n- **Code:** [View accepted C++ solution (../${values.slug}.cpp)](../${values.slug}.cpp)\n- **Constraints:** ${limits}\n\n${values.task}\n\n## Idea\n\nExplain what the constraints rule out, then derive the key invariant or reduction.\n\n## Algorithm\n\n1. Describe the first implementation step.\n2. Describe the maintained state or transition.\n3. Output the required result.\n\n## Correctness\n\n### Lemma 1\n\nState the central invariant.\n\n#### Proof\n\nProve why it is maintained. $\\square$\n\n### Theorem\n\nThe algorithm produces the required answer.\n\n#### Proof\n\nCombine the invariant with the termination condition. $\\square$\n\n## Implementation\n\nDiscuss only details that are easy to get wrong.\n\n## Complexity\n\nState the time and auxiliary-space complexity.\n\n## Worked Example\n\nTrace the central state on a small concrete instance.\n`;
+    }
+    function cppTemplate() {
+      return `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    return 0;\n}\n`;
+    }
+    function openCreateDialog() {
+      if (!state.local) { setStatus('Creating repository files is available on the local editorial server.', 'error'); return; }
+      if (state.dirty) { setStatus('Save or discard the current changes before creating an editorial.', 'error'); return; }
+      const collection = selectedCollection();
+      els['create-section'].replaceChildren(...collection.sections.map(([value, label]) => new Option(label, value)));
+      els['create-section'].value = els.section.value;
+      els['create-form'].reset();
+      delete els['create-slug'].dataset.edited;
+      els['create-section'].value = els.section.value;
+      els['create-dialog'].showModal();
+      els['create-title'].focus();
+    }
+    async function createEditorial(event) {
+      event.preventDefault();
+      if (event.submitter?.value !== 'create') return;
+      const values = {
+        title: els['create-title'].value.trim(), source: els['create-source'].value.trim(),
+        url: els['create-url'].value.trim(), slug: els['create-slug'].value.trim().toLowerCase(),
+        limits: els['create-limits'].value.trim(), section: els['create-section'].value,
+        task: els['create-task'].value.trim()
+      };
+      if (!values.title || !values.source || !values.task || !/^[a-z0-9][a-z0-9_-]*$/.test(values.slug)) return;
+      setStatus('Creating editorial files');
+      try {
+        await localApi('/__editor/create', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ collection: selectedCollection().repositoryPath, ...values, markdown: editorialTemplate(values), code: cppTemplate() })
+        });
+        els['create-dialog'].close();
+        els.section.value = values.section;
+        await loadSection();
+        els.file.value = `editorials/${values.slug}.md`;
+        await loadFiles();
+        setStatus('Editorial created locally', 'saved');
+      } catch (error) { setStatus(error.message, 'error'); }
     }
     async function loadFiles() {
       state.dirty = false; els.save.disabled = true; setStatus(state.local ? 'Loading local files' : state.session ? 'Loading' : 'Local draft mode');
@@ -312,6 +399,15 @@
     els.collection.addEventListener('change', () => populateSections());
     els.section.addEventListener('change', loadSection);
     els.file.addEventListener('change', loadFiles);
+    els['new-editorial'].addEventListener('click', openCreateDialog);
+    els['create-close'].addEventListener('click', () => els['create-dialog'].close());
+    els['create-cancel'].addEventListener('click', () => els['create-dialog'].close());
+    els['create-title'].addEventListener('input', () => {
+      if (els['create-slug'].dataset.edited) return;
+      els['create-slug'].value = els['create-title'].value.toLowerCase().replace(/[^a-z0-9]+/g, '').replace(/^_+|_+$/g, '');
+    });
+    els['create-slug'].addEventListener('input', () => { els['create-slug'].dataset.edited = 'true'; });
+    els['create-form'].addEventListener('submit', createEditorial);
     els.editor.addEventListener('input', () => { storeCurrentText(); state.dirty = true; els.save.disabled = false; render(); setStatus(state.local ? 'Unsaved local changes' : state.session ? 'Unsaved changes' : 'Unsaved local draft'); });
     els['markdown-tab'].addEventListener('click', () => selectTab('markdown'));
     els['code-tab'].addEventListener('click', () => selectTab('code'));
@@ -321,9 +417,8 @@
     });
     els.exit.addEventListener('click', () => {
       if (state.dirty && !confirm('Discard unsaved changes and exit the editor?')) return;
-      const query = new URLSearchParams({ collection: els.collection.value, section: els.section.value });
       state.dirty = false;
-      location.href = `index.html?${query}`;
+      location.href = 'manage.html';
     });
     els.logout.addEventListener('click', () => { state.session = ''; sessionStorage.removeItem('editorial-editor-session'); location.reload(); });
     els.save.addEventListener('click', save);
@@ -331,8 +426,23 @@
     addEventListener('beforeunload', event => { if (state.dirty) { event.preventDefault(); event.returnValue = ''; } });
     els.render.addEventListener('load', render);
 
-    if (!configured) els.login.hidden = true;
-    detectLocalMode().then(() => state.local ? populateSections(initial.get('section')) : establishSession().then(() => populateSections(initial.get('section'))));
+    async function initialize() {
+      if (!configured) els.login.hidden = true;
+      const localResult = await detectLocalMode();
+      if (localResult === false) return;
+      if (!state.local) await establishSession();
+      await populateSections(initial.get('section'));
+      const editorial = initial.get('editorial');
+      if (editorial) {
+        const value = `editorials/${editorial}.md`;
+        if ([...els.file.options].some(option => option.value === value)) {
+          els.file.value = value;
+          await loadFiles();
+        }
+      }
+      if (initial.get('new') === '1' && state.local) openCreateDialog();
+    }
+    initialize();
   </script>
 </body>
 </html>
