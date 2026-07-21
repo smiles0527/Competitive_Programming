@@ -25,6 +25,26 @@
 }
 .copy-code:hover { border-color: #2e7de9; color: #2e7de9; }
 .copy-code:focus-visible { outline: 2px solid #2e7de9; outline-offset: 2px; }
+.reveal-code {
+  margin-left: auto;
+  border: 1px solid #2563eb;
+  border-radius: 5px;
+  background: #2563eb;
+  color: #fff;
+  padding: 5px 10px;
+  font: 11px/1.2 var(--sans, sans-serif);
+  cursor: pointer;
+}
+.reveal-code:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.reveal-code:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.code-pane pre { transition: filter 180ms ease, opacity 180ms ease; }
+.code-pane.solution-hidden pre {
+  filter: blur(8px);
+  opacity: .5;
+  pointer-events: none;
+  user-select: none;
+}
+.code-pane.solution-hidden .copy-code { visibility: hidden; }
 
 .editorial-pane .mermaid {
   margin: 24px 0;

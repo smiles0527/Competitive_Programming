@@ -12,7 +12,7 @@ function moveProblem(direction) {
 
 const theme = document.createElement('link');
 theme.rel = 'stylesheet';
-theme.href = new URL('../../website/editorial-theme.css', location.href).href;
+theme.href = new URL('../../website/editorial-theme.css?v=3', location.href).href;
 document.head.appendChild(theme);
 
 const editorialPicker = document.getElementById('editorial');
@@ -21,15 +21,31 @@ if (editorialPicker?.value) {
 }
 
 const paneLabel = document.querySelector('.code-pane .pane-label');
+const codePane = document.querySelector('.code-pane');
 const sourceCode = document.getElementById('source-code');
 
-if (paneLabel && sourceCode) {
+if (codePane && paneLabel && sourceCode) {
+  codePane.classList.add('solution-hidden');
+
+  const revealButton = document.createElement('button');
+  revealButton.type = 'button';
+  revealButton.className = 'reveal-code';
+  revealButton.textContent = 'Reveal solution';
+  revealButton.setAttribute('aria-pressed', 'false');
+  paneLabel.appendChild(revealButton);
+
   const copyButton = document.createElement('button');
   copyButton.type = 'button';
   copyButton.className = 'copy-code';
   copyButton.textContent = 'Copy';
   copyButton.setAttribute('aria-label', 'Copy C++ solution');
   paneLabel.appendChild(copyButton);
+
+  revealButton.addEventListener('click', () => {
+    const hidden = codePane.classList.toggle('solution-hidden');
+    revealButton.textContent = hidden ? 'Reveal solution' : 'Hide solution';
+    revealButton.setAttribute('aria-pressed', String(!hidden));
+  });
 
   copyButton.addEventListener('click', async () => {
     try {
