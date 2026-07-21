@@ -23,7 +23,7 @@
 <body>
   <header>
     <a class="home utility" href="index.html">Home</a>
-    <a id="manage" class="utility" href="manage.html">Manage</a>
+    <a id="manage" class="utility" href="manage.html" hidden>Manage</a>
     <a class="utility" href="all.html">View all</a>
     <label for="collection">collection</label>
     <select id="collection" aria-label="Problem collection"></select>
@@ -43,7 +43,16 @@
 
     for (const collection of config.collections) collectionPicker.add(new Option(collection.label, collection.id));
     collectionPicker.value = params.get('collection') || config.collections[0].id;
-    manage.hidden = !['127.0.0.1', 'localhost'].includes(location.hostname);
+    async function showManagementWhenAuthorized() {
+      if (!['127.0.0.1', 'localhost'].includes(location.hostname)) return;
+      const token = sessionStorage.getItem('editorial-local-token') || '';
+      try {
+        const response = await fetch('/__editor/status', { headers: token ? { 'X-Local-Editor-Token': token } : {}, cache: 'no-store' });
+        const status = await response.json();
+        manage.hidden = !status.authorized;
+      } catch { manage.hidden = true; }
+    }
+    showManagementWhenAuthorized();
 
     function selectedCollection() { return config.collections.find(item => item.id === collectionPicker.value) || config.collections[0]; }
     function populateSections(preferred) {
