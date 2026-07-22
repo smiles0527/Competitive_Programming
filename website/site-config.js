@@ -11,7 +11,8 @@ window.EDITORIAL_SITE_CONFIG = {
         ["Slidingwindow", "Sliding Window Problems"],
         ["Bitwise", "Bitwise Operations"],
         ["Graphs", "Graph Algorithms"],
-        ["DP", "Dynamic Programming"]
+        ["DP", "Dynamic Programming"],
+        ["Interactive", "Interactive Problems"]
       ]
     }
   ],
