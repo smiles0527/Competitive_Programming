@@ -1,37 +1,55 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
 
-int n,m;
-ll dp[1024], nd[1024];
+const int MOD = 1e9 + 7;
 
-void go(int j, int c, int nx){
-	if(j==n){ nd[nx]=(nd[nx]+dp[c])%MOD; return;}
-	if(c>>j & 1){ go(j+1,c,nx); return;} //alr covered
-	if(j+1<n && !(c>>(j+1)&1)) go(j+2,c,nx); //vertical
-	go(j+1,c,nx | (1<<j)); //horizontal pertrudes
+int n;
+vector<vector<int>> trans;
+
+void gen(int row, int mask, int next) {
+    if (row == n) {
+        trans[mask].push_back(next);
+        return;
+    }
+
+    if (mask & (1 << row)) {
+        gen(row + 1, mask, next);
+        return;
+    }
+
+    gen(row + 1, mask, next | (1 << row));
+
+    if (row + 1 < n && !(mask & (1 << (row + 1)))) {
+        gen(row + 2, mask, next);
+    }
 }
 
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	
-	cin >> n >> m;
-	dp[0]=1;
-	for(int col=0;col<m;col++){
-		for(int k=0; k<(1<<n);k++) nd[k]=0;
-		for(int c=0; c<(1<<n);c++) if(dp[c]	) go(0,c,0);
-		for(int k=0; k<(1<<n);k++) dp[k]=nd[k];
-	}
-	cout << dp[0];
-	return 0;
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int m; cin >> n >> m;
+
+    int states = 1 << n;
+    trans.resize(states);
+
+    for (int mask = 0; mask < states; mask++) gen(0, mask, 0);
+
+    vector<int> dp(states), ndp(states);
+    dp[0] = 1;
+
+    for (int col = 0; col < m; col++) {
+        fill(ndp.begin(), ndp.end(), 0);
+
+        for (int mask = 0; mask < states; mask++) {
+            for (int next : trans[mask]) {
+                ndp[next] += dp[mask];
+                if (ndp[next] >= MOD) ndp[next] -= MOD;
+            }
+        }
+
+        dp.swap(ndp);
+    }
+
+    cout << dp[0] << '\n';
 }

@@ -1,38 +1,31 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	
-	int n; cin >> n;
 
-	vector<string> g(n); for (auto &x : g) cin >> x;
+const int MOD = 1000000007;
 
-	vector<vi> dp(n, vi(n,0));
-	for(int r=0; r<n; r++){
-		for(int c=0;c<n;c++){
-			if(g[r][c]=='*'){
-				dp[r][c]=0; continue;
-			}
-			if(r==0&&c==0){
-				dp[r][c]=1; continue;
-			}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-			ll up = (r>0)? dp[r-1][c]:0;
-			ll left = (c>0)? dp[r][c-1]:0;	
-			dp[r][c] = (up+left)%MOD;
-		}
-	}
-	cout << dp[n-1][n-1];
-	return 0;
+    int n;
+    cin >> n;
+
+    vector<int> dp(n);
+    dp[0] = 1;
+
+    for (int i = 0; i < n; i++) {
+        string s;
+        cin >> s;
+
+        for (int j = 0; j < n; j++) {
+            if (s[j] == '*') {
+                dp[j] = 0;
+            } else if (j) {
+                dp[j] += dp[j - 1];
+                if (dp[j] >= MOD) dp[j] -= MOD;
+            }
+        }
+    }
+
+    cout << dp[n - 1] << '\n';
 }

@@ -1,38 +1,36 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-const int MAXN = 1000000;
 
-int ans[MAXN+1];
+using ll = long long;
 
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	
-	ll w=1,n=1;
-	ans[1]=2;
+const int MOD = 1000000007;
 
-	for(int i=2;i<=MAXN;i++){
-		ll nw = (2*w+n)%MOD;
-		ll nn = (w+4*n)%MOD;
-		w=nw; n=nn;
-		ans[i]=int((w+n)%MOD);
-	}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
 
-	int t; cin >> t;
-	while(t--){
-		int n; cin >> n;
-		cout<<ans[n]<<'\n';
-	}
+    int t;
+    cin >> t;
 
-	return 0;
+    vector<int> q(t);
+    int mx = 0;
+
+    for (int i = 0; i < t; i++) {
+        cin >> q[i];
+        mx = max(mx, q[i]);
+    }
+
+    vector<int> ans(mx + 1);
+    ll a = 1, b = 1;
+    ans[1] = 2;
+
+    for (int i = 2; i <= mx; i++) {
+        ll na = (4 * a + b) % MOD;
+        ll nb = (a + 2 * b) % MOD;
+        a = na;
+        b = nb;
+        ans[i] = (a + b) % MOD;
+    }
+
+    for (int n : q) cout << ans[n] << '\n';
 }
