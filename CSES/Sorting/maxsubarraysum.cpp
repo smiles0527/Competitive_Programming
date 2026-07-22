@@ -1,26 +1,22 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int n;
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n;
-	ll cur = 0, best = LLONG_MIN;
-	for(int i = 0; i < n; i++){
-		ll x; cin >> x;
-		cur = max(x, cur + x);
-		best = max(best, cur);
-	}
-	cout << best << '\n';
-	return 0;
+
+using ll = long long;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n; cin >> n;
+
+    ll x; cin >> x;
+    ll cur = x, ans = x;
+
+    for (int i = 1; i < n; i++) {
+        cin >> x;
+        cur = max(x, cur + x);
+        ans = max(ans, cur);
+    }
+
+    cout << ans << '\n';
 }

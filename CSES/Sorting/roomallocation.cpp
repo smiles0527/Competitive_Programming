@@ -1,43 +1,26 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int n;
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n;
-	vector<array<int,3>> c(n);                   // {arrival, departure, idx}
-	for(int i = 0; i < n; i++){
-		int a, b; cin >> a >> b;
-		c[i] = {a, b, i};
-	}
-	sort(c.begin(), c.end());                    // by arrival
-
-	priority_queue<ii, vii, greater<ii>> pq;     // {departure, room id}
-	vector<int> room(n);
-	int k = 0;
-	for(auto &cust : c){
-		int a = cust[0], b = cust[1], idx = cust[2];
-		if(!pq.empty() && pq.top().f < a){       // earliest room frees before arrival
-			int rid = pq.top().s; pq.pop();
-			room[idx] = rid;
-			pq.push({b, rid});
-		} else {
-			k++;
-			room[idx] = k;
-			pq.push({b, k});
-		}
-	}
-	cout << k << '\n';
-	for(int i = 0; i < n; i++) cout << room[i] << (i+1 == n ? '\n' : ' ');
-	return 0;
+struct Customer { int a, b, id; };
+bool cmp(const Customer& x, const Customer& y) {
+    if (x.a != y.a) return x.a < y.a;
+    return x.b < y.b;
+}
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<Customer> a(n);
+    for (int i = 0; i < n; i++) { cin >> a[i].a >> a[i].b; a[i].id = i; }
+    sort(a.begin(), a.end(), cmp);
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> q;
+    vector<int> ans(n); int rooms = 0;
+    for (int i = 0; i < n; i++) {
+        int room;
+        if (!q.empty() && q.top().first < a[i].a) {
+            room = q.top().second; q.pop();
+        } else room = ++rooms;
+        ans[a[i].id] = room;
+        q.push({a[i].b, room});
+    }
+    cout << rooms << '\n';
+    for (int i = 0; i < n; i++) cout << ans[i] << " \n"[i == n - 1];
 }

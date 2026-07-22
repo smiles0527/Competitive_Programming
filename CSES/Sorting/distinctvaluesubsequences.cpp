@@ -1,26 +1,20 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int n;
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n;
-	unordered_map<int,int> cnt;
-	cnt.reserve(2*n);
-	for(int i = 0, x; i < n; i++){ cin >> x; cnt[x]++; }
-	ll prod = 1;
-	for(auto &e : cnt) prod = prod * ((e.s + 1) % MOD) % MOD;
-	ll ans = (prod - 1 + MOD) % MOD;
-	cout << ans << '\n';
-	return 0;
+using ll = long long;
+const int MOD = 1e9 + 7;
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) cin >> a[i];
+    sort(a.begin(), a.end());
+    ll ans = 1;
+    for (int i = 0; i < n; ) {
+        int j = i + 1;
+        while (j < n && a[j] == a[i]) j++;
+        ans = ans * (j - i + 1) % MOD;
+        i = j;
+    }
+    ans = (ans - 1 + MOD) % MOD;
+    cout << ans << '\n';
 }

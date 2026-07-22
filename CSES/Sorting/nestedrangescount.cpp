@@ -1,58 +1,33 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int n, m;
-int bit[200005];
-void upd(int i, int v){ for(; i <= m; i += i & -i) bit[i] += v; }
-int qry(int i){ int r = 0; for(; i > 0; i -= i & -i) r += bit[i]; return r; }
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n;
-	vector<array<int,3>> r(n);
-	vector<int> ys;
-	for(int i = 0; i < n; i++){
-		int x, y; cin >> x >> y;
-		r[i] = {x, y, i};
-		ys.pb(y);
-	}
-	sort(ys.begin(), ys.end());
-	ys.erase(unique(ys.begin(), ys.end()), ys.end());
-	m = ys.size();
-	auto yid = [&](int y){ return int(lower_bound(ys.begin(), ys.end(), y) - ys.begin()) + 1; };
-
-	sort(r.begin(), r.end(), [](const array<int,3>& a, const array<int,3>& b){
-		if(a[0] != b[0]) return a[0] < b[0];
-		return a[1] > b[1];
-	});
-
-	vector<int> contains(n, 0), contained(n, 0);
-
-	// forward: earlier ranges have x'<=x; current is contained by those with y'>=y
-	for(int i = 0; i < n; i++){
-		int id = yid(r[i][1]);
-		contained[r[i][2]] = qry(m) - qry(id - 1);
-		upd(id, 1);
-	}
-	for(int i = 1; i <= m; i++) bit[i] = 0;
-
-	// reverse: later ranges have x'>=x; current contains those with y'<=y
-	for(int i = n-1; i >= 0; i--){
-		int id = yid(r[i][1]);
-		contains[r[i][2]] = qry(id);
-		upd(id, 1);
-	}
-
-	for(int i = 0; i < n; i++) cout << contains[i] << (i+1==n?'\n':' ');
-	for(int i = 0; i < n; i++) cout << contained[i] << (i+1==n?'\n':' ');
-	return 0;
+struct Range { int l, r, id; };
+bool cmp(const Range& a, const Range& b) {
+    if (a.l != b.l) return a.l < b.l;
+    return a.r > b.r;
+}
+vector<int> bit;
+void add(int i, int x) { for (; i < (int)bit.size(); i += i & -i) bit[i] += x; }
+int get(int i) { int ans = 0; for (; i > 0; i -= i & -i) ans += bit[i]; return ans; }
+int main() {
+    ios::sync_with_stdio(false); cin.tie(nullptr);
+    int n; cin >> n;
+    vector<Range> a(n); vector<int> v(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i].l >> a[i].r; a[i].id = i; v[i] = a[i].r;
+    }
+    sort(a.begin(), a.end(), cmp);
+    sort(v.begin(), v.end()); v.erase(unique(v.begin(), v.end()), v.end());
+    vector<int> contains(n), contained(n);
+    bit.assign(v.size() + 1, 0);
+    for (int i = n - 1; i >= 0; i--) {
+        int p = lower_bound(v.begin(), v.end(), a[i].r) - v.begin() + 1;
+        contains[a[i].id] = get(p); add(p, 1);
+    }
+    fill(bit.begin(), bit.end(), 0);
+    for (int i = 0; i < n; i++) {
+        int p = lower_bound(v.begin(), v.end(), a[i].r) - v.begin() + 1;
+        contained[a[i].id] = i - get(p - 1); add(p, 1);
+    }
+    for (int i = 0; i < n; i++) cout << contains[i] << " \n"[i == n - 1];
+    for (int i = 0; i < n; i++) cout << contained[i] << " \n"[i == n - 1];
 }

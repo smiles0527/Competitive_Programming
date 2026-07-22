@@ -1,32 +1,34 @@
 #include <bits/stdc++.h>
 using namespace std;
-#pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2")
-#define pb push_back
-#define f first
-#define s second
-typedef long long ll;
-typedef pair<ll,ll> ii;
-typedef vector<ll> vi;
-typedef vector<ii> vii;
-const int MOD = 1e9+7;
-int n, x;
-int main(){
-	ios::sync_with_stdio(false);
-	cin.tie(nullptr);
-	cin >> n >> x;
-	unordered_map<int,int> seen;
-	seen.reserve(2*n);
-	for(int i = 1; i <= n; i++){
-		int a; cin >> a;
-		int need = x - a;
-		auto it = seen.find(need);
-		if(it != seen.end()){
-			cout << it->s << ' ' << i << '\n';
-			return 0;
-		}
-		seen.emplace(a, i);                      // record current value's index
-	}
-	cout << "IMPOSSIBLE\n";
-	return 0;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, x; cin >> n >> x;
+
+    vector<pair<int, int>> a(n);
+
+    for (int i = 0; i < n; i++) {
+        cin >> a[i].first;
+        a[i].second = i + 1;
+    }
+
+    sort(a.begin(), a.end());
+
+    int l = 0, r = n - 1;
+
+    while (l < r) {
+        long long sum = (long long)a[l].first + a[r].first;
+
+        if (sum == x) {
+            cout << a[l].second << ' ' << a[r].second << '\n';
+            return 0;
+        }
+
+        if (sum < x) l++;
+        else r--;
+    }
+
+    cout << "IMPOSSIBLE\n";
 }

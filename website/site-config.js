@@ -12,6 +12,7 @@ window.EDITORIAL_SITE_CONFIG = {
         ["Bitwise", "Bitwise Operations"],
         ["Graphs", "Graph Algorithms"],
         ["DP", "Dynamic Programming"],
+        ["Sorting", "Sorting and Searching"],
         ["Interactive", "Interactive Problems"]
       ]
     }
