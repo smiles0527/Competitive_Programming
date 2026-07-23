@@ -51,12 +51,19 @@ enables it locally, while the committed production values keep `DEV_MODE = "fals
 
 1. Sign in at `website/edit.html`.
 2. Choose an existing problem and create an editorial.
-3. Save revisions. Every save is immutable in D1.
-4. Submit the draft.
-5. An editor reviews it in `website/manage.html`.
-6. The editor can comment, request changes, approve, or publish the current revision.
-7. The public reader immediately uses the published revision. Later draft edits do not replace it
+3. Right-click an editorial, press `Shift+F10`, or use its `•••` button for management actions.
+   Editorials can be renamed, duplicated, moved, submitted or withdrawn, archived or restored, and
+   permanently deleted when the signed-in role permits it.
+4. Save revisions. Every save is immutable in D1.
+5. Submit the draft.
+6. An editor reviews it in `website/manage.html`.
+7. The editor can comment, request changes, approve, or publish the current revision.
+8. The public reader immediately uses the published revision. Later draft edits do not replace it
    until an editor publishes again.
+
+Owners use a direct workflow instead: **Create editorial** opens an unsaved editor, and **Save
+live** creates or updates the published revision immediately. Owners do not submit their own work
+for review and can directly edit any editorial.
 
 Multiple people can publish independent editorials for the same problem. The reader displays an
 author selector when more than one published editorial exists.

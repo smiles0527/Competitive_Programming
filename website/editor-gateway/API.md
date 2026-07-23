@@ -32,7 +32,11 @@ Authorization: Bearer SESSION_TOKEN
 | `POST` | `/api/editorials` | Create a draft and its first revision. |
 | `GET` | `/api/editorials/:id` | Load an accessible editorial, revisions, authors, and reviews. |
 | `PUT` | `/api/editorials/:id` | Save an immutable revision. |
+| `PATCH` | `/api/editorials/:id` | Rename an editorial or move it to another problem. |
+| `DELETE` | `/api/editorials/:id` | Permanently delete an editorial when the caller has permission. |
 | `POST` | `/api/editorials/:id/submit` | Submit a draft for review. |
+| `POST` | `/api/editorials/:id/withdraw` | Withdraw an editorial from review. |
+| `POST` | `/api/editorials/:id/duplicate` | Create an independent draft copy. |
 
 ## Editor and owner
 
@@ -41,6 +45,7 @@ Authorization: Bearer SESSION_TOKEN
 | `POST` | `/api/editorials/:id/review` | Comment, approve, or request changes. |
 | `POST` | `/api/editorials/:id/publish` | Publish the current revision. |
 | `POST` | `/api/editorials/:id/archive` | Remove an editorial from the public catalog. |
+| `POST` | `/api/editorials/:id/restore` | Restore an archived editorial. |
 
 ## Owner
 
@@ -52,3 +57,7 @@ Authorization: Bearer SESSION_TOKEN
 
 Public reads always use `published_revision_id`. Saving a new draft revision does not change the
 public content until an editor publishes that revision.
+
+Owner writes are direct: `PUT /api/editorials/:id` immediately updates `published_revision_id`, and
+an owner may pass `"publish": true` when creating an editorial to publish its first revision in the
+same operation.

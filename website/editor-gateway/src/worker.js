@@ -43,7 +43,7 @@ export default {
         response = await createEditorial(request, env);
       } else {
         const editorialMatch = path.match(
-          /^\/api\/editorials\/(\d+)(?:\/(submit|review|publish|archive))?$/,
+          /^\/api\/editorials\/(\d+)(?:\/(submit|withdraw|review|publish|archive|restore|duplicate))?$/,
         );
         const userMatch = path.match(/^\/api\/users\/(\d+)\/role$/);
 
@@ -54,14 +54,24 @@ export default {
             response = await getEditorial(request, env, id);
           else if (!action && request.method === "PUT")
             response = await updateEditorial(request, env, id);
+          else if (!action && request.method === "PATCH")
+            response = await updateEditorialMetadata(request, env, id);
+          else if (!action && request.method === "DELETE")
+            response = await deleteEditorial(request, env, id);
           else if (action === "submit" && request.method === "POST")
             response = await submitEditorial(request, env, id);
+          else if (action === "withdraw" && request.method === "POST")
+            response = await withdrawEditorial(request, env, id);
           else if (action === "review" && request.method === "POST")
             response = await reviewEditorial(request, env, id);
           else if (action === "publish" && request.method === "POST")
             response = await publishEditorial(request, env, id);
           else if (action === "archive" && request.method === "POST")
             response = await archiveEditorial(request, env, id);
+          else if (action === "restore" && request.method === "POST")
+            response = await restoreEditorial(request, env, id);
+          else if (action === "duplicate" && request.method === "POST")
+            response = await duplicateEditorial(request, env, id);
         } else if (userMatch && request.method === "PUT") {
           response = await updateUserRole(request, env, Number(userMatch[1]));
         }
@@ -348,7 +358,7 @@ async function getCatalog(env) {
      JOIN sections s ON s.id = p.section_id
      JOIN collections c ON c.id = s.collection_id
      JOIN users u ON u.id = e.created_by
-     WHERE e.status = 'published'
+     WHERE e.published_revision_id IS NOT NULL AND e.status <> 'archived'
      ORDER BY c.sort_order, s.sort_order, p.sort_order, p.id, e.id`,
   ).all();
   return json({ items: results });
@@ -371,7 +381,7 @@ async function getProblems(url, env) {
     `SELECT p.id, p.slug, p.title, p.source_url, p.sort_order,
             c.id collection, c.label collection_label,
             s.slug section, s.label section_label,
-            SUM(CASE WHEN e.status = 'published' THEN 1 ELSE 0 END) published_count
+            SUM(CASE WHEN e.published_revision_id IS NOT NULL AND e.status <> 'archived' THEN 1 ELSE 0 END) published_count
      FROM problems p
      JOIN sections s ON s.id = p.section_id
      JOIN collections c ON c.id = s.collection_id
@@ -403,7 +413,8 @@ async function getPublishedEditorials(url, env) {
      JOIN sections s ON s.id = p.section_id
      JOIN collections c ON c.id = s.collection_id
      JOIN users u ON u.id = e.created_by
-     WHERE e.status = 'published' AND c.id = ? AND s.slug = ? COLLATE NOCASE AND p.slug = ? COLLATE NOCASE
+     WHERE e.published_revision_id IS NOT NULL AND e.status <> 'archived'
+       AND c.id = ? AND s.slug = ? COLLATE NOCASE AND p.slug = ? COLLATE NOCASE
      ORDER BY e.published_at, e.id`,
   )
     .bind(collection, section, slug)
@@ -446,8 +457,9 @@ async function getDashboard(request, env) {
   const user = await requireUser(request, env);
   const staff = isStaff(user);
   const statement = env.DB.prepare(
-    `SELECT e.id, e.status, e.created_at, e.updated_at, e.submitted_at, e.published_at,
-            p.id problem_id, p.slug, p.title,
+    `SELECT e.id, e.created_by, e.status, e.created_at, e.updated_at, e.submitted_at, e.published_at,
+            p.id problem_id, p.slug, p.title problem_title,
+            COALESCE(NULLIF(e.title, ''), p.title) title,
             c.id collection, c.label collection_label,
             s.slug section, s.label section_label,
             u.login author_login, COALESCE(u.display_name, u.login) author_name,
@@ -518,7 +530,9 @@ async function getEditorial(request, env, id) {
 
 async function editorialRow(env, id) {
   return env.DB.prepare(
-    `SELECT e.*, p.slug, p.title, p.source_url, p.id problem_id,
+    `SELECT e.*, p.slug, p.title problem_title,
+            COALESCE(NULLIF(e.title, ''), p.title) title,
+            p.source_url, p.id problem_id,
             s.slug section, s.label section_label,
             c.id collection, c.label collection_label,
             u.login author_login, COALESCE(u.display_name, u.login) author_name
@@ -546,6 +560,7 @@ function validateContent(payload) {
 async function createEditorial(request, env) {
   const user = await requireUser(request, env);
   const payload = await bodyJson(request);
+  const directPublish = user.role === "owner" && payload.publish === true;
   const problemId = Number(payload.problem_id);
   if (!Number.isInteger(problemId))
     throw httpError(400, "A valid problem_id is required");
@@ -574,9 +589,17 @@ async function createEditorial(request, env) {
     .run();
   const revisionId = revisionResult.meta.last_row_id;
   await env.DB.batch([
-    env.DB.prepare(
-      "UPDATE editorials SET current_revision_id = ? WHERE id = ?",
-    ).bind(revisionId, editorialId),
+    directPublish
+      ? env.DB.prepare(
+          `UPDATE editorials
+           SET current_revision_id = ?, published_revision_id = ?,
+               status = 'published', published_at = CURRENT_TIMESTAMP,
+               updated_at = CURRENT_TIMESTAMP
+           WHERE id = ?`,
+        ).bind(revisionId, revisionId, editorialId)
+      : env.DB.prepare(
+          "UPDATE editorials SET current_revision_id = ? WHERE id = ?",
+        ).bind(revisionId, editorialId),
     env.DB.prepare(
       "INSERT INTO editorial_authors (editorial_id, user_id) VALUES (?, ?)",
     ).bind(editorialId, user.id),
@@ -590,7 +613,7 @@ async function assertCanEdit(request, env, id) {
   if (!editorial) throw httpError(404, "Editorial not found");
   if (!isStaff(user) && editorial.created_by !== user.id)
     throw httpError(403, "You cannot edit this editorial");
-  if (editorial.status === "archived")
+  if (editorial.status === "archived" && user.role !== "owner")
     throw httpError(409, "Archived editorials cannot be edited");
   return { user, editorial };
 }
@@ -604,8 +627,24 @@ async function updateEditorial(request, env, id) {
     .bind(id, user.id, content.markdown, content.solution, content.summary)
     .run();
   const revisionId = revisionResult.meta.last_row_id;
+  if (user.role === "owner") {
+    await env.DB.prepare(
+      `UPDATE editorials
+       SET current_revision_id = ?, published_revision_id = ?,
+           status = 'published',
+           published_at = COALESCE(published_at, CURRENT_TIMESTAMP),
+           updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+    )
+      .bind(revisionId, revisionId, id)
+      .run();
+    return json({
+      editorial: await editorialRow(env, id),
+      revision_id: revisionId,
+    });
+  }
   const status =
-    editorial.status === "published" || editorial.status === "changes_requested"
+    ["published", "submitted", "changes_requested"].includes(editorial.status)
       ? "draft"
       : editorial.status;
   await env.DB.prepare(
@@ -619,6 +658,103 @@ async function updateEditorial(request, env, id) {
   });
 }
 
+function cleanEditorialTitle(value) {
+  const title = String(value ?? "").trim();
+  if (!title) throw httpError(400, "Editorial name is required");
+  if (title.length > 160)
+    throw httpError(400, "Editorial name must be 160 characters or fewer");
+  return title;
+}
+
+async function updateEditorialMetadata(request, env, id) {
+  const { user, editorial } = await assertCanEdit(request, env, id);
+  const payload = await bodyJson(request);
+  const updates = [];
+  const values = [];
+
+  if (Object.hasOwn(payload, "title")) {
+    updates.push("title = ?");
+    values.push(cleanEditorialTitle(payload.title));
+  }
+
+  if (Object.hasOwn(payload, "problem_id")) {
+    const problemId = Number(payload.problem_id);
+    if (!Number.isInteger(problemId))
+      throw httpError(400, "A valid problem_id is required");
+    if (
+      !isStaff(user) &&
+      !["draft", "changes_requested"].includes(editorial.status)
+    ) {
+      throw httpError(
+        409,
+        "Withdraw this editorial before moving it to another problem",
+      );
+    }
+    const problem = await env.DB.prepare("SELECT id FROM problems WHERE id = ?")
+      .bind(problemId)
+      .first();
+    if (!problem) throw httpError(404, "Problem not found");
+    updates.push("problem_id = ?");
+    values.push(problemId);
+  }
+
+  if (!updates.length) throw httpError(400, "No editable fields were provided");
+  updates.push("updated_at = CURRENT_TIMESTAMP");
+  await env.DB.prepare(
+    `UPDATE editorials SET ${updates.join(", ")} WHERE id = ?`,
+  )
+    .bind(...values, id)
+    .run();
+  return json({ editorial: await editorialRow(env, id) });
+}
+
+async function duplicateEditorial(request, env, id) {
+  const user = await requireUser(request, env);
+  const source = await editorialRow(env, id);
+  if (!source) throw httpError(404, "Editorial not found");
+  if (
+    !isStaff(user) &&
+    source.created_by !== user.id &&
+    source.status !== "published"
+  ) {
+    throw httpError(403, "You cannot duplicate this editorial");
+  }
+  const revision = await env.DB.prepare(
+    "SELECT markdown, solution_cpp FROM revisions WHERE id = ?",
+  )
+    .bind(source.current_revision_id || source.published_revision_id)
+    .first();
+  if (!revision) throw httpError(409, "Editorial has no revision to duplicate");
+
+  const title = `${source.title} (copy)`.slice(0, 160);
+  const editorialResult = await env.DB.prepare(
+    "INSERT INTO editorials (problem_id, created_by, title) VALUES (?, ?, ?)",
+  )
+    .bind(source.problem_id, user.id, title)
+    .run();
+  const editorialId = editorialResult.meta.last_row_id;
+  const revisionResult = await env.DB.prepare(
+    "INSERT INTO revisions (editorial_id, author_id, markdown, solution_cpp, summary) VALUES (?, ?, ?, ?, ?)",
+  )
+    .bind(
+      editorialId,
+      user.id,
+      revision.markdown,
+      revision.solution_cpp,
+      `Duplicated from editorial ${id}`,
+    )
+    .run();
+  await env.DB.batch([
+    env.DB.prepare(
+      "UPDATE editorials SET current_revision_id = ? WHERE id = ?",
+    ).bind(revisionResult.meta.last_row_id, editorialId),
+    env.DB.prepare(
+      "INSERT INTO editorial_authors (editorial_id, user_id) VALUES (?, ?)",
+    ).bind(editorialId, user.id),
+  ]);
+  return json({ editorial: await editorialRow(env, editorialId) }, 201);
+}
+
 async function submitEditorial(request, env, id) {
   const { editorial } = await assertCanEdit(request, env, id);
   if (!editorial.current_revision_id)
@@ -628,6 +764,18 @@ async function submitEditorial(request, env, id) {
   }
   await env.DB.prepare(
     "UPDATE editorials SET status = 'submitted', submitted_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+  )
+    .bind(id)
+    .run();
+  return json({ editorial: await editorialRow(env, id) });
+}
+
+async function withdrawEditorial(request, env, id) {
+  const { editorial } = await assertCanEdit(request, env, id);
+  if (editorial.status !== "submitted")
+    throw httpError(409, "Only submitted editorials can be withdrawn");
+  await env.DB.prepare(
+    "UPDATE editorials SET status = 'draft', submitted_at = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
   )
     .bind(id)
     .run();
@@ -688,6 +836,53 @@ async function archiveEditorial(request, env, id) {
     .bind(id)
     .run();
   return json({ editorial: await editorialRow(env, id) });
+}
+
+async function restoreEditorial(request, env, id) {
+  await requireStaff(request, env);
+  const editorial = await editorialRow(env, id);
+  if (!editorial) throw httpError(404, "Editorial not found");
+  if (editorial.status !== "archived")
+    throw httpError(409, "Only archived editorials can be restored");
+  const status =
+    editorial.published_revision_id &&
+    editorial.current_revision_id === editorial.published_revision_id
+      ? "published"
+      : "draft";
+  await env.DB.prepare(
+    "UPDATE editorials SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+  )
+    .bind(status, id)
+    .run();
+  return json({ editorial: await editorialRow(env, id) });
+}
+
+async function deleteEditorial(request, env, id) {
+  const user = await requireUser(request, env);
+  const editorial = await editorialRow(env, id);
+  if (!editorial) throw httpError(404, "Editorial not found");
+  const ownsEditorial = editorial.created_by === user.id;
+  if (!isStaff(user) && !ownsEditorial)
+    throw httpError(403, "You cannot delete this editorial");
+  if (editorial.published_revision_id && user.role !== "owner") {
+    throw httpError(
+      409,
+      "Only the owner can permanently delete an editorial that has been published",
+    );
+  }
+  if (
+    !editorial.published_revision_id &&
+    !ownsEditorial &&
+    !isStaff(user)
+  ) {
+    throw httpError(403, "You cannot delete this editorial");
+  }
+  const payload = await bodyJson(request);
+  if (String(payload.confirm_title || "") !== editorial.title) {
+    throw httpError(400, "The confirmation name does not match");
+  }
+  await env.DB.prepare("DELETE FROM editorials WHERE id = ?").bind(id).run();
+  return json({ ok: true, id });
 }
 
 async function listUsers(request, env) {

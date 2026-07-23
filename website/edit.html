@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="cms.css" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   </head>
-  <body>
+  <body class="editor-workspace-page">
     <header class="topbar">
       <a class="brand" href="index.html">Editorial workspace</a>
       <span id="identity" class="muted"></span>
@@ -82,6 +82,37 @@
       </div>
     </main>
 
+    <div
+      id="editorial-menu"
+      class="context-menu"
+      role="menu"
+      aria-label="Editorial actions"
+      hidden
+    ></div>
+
+    <dialog id="editorial-dialog" class="editorial-dialog">
+      <form id="editorial-dialog-form">
+        <h2 id="editorial-dialog-title"></h2>
+        <p id="editorial-dialog-description" class="muted"></p>
+        <label id="editorial-dialog-field">
+          <span id="editorial-dialog-label"></span>
+          <input id="editorial-dialog-input" autocomplete="off" />
+          <select id="editorial-dialog-select"></select>
+        </label>
+        <p
+          id="editorial-dialog-error"
+          class="status error"
+          aria-live="polite"
+        ></p>
+        <div class="dialog-actions">
+          <button id="editorial-dialog-cancel" type="button">Cancel</button>
+          <button id="editorial-dialog-confirm" type="submit" class="primary">
+            Confirm
+          </button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="site-config.js?v=4"></script>
     <script src="api.js?v=4"></script>
     <script>
@@ -91,6 +122,8 @@
         problems: [],
         items: [],
         current: null,
+        menuItem: null,
+        creating: false,
         dirty: false,
       };
       const fields = {
@@ -165,6 +198,14 @@
           return;
         }
         for (const item of state.items) {
+          const row = document.createElement("div");
+          row.className = "draft-row";
+          row.dataset.editorialId = item.id;
+          row.addEventListener("contextmenu", (event) => {
+            event.preventDefault();
+            openContextMenu(item, { x: event.clientX, y: event.clientY });
+          });
+
           const button = document.createElement("button");
           button.className = `draft ${state.current?.id === item.id ? "active" : ""}`;
           button.innerHTML = `<strong></strong><span></span>`;
@@ -172,7 +213,404 @@
           button.querySelector("span").textContent =
             `${item.section_label} · ${item.status.replaceAll("_", " ")}`;
           button.addEventListener("click", () => openEditorial(item.id));
-          $("drafts").appendChild(button);
+          button.addEventListener("keydown", (event) => {
+            if (
+              event.key === "ContextMenu" ||
+              (event.shiftKey && event.key === "F10")
+            ) {
+              event.preventDefault();
+              const box = button.getBoundingClientRect();
+              openContextMenu(item, { x: box.left + 20, y: box.top + 20 });
+            }
+          });
+
+          const more = document.createElement("button");
+          more.type = "button";
+          more.className = "draft-more";
+          more.textContent = "•••";
+          more.setAttribute("aria-label", `Actions for ${item.title}`);
+          more.addEventListener("click", (event) => {
+            event.stopPropagation();
+            const box = more.getBoundingClientRect();
+            openContextMenu(item, { x: box.right, y: box.bottom });
+          });
+
+          row.append(button, more);
+          $("drafts").appendChild(row);
+        }
+      }
+
+      function isStaff() {
+        return ["owner", "editor"].includes(state.user?.role);
+      }
+
+      function ownsEditorial(item) {
+        return Number(item.created_by) === Number(state.user?.id);
+      }
+
+      function publicEditorialUrl(item) {
+        const query = new URLSearchParams({
+          collection: item.collection,
+          section: item.section,
+          slug: item.slug,
+        });
+        return new URL(`section.html?${query}`, location.href).toString();
+      }
+
+      function contextActions(item) {
+        const editable = isStaff() || ownsEditorial(item);
+        const publiclyVisible =
+          item.published_revision_id && item.status !== "archived";
+        const owner = state.user?.role === "owner";
+        const actions = [
+          ["open", "Open"],
+          publiclyVisible && ["public", "Open public version"],
+          publiclyVisible && ["copy-link", "Copy public link"],
+          null,
+          editable && item.status !== "archived" && ["rename", "Rename"],
+          ["duplicate", "Duplicate"],
+          editable && item.status !== "archived" && ["move", "Move to problem"],
+          null,
+          !owner &&
+            editable &&
+            ["draft", "changes_requested"].includes(item.status) && [
+              "submit",
+              "Submit for review",
+            ],
+          !owner && editable && item.status === "submitted" && [
+            "withdraw",
+            "Withdraw from review",
+          ],
+          owner &&
+            item.status !== "archived" &&
+            (item.status !== "published" ||
+              item.current_revision_id !== item.published_revision_id) && [
+              "publish",
+              "Publish now",
+            ],
+          isStaff() &&
+            item.status !== "archived" && ["archive", "Move to archive"],
+          isStaff() && item.status === "archived" && ["restore", "Restore"],
+          null,
+          editable &&
+            (state.user.role === "owner" || !item.published_revision_id) && [
+              "delete",
+              "Delete permanently",
+              "danger",
+            ],
+        ];
+        const cleaned = [];
+        for (const action of actions) {
+          if (action) {
+            cleaned.push(action);
+          } else if (
+            action === null &&
+            cleaned.length &&
+            cleaned.at(-1) !== null
+          ) {
+            cleaned.push(null);
+          }
+        }
+        while (cleaned.at(-1) === null) cleaned.pop();
+        return cleaned;
+      }
+
+      function closeContextMenu({ restoreFocus = false } = {}) {
+        const menu = $("editorial-menu");
+        const trigger = menu._trigger;
+        menu.hidden = true;
+        menu.replaceChildren();
+        state.menuItem = null;
+        if (restoreFocus) trigger?.focus();
+      }
+
+      function openContextMenu(item, point) {
+        const menu = $("editorial-menu");
+        closeContextMenu();
+        state.menuItem = item;
+        menu._trigger = document.activeElement;
+
+        for (const action of contextActions(item)) {
+          if (!action) {
+            const separator = document.createElement("div");
+            separator.className = "context-menu-separator";
+            separator.setAttribute("role", "separator");
+            menu.appendChild(separator);
+            continue;
+          }
+          const [name, label, tone] = action;
+          const button = document.createElement("button");
+          button.type = "button";
+          button.role = "menuitem";
+          button.dataset.action = name;
+          button.textContent = label;
+          if (tone) button.classList.add(tone);
+          button.addEventListener("click", () => runContextAction(name, item));
+          menu.appendChild(button);
+        }
+
+        menu.hidden = false;
+        menu.style.left = "0px";
+        menu.style.top = "0px";
+        const box = menu.getBoundingClientRect();
+        const margin = 8;
+        const left = Math.max(
+          margin,
+          Math.min(point.x, innerWidth - box.width - margin),
+        );
+        const top = Math.max(
+          margin,
+          Math.min(point.y, innerHeight - box.height - margin),
+        );
+        menu.style.left = `${left}px`;
+        menu.style.top = `${top}px`;
+        menu.querySelector('[role="menuitem"]')?.focus();
+      }
+
+      let dialogResolve = null;
+
+      function finishDialog(value) {
+        const resolve = dialogResolve;
+        dialogResolve = null;
+        $("editorial-dialog").close();
+        resolve?.(value);
+      }
+
+      function showEditorialDialog({
+        title,
+        description = "",
+        label = "",
+        value = "",
+        confirmLabel = "Confirm",
+        danger = false,
+        options = null,
+        validate = null,
+      }) {
+        const dialog = $("editorial-dialog");
+        $("editorial-dialog-title").textContent = title;
+        $("editorial-dialog-description").textContent = description;
+        $("editorial-dialog-description").hidden = !description;
+        $("editorial-dialog-label").textContent = label;
+        $("editorial-dialog-error").textContent = "";
+
+        const field = $("editorial-dialog-field");
+        const input = $("editorial-dialog-input");
+        const select = $("editorial-dialog-select");
+        field.hidden = !label && !options;
+        input.hidden = Boolean(options);
+        select.hidden = !options;
+        if (options) {
+          select.replaceChildren(
+            ...options.map(
+              (option) => new Option(option.label, String(option.value)),
+            ),
+          );
+          select.value = String(value);
+        } else {
+          input.value = value;
+        }
+
+        const confirm = $("editorial-dialog-confirm");
+        confirm.textContent = confirmLabel;
+        confirm.className = danger ? "danger solid" : "primary";
+        dialog._validate = validate;
+        dialog.showModal();
+        setTimeout(
+          () => (field.hidden ? confirm : options ? select : input).focus(),
+          0,
+        );
+        return new Promise((resolve) => {
+          dialogResolve = resolve;
+        });
+      }
+
+      async function refreshAfterAction(id = null) {
+        state.dirty = false;
+        state.creating = false;
+        await refreshDashboard();
+        const next = id
+          ? state.items.find((item) => item.id === id)
+          : state.items[0];
+        if (next) await openEditorial(next.id);
+        else {
+          state.current = null;
+          fields.markdown.value = "";
+          fields.code.value = "";
+          $("editorial-status").textContent = "No draft selected";
+          $("save").disabled = true;
+          $("submit").disabled = true;
+          renderPreview();
+          renderDrafts();
+          history.replaceState(null, "", "edit.html");
+        }
+      }
+
+      async function saveCurrentBeforeAction(item) {
+        if (state.current?.id !== item.id || !state.dirty) return true;
+        const confirmed = await showEditorialDialog({
+          title: "Save changes first?",
+          description:
+            "This action uses the saved revision. Save your current changes before continuing.",
+          confirmLabel: "Save and continue",
+        });
+        if (confirmed === null) return false;
+        return saveRevision();
+      }
+
+      async function runContextAction(action, item) {
+        closeContextMenu();
+        try {
+          if (action === "open") return openEditorial(item.id);
+          if (action === "public") {
+            location.href = publicEditorialUrl(item);
+            return;
+          }
+          if (action === "copy-link") {
+            await navigator.clipboard.writeText(publicEditorialUrl(item));
+            setStatus("Public link copied.", "success");
+            return;
+          }
+
+          if (action === "rename") {
+            const title = await showEditorialDialog({
+              title: "Rename editorial",
+              label: "Editorial name",
+              value: item.title,
+              confirmLabel: "Rename",
+              validate: (value) =>
+                value.trim() ? "" : "Enter an editorial name.",
+            });
+            if (title === null) return;
+            await EditorialApi.request(`/api/editorials/${item.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ title }),
+            });
+            await refreshDashboard();
+            if (state.current?.id === item.id) state.current.title = title.trim();
+            renderDrafts();
+            setStatus("Editorial renamed.", "success");
+            return;
+          }
+
+          if (action === "move") {
+            if (!(await saveCurrentBeforeAction(item))) return;
+            const problemId = await showEditorialDialog({
+              title: "Move editorial",
+              description:
+                "The editorial will belong to the selected problem. Its saved revisions are unchanged.",
+              label: "Problem",
+              value: item.problem_id,
+              confirmLabel: "Move",
+              options: state.problems.map((problem) => ({
+                value: problem.id,
+                label: `${problem.collection_label} / ${problem.section_label} / ${problem.title}`,
+              })),
+            });
+            if (problemId === null || Number(problemId) === item.problem_id)
+              return;
+            await EditorialApi.request(`/api/editorials/${item.id}`, {
+              method: "PATCH",
+              body: JSON.stringify({ problem_id: Number(problemId) }),
+            });
+            await refreshAfterAction(item.id);
+            setStatus("Editorial moved.", "success");
+            return;
+          }
+
+          if (action === "duplicate") {
+            if (!(await saveCurrentBeforeAction(item))) return;
+            const result = await EditorialApi.request(
+              `/api/editorials/${item.id}/duplicate`,
+              { method: "POST" },
+            );
+            await refreshAfterAction(result.editorial.id);
+            setStatus("Draft duplicated.", "success");
+            return;
+          }
+
+          if (action === "submit") {
+            if (state.current?.id !== item.id) await openEditorial(item.id);
+            await submit();
+            return;
+          }
+
+          if (action === "withdraw") {
+            if (!(await saveCurrentBeforeAction(item))) return;
+            const confirmed = await showEditorialDialog({
+              title: "Withdraw from review?",
+              description:
+                "The editorial will return to draft status so it can be edited.",
+              confirmLabel: "Withdraw",
+            });
+            if (confirmed === null) return;
+            await EditorialApi.request(`/api/editorials/${item.id}/withdraw`, {
+              method: "POST",
+            });
+            await refreshAfterAction(item.id);
+            setStatus("Editorial withdrawn.", "success");
+            return;
+          }
+
+          if (action === "publish") {
+            if (!(await saveCurrentBeforeAction(item))) return;
+            const confirmed = await showEditorialDialog({
+              title: "Publish this revision?",
+              description:
+                "The current saved revision will become public immediately.",
+              confirmLabel: "Publish now",
+            });
+            if (confirmed === null) return;
+            await EditorialApi.request(
+              `/api/editorials/${item.id}/publish`,
+              { method: "POST" },
+            );
+            await refreshAfterAction(item.id);
+            setStatus("Editorial published.", "success");
+            return;
+          }
+
+          if (action === "archive" || action === "restore") {
+            const restoring = action === "restore";
+            if (!restoring && !(await saveCurrentBeforeAction(item))) return;
+            const confirmed = await showEditorialDialog({
+              title: restoring ? "Restore editorial?" : "Archive editorial?",
+              description: restoring
+                ? "A previously published editorial will return to the public catalog."
+                : "The editorial will be removed from the public catalog but can be restored later.",
+              confirmLabel: restoring ? "Restore" : "Archive",
+              danger: !restoring,
+            });
+            if (confirmed === null) return;
+            await EditorialApi.request(
+              `/api/editorials/${item.id}/${action}`,
+              { method: "POST" },
+            );
+            await refreshAfterAction(item.id);
+            setStatus(restoring ? "Editorial restored." : "Editorial archived.", "success");
+            return;
+          }
+
+          if (action === "delete") {
+            const confirmation = await showEditorialDialog({
+              title: "Delete editorial permanently?",
+              description:
+                "This removes every revision, author link, and review. This action cannot be undone.",
+              label: `Type “${item.title}” to confirm`,
+              confirmLabel: "Delete permanently",
+              danger: true,
+              validate: (value) =>
+                value === item.title ? "" : "The editorial name does not match.",
+            });
+            if (confirmation === null) return;
+            await EditorialApi.request(`/api/editorials/${item.id}`, {
+              method: "DELETE",
+              body: JSON.stringify({ confirm_title: confirmation }),
+            });
+            await refreshAfterAction();
+            setStatus("Editorial deleted.", "success");
+          }
+        } catch (error) {
+          setStatus(error.message, "error");
         }
       }
 
@@ -189,6 +627,9 @@
         $("moderate-link").hidden = !["owner", "editor"].includes(
           state.user.role,
         );
+        const owner = state.user.role === "owner";
+        $("save").textContent = owner ? "Save live" : "Save revision";
+        $("submit").hidden = owner;
         $("logout").hidden = false;
         populateSelectors();
         renderDrafts();
@@ -198,6 +639,7 @@
         if (state.dirty && !confirm("Discard the unsaved changes?")) return;
         const result = await EditorialApi.request(`/api/editorials/${id}`);
         state.current = result.editorial;
+        state.creating = false;
         const current = result.revisions.find(
           (revision) => revision.id === result.editorial.current_revision_id,
         );
@@ -241,6 +683,36 @@
         const markdown = `# ${problem.title}\n\n## Idea\n\nExplain the central observation.\n\n## Algorithm\n\n1. Describe the steps.\n\n## Correctness\n\nProve that the algorithm returns the required result.\n\n## Complexity\n\nState the time and memory complexity.\n`;
         setStatus("Creating draft…");
         try {
+          if (state.user.role === "owner") {
+            if (
+              state.dirty &&
+              !confirm(
+                "Discard the unsaved changes and create a new editorial?",
+              )
+            ) {
+              return;
+            }
+            state.current = {
+              id: null,
+              problem_id: problemId,
+              title: problem.title,
+              status: "new",
+            };
+            state.creating = true;
+            state.dirty = true;
+            fields.markdown.value = markdown;
+            fields.code.value = "";
+            fields.summary.value = "Initial editorial";
+            $("editorial-status").textContent = "new editorial";
+            $("editorial-status").className = "badge";
+            $("save").disabled = false;
+            $("reviews").textContent = "No reviews yet.";
+            setStatus("Write the editorial, then Save live.", "success");
+            renderPreview();
+            renderDrafts();
+            history.replaceState(null, "", "edit.html");
+            return;
+          }
           const result = await EditorialApi.request("/api/editorials", {
             method: "POST",
             body: JSON.stringify({
@@ -259,30 +731,53 @@
       }
 
       async function saveRevision() {
-        if (!state.current) return;
+        if (!state.current) return false;
         $("save").disabled = true;
         setStatus("Saving revision…");
         try {
-          await EditorialApi.request(`/api/editorials/${state.current.id}`, {
-            method: "PUT",
-            body: JSON.stringify({
-              markdown: fields.markdown.value,
-              solution_cpp: fields.code.value,
-              summary: fields.summary.value || "Updated editorial",
-            }),
-          });
+          const result = state.creating
+            ? await EditorialApi.request("/api/editorials", {
+                method: "POST",
+                body: JSON.stringify({
+                  problem_id: state.current.problem_id,
+                  markdown: fields.markdown.value,
+                  solution_cpp: fields.code.value,
+                  summary: fields.summary.value || "Initial editorial",
+                  publish: state.user.role === "owner",
+                }),
+              })
+            : await EditorialApi.request(
+                `/api/editorials/${state.current.id}`,
+                {
+                  method: "PUT",
+                  body: JSON.stringify({
+                    markdown: fields.markdown.value,
+                    solution_cpp: fields.code.value,
+                    summary: fields.summary.value || "Updated editorial",
+                  }),
+                },
+              );
           state.dirty = false;
+          state.creating = false;
+          const editorialId = result.editorial.id;
           await refreshDashboard();
-          await openEditorial(state.current.id);
-          setStatus("Revision saved.", "success");
+          await openEditorial(editorialId);
+          setStatus(
+            state.user.role === "owner"
+              ? "Saved and published."
+              : "Revision saved.",
+            "success",
+          );
+          return true;
         } catch (error) {
           $("save").disabled = false;
           setStatus(error.message, "error");
+          return false;
         }
       }
 
       async function submit() {
-        if (state.dirty) await saveRevision();
+        if (state.dirty && !(await saveRevision())) return;
         if (!state.current) return;
         try {
           await EditorialApi.request(
@@ -336,6 +831,53 @@
       $("submit").addEventListener("click", submit);
       $("markdown-tab").addEventListener("click", () => selectTab("markdown"));
       $("code-tab").addEventListener("click", () => selectTab("code"));
+      $("editorial-dialog-cancel").addEventListener("click", () =>
+        finishDialog(null),
+      );
+      $("editorial-dialog").addEventListener("cancel", (event) => {
+        event.preventDefault();
+        finishDialog(null);
+      });
+      $("editorial-dialog-form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const field = $("editorial-dialog-field");
+        const value = field.hidden
+          ? true
+          : $("editorial-dialog-select").hidden
+            ? $("editorial-dialog-input").value
+            : $("editorial-dialog-select").value;
+        const error = $("editorial-dialog")._validate?.(value) || "";
+        $("editorial-dialog-error").textContent = error;
+        if (!error) finishDialog(value);
+      });
+      $("editorial-menu").addEventListener("keydown", (event) => {
+        const items = [
+          ...$("editorial-menu").querySelectorAll('[role="menuitem"]'),
+        ];
+        const current = items.indexOf(document.activeElement);
+        let next = null;
+        if (event.key === "ArrowDown")
+          next = items[(current + 1) % items.length];
+        if (event.key === "ArrowUp")
+          next = items[(current - 1 + items.length) % items.length];
+        if (event.key === "Home") next = items[0];
+        if (event.key === "End") next = items.at(-1);
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeContextMenu({ restoreFocus: true });
+          return;
+        }
+        if (next) {
+          event.preventDefault();
+          next.focus();
+        }
+      });
+      addEventListener("pointerdown", (event) => {
+        const menu = $("editorial-menu");
+        if (!menu.hidden && !menu.contains(event.target)) closeContextMenu();
+      });
+      addEventListener("resize", () => closeContextMenu());
+      addEventListener("scroll", () => closeContextMenu(), true);
       for (const field of Object.values(fields))
         field.addEventListener("input", markDirty);
       addEventListener("keydown", (event) => {

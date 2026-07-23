@@ -12,8 +12,16 @@ Editorial updates do not create Git commits and contributors never receive repos
 Roles are enforced by the Worker:
 
 - `contributor`: create, edit, and submit their own drafts;
-- `editor`: review any submission, request changes, publish, and archive;
-- `owner`: all editor permissions plus role management and full exports.
+- `editor`: review any submission, request changes, publish, archive, and restore;
+- `owner`: direct live editing of any editorial, plus role management and full exports.
+
+The writing workspace also supports renaming, moving, duplicating, withdrawing, and deleting
+editorials. Permanent deletion is intentionally stricter than archiving: only the owner can delete
+an editorial that has previously been published.
+
+Owner saves bypass draft review and atomically make the new revision public. A new owner editorial
+is kept only in the browser until its first **Save live**, so an unfinished template is never
+published as a placeholder.
 
 Logins listed in `OWNER_LOGINS` become owners. Every other new login starts as a contributor.
 
