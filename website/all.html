@@ -3,253 +3,180 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>All Editorials</title>
-    <style>
-      :root {
-        --ink: #111;
-        --muted: #777;
-        --line: #e4e4e4;
-        --soft: #f7f7f5;
-        --sans:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
-          sans-serif;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        color: var(--ink);
-        background: #fff;
-        font: 14px/1.5 var(--sans);
-      }
-      header {
-        border-bottom: 1px solid var(--line);
-      }
-      .bar,
-      main {
-        width: min(1040px, calc(100% - 40px));
-        margin: 0 auto;
-      }
-      .bar {
-        height: 64px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-      a {
-        color: inherit;
-      }
-      .back {
-        color: var(--muted);
-        text-decoration: none;
-        font-size: 12px;
-      }
-      .back:hover {
-        color: var(--ink);
-      }
-      main {
-        padding: 58px 0 100px;
-      }
-      h1 {
-        margin: 0;
-        font-size: clamp(30px, 5vw, 48px);
-        letter-spacing: -1.5px;
-      }
-      .intro {
-        display: flex;
-        align-items: end;
-        justify-content: space-between;
-        gap: 24px;
-        margin-bottom: 42px;
-      }
-      .count {
-        color: var(--muted);
-      }
-      input {
-        width: 100%;
-        height: 46px;
-        margin-bottom: 36px;
-        padding: 0 14px;
-        border: 1px solid #aaa;
-        border-radius: 0;
-        color: var(--ink);
-        background: #fff;
-        font: 14px var(--sans);
-      }
-      input:focus {
-        outline: 2px solid #222;
-        outline-offset: 2px;
-      }
-      .group {
-        margin: 0 0 42px;
-      }
-      .group-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        padding-bottom: 10px;
-        border-bottom: 1px solid var(--line);
-      }
-      h2 {
-        margin: 0;
-        font-size: 17px;
-      }
-      .group-count {
-        color: var(--muted);
-        font-size: 12px;
-      }
-      .list {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-      .item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        min-width: 0;
-        padding: 15px 2px;
-        border-bottom: 1px solid var(--line);
-        text-decoration: none;
-      }
-      .item:nth-child(odd) {
-        margin-right: 22px;
-      }
-      .item:hover .name {
-        text-decoration: underline;
-        text-underline-offset: 3px;
-      }
-      .name {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .arrow {
-        color: #aaa;
-      }
-      .empty,
-      .loading {
-        padding: 48px 0;
-        color: var(--muted);
-      }
-      @media (max-width: 650px) {
-        .list {
-          grid-template-columns: 1fr;
-        }
-        .item:nth-child(odd) {
-          margin-right: 0;
-        }
-        .intro {
-          align-items: start;
-          flex-direction: column;
-        }
-      }
-    </style>
+    <title>Find an editorial · CP Editorials</title>
+    <link rel="stylesheet" href="site.css?v=6" />
   </head>
   <body>
-    <header>
-      <div class="bar">
-        <a class="back" href="index.html">← Home</a><span>all editorials</span>
+    <header class="site-header" data-site-nav data-active="find">
+      <div class="site-header-inner">
+        <a class="site-brand" href="index.html">
+          <span class="site-brand-mark">CP</span>
+          <span>Editorials</span>
+        </a>
+        <nav class="site-nav" aria-label="Primary navigation">
+          <a href="index.html">Home</a>
+          <a href="all.html" data-nav="find">Find</a>
+          <a href="edit.html">Write</a>
+          <a href="manage.html" data-review-link hidden>Review</a>
+        </nav>
+        <div class="site-account">
+          <span class="site-identity" data-identity hidden></span>
+          <button type="button" data-sign-in>Sign in</button>
+          <button type="button" data-sign-out hidden>Sign out</button>
+        </div>
       </div>
     </header>
-    <main>
-      <div class="intro">
-        <h1>Every editorial</h1>
-        <span id="total" class="count"></span>
-      </div>
-      <input
-        id="search"
-        type="search"
-        autocomplete="off"
-        placeholder="Search by problem or category"
-        aria-label="Search editorials"
-      />
-      <div id="catalog" class="loading">Loading editorials…</div>
-    </main>
-    <script src="site-config.js?v=4"></script>
-    <script src="api.js?v=4"></script>
-    <script>
-      const catalog = document.getElementById("catalog");
-      const search = document.getElementById("search");
-      const total = document.getElementById("total");
-      let entries = [];
 
-      async function loadCatalog() {
-        const result = await EditorialApi.request("/api/catalog");
-        entries = result.items.map((item) => ({
-          collection: item.collection,
-          collectionLabel: item.collection_label,
-          section: item.section,
-          sectionLabel: item.section_label,
-          name: item.title,
-          slug: item.slug,
-          editorialId: item.editorial_id,
-          author: item.author_name,
-        }));
-        total.textContent = `${entries.length} editorials`;
+    <main class="simple-catalog">
+      <div class="catalog-toolbar">
+        <select id="collection" aria-label="Collection"></select>
+        <select id="section" aria-label="Section"></select>
+        <input
+          id="search"
+          type="search"
+          autocomplete="off"
+          placeholder="Search editorials"
+          aria-label="Search editorials"
+        />
+      </div>
+      <div id="catalog" class="catalog-grid">Loading…</div>
+    </main>
+
+    <script src="site-config.js?v=6"></script>
+    <script src="api.js?v=6"></script>
+    <script src="site-nav.js?v=6"></script>
+    <script>
+      const collectionPicker = document.getElementById("collection");
+      const sectionPicker = document.getElementById("section");
+      const search = document.getElementById("search");
+      const catalog = document.getElementById("catalog");
+      let problems = [];
+
+      function uniqueProblems(items) {
+        const grouped = new Map();
+        for (const item of items) {
+          const key = `${item.collection}|${item.section}|${item.slug}`;
+          if (!grouped.has(key)) {
+            grouped.set(key, {
+              collection: item.collection,
+              collectionLabel: item.collection_label,
+              section: item.section,
+              sectionLabel: item.section_label,
+              title: item.title,
+              slug: item.slug,
+              editorialCount: 0,
+            });
+          }
+          grouped.get(key).editorialCount++;
+        }
+        return [...grouped.values()];
+      }
+
+      function populateCollections(preferred = "", preferredSection = "") {
+        const collections = [
+          ...new Map(
+            problems.map((item) => [
+              item.collection,
+              item.collectionLabel,
+            ]),
+          ).entries(),
+        ];
+        collectionPicker.replaceChildren(
+          new Option("All collections", ""),
+          ...collections.map(([id, label]) => new Option(label, id)),
+        );
+        collectionPicker.value = preferred;
+        populateSections(preferredSection);
+      }
+
+      function populateSections(preferred = "") {
+        const scoped = collectionPicker.value
+          ? problems.filter(
+              (item) => item.collection === collectionPicker.value,
+            )
+          : problems;
+        const sections = new Map();
+        for (const item of scoped) {
+          const value = collectionPicker.value
+            ? item.section
+            : `${item.collection}|${item.section}`;
+          const label = collectionPicker.value
+            ? item.sectionLabel
+            : `${item.collectionLabel} · ${item.sectionLabel}`;
+          if (!sections.has(value)) sections.set(value, label);
+        }
+        sectionPicker.replaceChildren(
+          new Option("All sections", ""),
+          ...[...sections].map(
+            ([value, label]) => new Option(label, value),
+          ),
+        );
+        sectionPicker.value = preferred;
         render();
       }
 
       function render() {
         const query = search.value.trim().toLowerCase();
-        const visible = entries.filter((item) =>
-          `${item.name} ${item.sectionLabel} ${item.collectionLabel}`
+        const visible = problems.filter((item) => {
+          if (
+            collectionPicker.value &&
+            item.collection !== collectionPicker.value
+          )
+            return false;
+          const sectionValue = collectionPicker.value
+            ? item.section
+            : `${item.collection}|${item.section}`;
+          if (sectionPicker.value && sectionValue !== sectionPicker.value)
+            return false;
+          return `${item.title} ${item.collectionLabel} ${item.sectionLabel}`
             .toLowerCase()
-            .includes(query),
-        );
-        catalog.className = "";
+            .includes(query);
+        });
         catalog.replaceChildren();
+        catalog.className = visible.length ? "catalog-grid" : "catalog-empty";
         if (!visible.length) {
-          const empty = document.createElement("div");
-          empty.className = "empty";
-          empty.textContent = query
-            ? "No editorials match that search."
-            : "No editorials are published yet.";
-          catalog.appendChild(empty);
+          catalog.textContent = "No editorials found.";
           return;
         }
-        const grouped = new Map();
         for (const item of visible) {
-          const key = `${item.collection}|${item.section}`;
-          if (!grouped.has(key)) grouped.set(key, []);
-          grouped.get(key).push(item);
-        }
-        for (const items of grouped.values()) {
-          const group = document.createElement("section");
-          group.className = "group";
-          const head = document.createElement("div");
-          head.className = "group-head";
-          const heading = document.createElement("h2");
-          heading.textContent = items[0].sectionLabel;
-          const count = document.createElement("span");
-          count.className = "group-count";
-          count.textContent = `${items.length} ${items.length === 1 ? "editorial" : "editorials"}`;
-          const list = document.createElement("div");
-          list.className = "list";
-          head.append(heading, count);
-          group.append(head, list);
-          for (const item of items) {
-            const link = document.createElement("a");
-            link.className = "item";
-            link.href = `browse.html?${new URLSearchParams({ collection: item.collection, section: item.section, slug: item.slug })}`;
-            const name = document.createElement("span");
-            name.className = "name";
-            name.textContent = item.name;
-            const arrow = document.createElement("span");
-            arrow.className = "arrow";
-            arrow.textContent = "→";
-            link.append(name, arrow);
-            list.appendChild(link);
-          }
-          catalog.appendChild(group);
+          const link = document.createElement("a");
+          link.className = "catalog-button";
+          link.href = `section.html?${new URLSearchParams({
+            collection: item.collection,
+            section: item.section,
+            slug: item.slug,
+          })}`;
+          link.innerHTML =
+            "<span class='catalog-button-title'></span><span class='catalog-button-meta'></span><span class='catalog-button-arrow'>→</span>";
+          link.querySelector(".catalog-button-title").textContent =
+            item.title;
+          link.querySelector(".catalog-button-meta").textContent =
+            `${item.collectionLabel} · ${item.sectionLabel}${
+              item.editorialCount > 1
+                ? ` · ${item.editorialCount} editorials`
+                : ""
+            }`;
+          catalog.appendChild(link);
         }
       }
 
+      async function initialize() {
+        const result = await EditorialApi.request("/api/catalog");
+        problems = uniqueProblems(result.items);
+        const params = new URLSearchParams(location.search);
+        search.value = params.get("q") || "";
+        populateCollections(
+          params.get("collection") || "",
+          params.get("section") || "",
+        );
+      }
+
+      collectionPicker.addEventListener("change", () => populateSections());
+      sectionPicker.addEventListener("change", render);
       search.addEventListener("input", render);
-      loadCatalog().catch((error) => {
-        catalog.className = "empty";
-        catalog.textContent = `The editorial catalogue could not be loaded: ${error.message}`;
+      initialize().catch((error) => {
+        catalog.className = "catalog-empty";
+        catalog.textContent = error.message;
       });
     </script>
   </body>

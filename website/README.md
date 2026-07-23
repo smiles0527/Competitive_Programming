@@ -10,6 +10,17 @@ This repository uses a small content-management system instead of one Markdown f
 - Owners can also manage roles and export complete backups.
 - GitHub Pages remains the public static frontend.
 
+The public site uses a small set of direct routes:
+
+- **Home** contains buttons for finding, writing, and reviewing editorials.
+- **Find** is the only catalog and filters every published problem by collection and section.
+- **Write** is the contributor workspace for drafts and submissions.
+- **Review** is the editor and owner moderation console.
+
+Collections are database records rather than hard-coded pages. Adding CCC, USACO, IOI, or another
+source does not require another catalog or reader implementation. The legacy `browse.html` address
+redirects into Find or the reader so existing links continue to work.
+
 The original 399 Markdown/C++ pairs were imported into the consolidated
 `editor-gateway/seeds/editorials.json` snapshot. It is used only to initialize a new database;
 new content is created through the editor.

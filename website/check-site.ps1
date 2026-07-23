@@ -6,6 +6,7 @@ Set-Location $repository
 foreach ($script in @(
     "website\api.js",
     "website\shortcut.js",
+    "website\site-nav.js",
     "website\site-config.js",
     "website\editor-gateway\src\worker.js",
     "website\editor-gateway\scripts\build-seed.mjs",
