@@ -53,7 +53,7 @@
   color: #0e7490;
 }
 .copy-code {
-  margin-left: auto;
+  margin-left: 0;
   border: 1px solid #d8dbe5;
   border-radius: 5px;
   background: #fff;
@@ -71,7 +71,7 @@
   outline-offset: 2px;
 }
 .reveal-code {
-  margin-left: auto;
+  margin-left: 0;
   border: 1px solid #2563eb;
   border-radius: 5px;
   background: #2563eb;
@@ -88,16 +88,13 @@
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
-.code-pane pre {
-  transition:
-    filter 180ms ease,
-    opacity 180ms ease;
+.pane-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .code-pane.solution-hidden pre {
-  filter: blur(8px);
-  opacity: 0.5;
-  pointer-events: none;
-  user-select: none;
+  display: none;
 }
 .code-pane.solution-hidden .copy-code {
   visibility: hidden;

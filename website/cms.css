@@ -74,6 +74,16 @@ a {
   font-weight: 650;
   text-decoration: none;
 }
+.topbar-button {
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.topbar-button:hover {
+  border-color: #333;
+}
 .spacer {
   flex: 1;
 }
@@ -355,6 +365,91 @@ textarea {
   width: min(1180px, calc(100% - 40px));
   margin: 28px auto 80px;
 }
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.section-heading h2,
+.section-heading h3 {
+  margin: 0;
+}
+.structure-section {
+  margin-top: 48px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+.structure-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.structure-column {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+.structure-list {
+  display: grid;
+  gap: 6px;
+  max-height: 520px;
+  margin-top: 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.structure-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding: 7px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.structure-item.selected {
+  border-color: var(--ink);
+  background: var(--soft);
+}
+.structure-item.inactive {
+  opacity: 0.55;
+}
+.structure-select {
+  min-width: 0;
+  padding: 3px 5px;
+  overflow: hidden;
+  border: 0;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.structure-item-actions {
+  display: flex;
+  gap: 3px;
+}
+.structure-item-actions button {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0 7px;
+}
+.catalog-fields {
+  display: grid;
+  gap: 12px;
+  margin: 18px 0;
+}
+.catalog-fields label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.catalog-fields input,
+.catalog-fields select {
+  width: 100%;
+  color: var(--ink);
+}
 .metrics {
   display: flex;
   gap: 10px;
@@ -418,6 +513,9 @@ textarea {
     grid-column: 1 / -1;
     border-top: 1px solid var(--line);
     max-height: none;
+  }
+  .structure-grid {
+    grid-template-columns: 1fr;
   }
 }
 @media (min-width: 1051px) {

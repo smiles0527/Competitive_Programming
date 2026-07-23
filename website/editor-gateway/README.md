@@ -23,6 +23,11 @@ Owner saves bypass draft review and atomically make the new revision public. A n
 is kept only in the browser until its first **Save live**, so an unfinished template is never
 published as a placeholder.
 
+Editors and owners can manage the catalog hierarchy from the moderation console. Collections,
+sections, and problems can be created, renamed, moved, hidden/restored, and reordered. Hiding a
+catalog node removes it from public APIs without deleting any descendant records. The owner-only
+user list includes a last-visited timestamp updated at most once every five minutes.
+
 Logins listed in `OWNER_LOGINS` become owners. Every other new login starts as a contributor.
 
 ## 1. Create the D1 database

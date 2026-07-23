@@ -12,7 +12,8 @@
       <a class="brand" href="index.html">Editorial moderation</a>
       <span id="identity" class="muted"></span>
       <span class="spacer"></span>
-      <a href="edit.html">Write</a>
+      <a class="topbar-button" href="edit.html">Write</a>
+      <a class="topbar-button" href="index.html">Exit</a>
       <button id="export" hidden>Export backup</button>
       <button id="logout" hidden>Sign out</button>
     </header>
@@ -78,6 +79,36 @@
         </aside>
       </section>
 
+      <section id="structure-section" class="structure-section">
+        <div class="section-heading">
+          <h2>Catalog structure</h2>
+          <span id="structure-status" class="status"></span>
+        </div>
+        <div class="structure-grid">
+          <section class="structure-column">
+            <div class="section-heading">
+              <h3>Collections</h3>
+              <button id="add-collection">Add</button>
+            </div>
+            <div id="collections-list" class="structure-list"></div>
+          </section>
+          <section class="structure-column">
+            <div class="section-heading">
+              <h3>Sections</h3>
+              <button id="add-section">Add</button>
+            </div>
+            <div id="sections-list" class="structure-list"></div>
+          </section>
+          <section class="structure-column">
+            <div class="section-heading">
+              <h3>Problems</h3>
+              <button id="add-problem">Add</button>
+            </div>
+            <div id="problems-list" class="structure-list"></div>
+          </section>
+        </div>
+      </section>
+
       <section id="users-section" hidden>
         <h2>People and roles</h2>
         <p class="muted">
@@ -88,6 +119,7 @@
             <tr>
               <th>User</th>
               <th>Role</th>
+              <th>Last visited</th>
               <th>Joined</th>
             </tr>
           </thead>
@@ -96,15 +128,471 @@
       </section>
     </main>
 
+    <dialog id="catalog-dialog" class="editorial-dialog">
+      <form id="catalog-form">
+        <h2 id="catalog-dialog-title"></h2>
+        <div id="catalog-fields" class="catalog-fields"></div>
+        <p id="catalog-error" class="status error" aria-live="polite"></p>
+        <div class="dialog-actions">
+          <button id="catalog-cancel" type="button">Cancel</button>
+          <button id="catalog-submit" type="submit" class="primary">Save</button>
+        </div>
+      </form>
+    </dialog>
+
     <script src="site-config.js?v=4"></script>
     <script src="api.js?v=4"></script>
     <script>
       const $ = (id) => document.getElementById(id);
-      const state = { user: null, items: [], current: null };
+      const state = {
+        user: null,
+        items: [],
+        current: null,
+        structure: { collections: [], sections: [], problems: [] },
+        selectedCollection: null,
+        selectedSection: null,
+        catalogSubmit: null,
+      };
 
       function setStatus(message, type = "") {
         $("status").textContent = message;
         $("status").className = `status ${type}`;
+      }
+
+      function setStructureStatus(message, type = "") {
+        $("structure-status").textContent = message;
+        $("structure-status").className = `status ${type}`;
+      }
+
+      function suggestedKey(value) {
+        return String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 80);
+      }
+
+      function openCatalogDialog({ title, submitLabel = "Save", fields, onSubmit }) {
+        $("catalog-dialog-title").textContent = title;
+        $("catalog-submit").textContent = submitLabel;
+        $("catalog-error").textContent = "";
+        $("catalog-fields").replaceChildren();
+        state.catalogSubmit = onSubmit;
+
+        for (const field of fields) {
+          const label = document.createElement("label");
+          const caption = document.createElement("span");
+          caption.textContent = field.label;
+          const input = field.options
+            ? document.createElement("select")
+            : document.createElement("input");
+          input.name = field.name;
+          input.required = field.required !== false;
+          if (field.options) {
+            input.replaceChildren(
+              ...field.options.map(
+                (option) =>
+                  new Option(option.label, String(option.value)),
+              ),
+            );
+          } else {
+            input.type = field.type || "text";
+            input.maxLength = field.maxLength || 160;
+            input.placeholder = field.placeholder || "";
+          }
+          input.value = String(field.value ?? "");
+          if (field.suggestFrom) {
+            const sourceName = field.suggestFrom;
+            queueMicrotask(() => {
+              const source = $(
+                "catalog-fields",
+              ).querySelector(`[name="${sourceName}"]`);
+              source?.addEventListener("input", () => {
+                if (!input.dataset.edited)
+                  input.value = suggestedKey(source.value);
+              });
+              input.addEventListener("input", () => {
+                input.dataset.edited = "true";
+              });
+            });
+          }
+          label.append(caption, input);
+          $("catalog-fields").appendChild(label);
+        }
+
+        $("catalog-dialog").showModal();
+        setTimeout(
+          () => $("catalog-fields").querySelector("input, select")?.focus(),
+          0,
+        );
+      }
+
+      function collectionOptions() {
+        return state.structure.collections.map((item) => ({
+          value: item.id,
+          label: `${item.label}${item.active ? "" : " (hidden)"}`,
+        }));
+      }
+
+      function sectionOptions() {
+        const collectionNames = new Map(
+          state.structure.collections.map((item) => [item.id, item.label]),
+        );
+        return state.structure.sections.map((item) => ({
+          value: item.id,
+          label: `${collectionNames.get(item.collection_id)} / ${item.label}${
+            item.active ? "" : " (hidden)"
+          }`,
+        }));
+      }
+
+      function currentCollection() {
+        return state.structure.collections.find(
+          (item) => item.id === state.selectedCollection,
+        );
+      }
+
+      function currentSection() {
+        return state.structure.sections.find(
+          (item) => item.id === state.selectedSection,
+        );
+      }
+
+      function makeStructureItem({
+        item,
+        label,
+        selected,
+        onSelect,
+        onEdit,
+        onToggle,
+        onMove,
+        index,
+        count,
+      }) {
+        const row = document.createElement("div");
+        row.className = `structure-item${selected ? " selected" : ""}${
+          item.active ? "" : " inactive"
+        }`;
+        const select = document.createElement("button");
+        select.type = "button";
+        select.className = "structure-select";
+        select.textContent = label;
+        select.title = label;
+        select.addEventListener("click", onSelect);
+
+        const actions = document.createElement("span");
+        actions.className = "structure-item-actions";
+        for (const [text, title, handler, disabled] of [
+          ["↑", "Move up", () => onMove(-1), index === 0],
+          ["↓", "Move down", () => onMove(1), index === count - 1],
+          ["Edit", "Edit", onEdit, false],
+          [item.active ? "Hide" : "Show", item.active ? "Hide" : "Restore", onToggle, false],
+        ]) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.textContent = text;
+          button.title = title;
+          button.disabled = disabled;
+          button.addEventListener("click", handler);
+          actions.appendChild(button);
+        }
+        row.append(select, actions);
+        return row;
+      }
+
+      async function loadStructure() {
+        const result = await EditorialApi.request("/api/structure");
+        state.structure = result;
+        if (
+          !result.collections.some(
+            (item) => item.id === state.selectedCollection,
+          )
+        ) {
+          state.selectedCollection = result.collections[0]?.id || null;
+        }
+        const sections = result.sections.filter(
+          (item) => item.collection_id === state.selectedCollection,
+        );
+        if (!sections.some((item) => item.id === state.selectedSection)) {
+          state.selectedSection = sections[0]?.id || null;
+        }
+        renderStructure();
+      }
+
+      function renderStructure() {
+        const collections = state.structure.collections;
+        $("collections-list").replaceChildren(
+          ...collections.map((item, index) =>
+            makeStructureItem({
+              item,
+              label: item.label,
+              selected: item.id === state.selectedCollection,
+              onSelect: () => {
+                state.selectedCollection = item.id;
+                state.selectedSection =
+                  state.structure.sections.find(
+                    (section) => section.collection_id === item.id,
+                  )?.id || null;
+                renderStructure();
+              },
+              onEdit: () => editCollection(item),
+              onToggle: () => toggleCatalogItem("collections", item),
+              onMove: (direction) =>
+                moveStructure("collections", collections, index, direction),
+              index,
+              count: collections.length,
+            }),
+          ),
+        );
+
+        const sections = state.structure.sections.filter(
+          (item) => item.collection_id === state.selectedCollection,
+        );
+        $("sections-list").replaceChildren(
+          ...sections.map((item, index) =>
+            makeStructureItem({
+              item,
+              label: item.label,
+              selected: item.id === state.selectedSection,
+              onSelect: () => {
+                state.selectedSection = item.id;
+                renderStructure();
+              },
+              onEdit: () => editSection(item),
+              onToggle: () => toggleCatalogItem("sections", item),
+              onMove: (direction) =>
+                moveStructure("sections", sections, index, direction),
+              index,
+              count: sections.length,
+            }),
+          ),
+        );
+
+        const problems = state.structure.problems.filter(
+          (item) => item.section_id === state.selectedSection,
+        );
+        $("problems-list").replaceChildren(
+          ...problems.map((item, index) =>
+            makeStructureItem({
+              item,
+              label: item.title,
+              selected: false,
+              onSelect: () => editProblem(item),
+              onEdit: () => editProblem(item),
+              onToggle: () => toggleCatalogItem("problems", item),
+              onMove: (direction) =>
+                moveStructure("problems", problems, index, direction),
+              index,
+              count: problems.length,
+            }),
+          ),
+        );
+
+        $("add-section").disabled = !currentCollection();
+        $("add-problem").disabled = !currentSection();
+      }
+
+      async function moveStructure(entity, items, index, direction) {
+        const target = index + direction;
+        if (target < 0 || target >= items.length) return;
+        const reordered = [...items];
+        [reordered[index], reordered[target]] = [
+          reordered[target],
+          reordered[index],
+        ];
+        try {
+          await EditorialApi.request("/api/structure/reorder", {
+            method: "POST",
+            body: JSON.stringify({
+              entity,
+              ids: reordered.map((item) => item.id),
+              parent_id:
+                entity === "sections"
+                  ? state.selectedCollection
+                  : entity === "problems"
+                    ? state.selectedSection
+                    : null,
+            }),
+          });
+          await loadStructure();
+          setStructureStatus("Order saved.", "success");
+        } catch (error) {
+          setStructureStatus(error.message, "error");
+        }
+      }
+
+      async function toggleCatalogItem(entity, item) {
+        try {
+          await EditorialApi.request(`/api/${entity}/${item.id}`, {
+            method: "PATCH",
+            body: JSON.stringify({ active: !item.active }),
+          });
+          await loadStructure();
+          setStructureStatus(item.active ? "Hidden." : "Restored.", "success");
+        } catch (error) {
+          setStructureStatus(error.message, "error");
+        }
+      }
+
+      function createCollection() {
+        openCatalogDialog({
+          title: "New collection",
+          submitLabel: "Create",
+          fields: [
+            { name: "label", label: "Name", suggestFrom: null },
+            {
+              name: "id",
+              label: "Key",
+              maxLength: 80,
+              suggestFrom: "label",
+            },
+          ],
+          onSubmit: async (values) => {
+            const result = await EditorialApi.request("/api/collections", {
+              method: "POST",
+              body: JSON.stringify(values),
+            });
+            state.selectedCollection = result.collection.id;
+            state.selectedSection = null;
+          },
+        });
+      }
+
+      function editCollection(item) {
+        openCatalogDialog({
+          title: "Edit collection",
+          fields: [{ name: "label", label: "Name", value: item.label }],
+          onSubmit: (values) =>
+            EditorialApi.request(`/api/collections/${item.id}`, {
+              method: "PATCH",
+              body: JSON.stringify(values),
+            }),
+        });
+      }
+
+      function createSection() {
+        openCatalogDialog({
+          title: "New section",
+          submitLabel: "Create",
+          fields: [
+            {
+              name: "collection_id",
+              label: "Collection",
+              value: state.selectedCollection,
+              options: collectionOptions(),
+            },
+            { name: "label", label: "Name" },
+            {
+              name: "slug",
+              label: "Key",
+              maxLength: 80,
+              suggestFrom: "label",
+            },
+          ],
+          onSubmit: async (values) => {
+            const result = await EditorialApi.request("/api/sections", {
+              method: "POST",
+              body: JSON.stringify(values),
+            });
+            state.selectedCollection = values.collection_id;
+            state.selectedSection = result.id;
+          },
+        });
+      }
+
+      function editSection(item) {
+        openCatalogDialog({
+          title: "Edit section",
+          fields: [
+            {
+              name: "collection_id",
+              label: "Collection",
+              value: item.collection_id,
+              options: collectionOptions(),
+            },
+            { name: "label", label: "Name", value: item.label },
+            { name: "slug", label: "Key", value: item.slug, maxLength: 80 },
+          ],
+          onSubmit: async (values) => {
+            await EditorialApi.request(`/api/sections/${item.id}`, {
+              method: "PATCH",
+              body: JSON.stringify(values),
+            });
+            state.selectedCollection = values.collection_id;
+            state.selectedSection = item.id;
+          },
+        });
+      }
+
+      function createProblem() {
+        openCatalogDialog({
+          title: "New problem",
+          submitLabel: "Create",
+          fields: [
+            {
+              name: "section_id",
+              label: "Section",
+              value: state.selectedSection,
+              options: sectionOptions(),
+            },
+            { name: "title", label: "Title" },
+            {
+              name: "slug",
+              label: "Key",
+              maxLength: 80,
+              suggestFrom: "title",
+            },
+            {
+              name: "source_url",
+              label: "Problem URL",
+              type: "url",
+              required: false,
+              maxLength: 2000,
+            },
+          ],
+          onSubmit: async (values) => {
+            values.section_id = Number(values.section_id);
+            const result = await EditorialApi.request("/api/problems", {
+              method: "POST",
+              body: JSON.stringify(values),
+            });
+            state.selectedSection = values.section_id;
+            setStructureStatus(`Problem ${result.id} created.`, "success");
+          },
+        });
+      }
+
+      function editProblem(item) {
+        openCatalogDialog({
+          title: "Edit problem",
+          fields: [
+            {
+              name: "section_id",
+              label: "Section",
+              value: item.section_id,
+              options: sectionOptions(),
+            },
+            { name: "title", label: "Title", value: item.title },
+            { name: "slug", label: "Key", value: item.slug, maxLength: 80 },
+            {
+              name: "source_url",
+              label: "Problem URL",
+              type: "url",
+              required: false,
+              maxLength: 2000,
+              value: item.source_url || "",
+            },
+          ],
+          onSubmit: async (values) => {
+            values.section_id = Number(values.section_id);
+            await EditorialApi.request(`/api/problems/${item.id}`, {
+              method: "PATCH",
+              body: JSON.stringify(values),
+            });
+            state.selectedSection = values.section_id;
+          },
+        });
       }
 
       function updateMetrics() {
@@ -172,6 +660,7 @@
         $("export").hidden = state.user.role !== "owner";
         updateMetrics();
         renderQueue();
+        await loadStructure();
         if (state.user.role === "owner") await loadUsers();
       }
 
@@ -230,7 +719,6 @@
 
       async function action(name) {
         if (!state.current) return;
-        if (name === "archive" && !confirm("Archive this editorial?")) return;
         setStatus(`${name === "publish" ? "Publishing" : "Archiving"}…`);
         try {
           await EditorialApi.request(
@@ -271,11 +759,15 @@
             }
           });
           roleCell.appendChild(select);
+          const lastVisited = document.createElement("td");
+          lastVisited.textContent = user.last_seen_at
+            ? new Date(`${user.last_seen_at}Z`).toLocaleString()
+            : "Never";
           const joined = document.createElement("td");
           joined.textContent = new Date(
             `${user.created_at}Z`,
           ).toLocaleDateString();
-          row.append(person, roleCell, joined);
+          row.append(person, roleCell, lastVisited, joined);
           $("users").appendChild(row);
         }
       }
@@ -319,6 +811,35 @@
       $("publish").addEventListener("click", () => action("publish"));
       $("archive").addEventListener("click", () => action("archive"));
       $("export").addEventListener("click", exportBackup);
+      $("add-collection").addEventListener("click", createCollection);
+      $("add-section").addEventListener("click", createSection);
+      $("add-problem").addEventListener("click", createProblem);
+      $("catalog-cancel").addEventListener("click", () => {
+        state.catalogSubmit = null;
+        $("catalog-dialog").close();
+      });
+      $("catalog-dialog").addEventListener("cancel", () => {
+        state.catalogSubmit = null;
+      });
+      $("catalog-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        $("catalog-submit").disabled = true;
+        $("catalog-error").textContent = "";
+        try {
+          const values = Object.fromEntries(
+            new FormData($("catalog-form")).entries(),
+          );
+          await state.catalogSubmit(values);
+          $("catalog-dialog").close();
+          state.catalogSubmit = null;
+          await loadStructure();
+          setStructureStatus("Catalog saved.", "success");
+        } catch (error) {
+          $("catalog-error").textContent = error.message;
+        } finally {
+          $("catalog-submit").disabled = false;
+        }
+      });
       for (const button of document.querySelectorAll("[data-decision]")) {
         button.addEventListener("click", () => review(button.dataset.decision));
       }

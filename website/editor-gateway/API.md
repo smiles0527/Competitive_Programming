@@ -42,6 +42,14 @@ Authorization: Bearer SESSION_TOKEN
 
 | Method | Route | Purpose |
 | --- | --- | --- |
+| `GET` | `/api/structure` | List every collection, section, and problem, including hidden items. |
+| `POST` | `/api/collections` | Create a collection. |
+| `PATCH` | `/api/collections/:id` | Rename or hide/restore a collection. |
+| `POST` | `/api/sections` | Create a section. |
+| `PATCH` | `/api/sections/:id` | Rename, move, or hide/restore a section. |
+| `POST` | `/api/problems` | Create a problem. |
+| `PATCH` | `/api/problems/:id` | Edit, move, or hide/restore a problem. |
+| `POST` | `/api/structure/reorder` | Save collection, section, or problem order. |
 | `POST` | `/api/editorials/:id/review` | Comment, approve, or request changes. |
 | `POST` | `/api/editorials/:id/publish` | Publish the current revision. |
 | `POST` | `/api/editorials/:id/archive` | Remove an editorial from the public catalog. |
@@ -61,3 +69,7 @@ public content until an editor publishes that revision.
 Owner writes are direct: `PUT /api/editorials/:id` immediately updates `published_revision_id`, and
 an owner may pass `"publish": true` when creating an editorial to publish its first revision in the
 same operation.
+
+Only the owner can call `/api/users`; its response includes the rate-limited `last_seen_at`
+timestamp. Catalog structure endpoints require an editor or owner role. Hidden catalog nodes and
+their descendants are excluded from all public endpoints without deleting their content.

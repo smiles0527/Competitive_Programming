@@ -17,6 +17,11 @@ The public site uses a small set of direct routes:
 - **Write** is the contributor workspace for drafts and submissions.
 - **Review** is the editor and owner moderation console.
 
+The Review console also contains a catalog manager. Editors and owners can add, rename, move,
+hide/restore, and reorder collections, sections, and problems. Hiding is non-destructive: existing
+editorials remain in D1 and reappear when the catalog item is restored. The owner-only people table
+shows each account's last visit.
+
 Collections are database records rather than hard-coded pages. Adding CCC, USACO, IOI, or another
 source does not require another catalog or reader implementation. The legacy `browse.html` address
 redirects into Find or the reader so existing links continue to work.

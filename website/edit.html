@@ -13,6 +13,7 @@
       <span id="identity" class="muted"></span>
       <span class="spacer"></span>
       <a id="moderate-link" href="manage.html" hidden>Moderate</a>
+      <a class="topbar-button" href="index.html">Exit</a>
       <button id="logout" hidden>Sign out</button>
     </header>
 
@@ -447,13 +448,6 @@
 
       async function saveCurrentBeforeAction(item) {
         if (state.current?.id !== item.id || !state.dirty) return true;
-        const confirmed = await showEditorialDialog({
-          title: "Save changes first?",
-          description:
-            "This action uses the saved revision. Save your current changes before continuing.",
-          confirmLabel: "Save and continue",
-        });
-        if (confirmed === null) return false;
         return saveRevision();
       }
 
@@ -536,13 +530,6 @@
 
           if (action === "withdraw") {
             if (!(await saveCurrentBeforeAction(item))) return;
-            const confirmed = await showEditorialDialog({
-              title: "Withdraw from review?",
-              description:
-                "The editorial will return to draft status so it can be edited.",
-              confirmLabel: "Withdraw",
-            });
-            if (confirmed === null) return;
             await EditorialApi.request(`/api/editorials/${item.id}/withdraw`, {
               method: "POST",
             });
@@ -553,13 +540,6 @@
 
           if (action === "publish") {
             if (!(await saveCurrentBeforeAction(item))) return;
-            const confirmed = await showEditorialDialog({
-              title: "Publish this revision?",
-              description:
-                "The current saved revision will become public immediately.",
-              confirmLabel: "Publish now",
-            });
-            if (confirmed === null) return;
             await EditorialApi.request(
               `/api/editorials/${item.id}/publish`,
               { method: "POST" },
@@ -572,15 +552,6 @@
           if (action === "archive" || action === "restore") {
             const restoring = action === "restore";
             if (!restoring && !(await saveCurrentBeforeAction(item))) return;
-            const confirmed = await showEditorialDialog({
-              title: restoring ? "Restore editorial?" : "Archive editorial?",
-              description: restoring
-                ? "A previously published editorial will return to the public catalog."
-                : "The editorial will be removed from the public catalog but can be restored later.",
-              confirmLabel: restoring ? "Restore" : "Archive",
-              danger: !restoring,
-            });
-            if (confirmed === null) return;
             await EditorialApi.request(
               `/api/editorials/${item.id}/${action}`,
               { method: "POST" },
@@ -591,20 +562,8 @@
           }
 
           if (action === "delete") {
-            const confirmation = await showEditorialDialog({
-              title: "Delete editorial permanently?",
-              description:
-                "This removes every revision, author link, and review. This action cannot be undone.",
-              label: `Type “${item.title}” to confirm`,
-              confirmLabel: "Delete permanently",
-              danger: true,
-              validate: (value) =>
-                value === item.title ? "" : "The editorial name does not match.",
-            });
-            if (confirmation === null) return;
             await EditorialApi.request(`/api/editorials/${item.id}`, {
               method: "DELETE",
-              body: JSON.stringify({ confirm_title: confirmation }),
             });
             await refreshAfterAction();
             setStatus("Editorial deleted.", "success");
@@ -636,7 +595,7 @@
       }
 
       async function openEditorial(id) {
-        if (state.dirty && !confirm("Discard the unsaved changes?")) return;
+        if (state.dirty && !(await saveRevision())) return;
         const result = await EditorialApi.request(`/api/editorials/${id}`);
         state.current = result.editorial;
         state.creating = false;
@@ -677,6 +636,7 @@
       }
 
       async function createEditorial() {
+        if (state.dirty && !(await saveRevision())) return;
         const problemId = Number($("problem").value);
         if (!problemId) return;
         const problem = state.problems.find((item) => item.id === problemId);
@@ -684,14 +644,6 @@
         setStatus("Creating draft…");
         try {
           if (state.user.role === "owner") {
-            if (
-              state.dirty &&
-              !confirm(
-                "Discard the unsaved changes and create a new editorial?",
-              )
-            ) {
-              return;
-            }
             state.current = {
               id: null,
               problem_id: problemId,
@@ -888,9 +840,6 @@
           event.preventDefault();
           saveRevision();
         }
-      });
-      addEventListener("beforeunload", (event) => {
-        if (state.dirty) event.preventDefault();
       });
       initialize();
     </script>

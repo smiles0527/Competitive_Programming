@@ -16,6 +16,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/styles/github.min.css"
     />
+    <link rel="stylesheet" href="editorial-theme.css?v=5" />
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.10.0/build/highlight.min.js"></script>
     <style>
       :root {
@@ -288,12 +289,30 @@
       <select id="author" aria-label="Choose author" hidden></select>
     </header>
     <div class="workspace">
-      <aside class="code-pane" aria-label="Accepted C++ solution">
+      <aside
+        id="code-pane"
+        class="code-pane solution-hidden"
+        aria-label="Accepted C++ solution"
+      >
         <div class="pane-inner">
           <div class="pane-label">
-            <strong>accepted solution</strong><span id="code-name">C++17</span>
+            <strong>accepted solution</strong>
+            <span class="pane-actions">
+              <span id="code-name">C++17</span>
+              <button id="copy-code" class="copy-code" type="button" hidden>
+                Copy
+              </button>
+              <button
+                id="toggle-solution"
+                class="reveal-code"
+                type="button"
+                aria-expanded="false"
+              >
+                Reveal solution
+              </button>
+            </span>
           </div>
-          <pre><code id="source-code" class="language-cpp">Loading code…</code></pre>
+          <pre id="solution-block" hidden><code id="source-code" class="language-cpp">Loading code…</code></pre>
         </div>
       </aside>
       <section class="editorial-pane" aria-label="Editorial explanation">
@@ -308,7 +327,21 @@
       const section = params.get("section") || "introductory";
       const picker = document.getElementById("editorial");
       const authorPicker = document.getElementById("author");
+      const codePane = document.getElementById("code-pane");
+      const solutionBlock = document.getElementById("solution-block");
+      const toggleSolution = document.getElementById("toggle-solution");
+      const copyCode = document.getElementById("copy-code");
       let published = [];
+
+      function setSolutionVisible(visible) {
+        codePane.classList.toggle("solution-hidden", !visible);
+        solutionBlock.hidden = !visible;
+        copyCode.hidden = !visible;
+        toggleSolution.textContent = visible
+          ? "Hide solution"
+          : "Reveal solution";
+        toggleSolution.setAttribute("aria-expanded", String(visible));
+      }
 
       async function load() {
         const problemResult = await EditorialApi.request(
@@ -375,10 +408,25 @@
           selected.solution_cpp || "// No C++ solution has been attached.";
         source.removeAttribute("data-highlighted");
         hljs.highlightElement(source);
+        setSolutionVisible(false);
         document.title =
           document.querySelector("h1")?.textContent || document.title;
         await MathJax.typesetPromise();
       }
+
+      toggleSolution.addEventListener("click", () =>
+        setSolutionVisible(solutionBlock.hidden),
+      );
+      copyCode.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(
+          document.getElementById("source-code").textContent,
+        );
+        copyCode.textContent = "Copied";
+        setTimeout(() => {
+          copyCode.textContent = "Copy";
+        }, 1200);
+      });
+      setSolutionVisible(false);
 
       load().catch((error) => {
         const content = document.getElementById("content");

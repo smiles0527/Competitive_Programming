@@ -1,0 +1,8 @@
+ALTER TABLE collections
+  ADD COLUMN active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1));
+
+ALTER TABLE sections
+  ADD COLUMN active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1));
+
+ALTER TABLE problems
+  ADD COLUMN active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1));

@@ -35,6 +35,19 @@ export default {
         response = json({ user: await requireUser(request, env) });
       } else if (path === "/api/dashboard" && request.method === "GET") {
         response = await getDashboard(request, env);
+      } else if (path === "/api/structure" && request.method === "GET") {
+        response = await getStructure(request, env);
+      } else if (
+        path === "/api/structure/reorder" &&
+        request.method === "POST"
+      ) {
+        response = await reorderStructure(request, env);
+      } else if (path === "/api/collections" && request.method === "POST") {
+        response = await createCollection(request, env);
+      } else if (path === "/api/sections" && request.method === "POST") {
+        response = await createSection(request, env);
+      } else if (path === "/api/problems" && request.method === "POST") {
+        response = await createProblem(request, env);
       } else if (path === "/api/users" && request.method === "GET") {
         response = await listUsers(request, env);
       } else if (path === "/api/export" && request.method === "GET") {
@@ -46,6 +59,9 @@ export default {
           /^\/api\/editorials\/(\d+)(?:\/(submit|withdraw|review|publish|archive|restore|duplicate))?$/,
         );
         const userMatch = path.match(/^\/api\/users\/(\d+)\/role$/);
+        const collectionMatch = path.match(/^\/api\/collections\/([^/]+)$/);
+        const sectionMatch = path.match(/^\/api\/sections\/(\d+)$/);
+        const problemMatch = path.match(/^\/api\/problems\/(\d+)$/);
 
         if (editorialMatch) {
           const id = Number(editorialMatch[1]);
@@ -72,6 +88,24 @@ export default {
             response = await restoreEditorial(request, env, id);
           else if (action === "duplicate" && request.method === "POST")
             response = await duplicateEditorial(request, env, id);
+        } else if (collectionMatch && request.method === "PATCH") {
+          response = await updateCollection(
+            request,
+            env,
+            decodeURIComponent(collectionMatch[1]),
+          );
+        } else if (sectionMatch && request.method === "PATCH") {
+          response = await updateSection(
+            request,
+            env,
+            Number(sectionMatch[1]),
+          );
+        } else if (problemMatch && request.method === "PATCH") {
+          response = await updateProblem(
+            request,
+            env,
+            Number(problemMatch[1]),
+          );
         } else if (userMatch && request.method === "PUT") {
           response = await updateUserRole(request, env, Number(userMatch[1]));
         }
@@ -324,7 +358,16 @@ async function optionalUser(request, env) {
   )
     .bind(token)
     .first();
-  return user?.active ? user : null;
+  if (!user?.active) return null;
+  await env.DB.prepare(
+    `UPDATE users
+     SET last_seen_at = CURRENT_TIMESTAMP
+     WHERE id = ?
+       AND (last_seen_at IS NULL OR last_seen_at < datetime('now', '-5 minutes'))`,
+  )
+    .bind(user.id)
+    .run();
+  return user;
 }
 
 async function requireUser(request, env) {
@@ -359,6 +402,7 @@ async function getCatalog(env) {
      JOIN collections c ON c.id = s.collection_id
      JOIN users u ON u.id = e.created_by
      WHERE e.published_revision_id IS NOT NULL AND e.status <> 'archived'
+       AND c.active = 1 AND s.active = 1 AND p.active = 1
      ORDER BY c.sort_order, s.sort_order, p.sort_order, p.id, e.id`,
   ).all();
   return json({ items: results });
@@ -386,7 +430,8 @@ async function getProblems(url, env) {
      JOIN sections s ON s.id = p.section_id
      JOIN collections c ON c.id = s.collection_id
      LEFT JOIN editorials e ON e.problem_id = p.id
-     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+     WHERE c.active = 1 AND s.active = 1 AND p.active = 1
+       ${where.length ? `AND ${where.join(" AND ")}` : ""}
      GROUP BY p.id
      ORDER BY c.sort_order, s.sort_order, p.sort_order, p.id`,
   )
@@ -414,6 +459,7 @@ async function getPublishedEditorials(url, env) {
      JOIN collections c ON c.id = s.collection_id
      JOIN users u ON u.id = e.created_by
      WHERE e.published_revision_id IS NOT NULL AND e.status <> 'archived'
+       AND c.active = 1 AND s.active = 1 AND p.active = 1
        AND c.id = ? AND s.slug = ? COLLATE NOCASE AND p.slug = ? COLLATE NOCASE
      ORDER BY e.published_at, e.id`,
   )
@@ -451,6 +497,322 @@ function stripProblemFields(row) {
       avatar_url: row.avatar_url,
     },
   };
+}
+
+function catalogKey(value, field) {
+  const key = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (!/^[a-z0-9][a-z0-9_-]{0,79}$/.test(key)) {
+    throw httpError(
+      400,
+      `${field} must use lowercase letters, numbers, underscores, or hyphens`,
+    );
+  }
+  return key;
+}
+
+function catalogLabel(value, field) {
+  const label = String(value || "").trim();
+  if (!label) throw httpError(400, `${field} is required`);
+  if (label.length > 160)
+    throw httpError(400, `${field} must be 160 characters or fewer`);
+  return label;
+}
+
+function catalogActive(value) {
+  if (value !== true && value !== false && value !== 1 && value !== 0)
+    throw httpError(400, "active must be true or false");
+  return value === true || value === 1 ? 1 : 0;
+}
+
+async function catalogWrite(operation, conflictMessage) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (String(error.message || error).includes("UNIQUE constraint failed")) {
+      throw httpError(409, conflictMessage);
+    }
+    if (String(error.message || error).includes("FOREIGN KEY constraint failed")) {
+      throw httpError(400, "The selected parent does not exist");
+    }
+    throw error;
+  }
+}
+
+async function getStructure(request, env) {
+  await requireStaff(request, env);
+  const [collections, sections, problems] = await env.DB.batch([
+    env.DB.prepare(
+      "SELECT id, label, sort_order, active FROM collections ORDER BY sort_order, id",
+    ),
+    env.DB.prepare(
+      `SELECT id, collection_id, slug, label, sort_order, active
+       FROM sections ORDER BY collection_id, sort_order, id`,
+    ),
+    env.DB.prepare(
+      `SELECT id, section_id, slug, title, source_url, sort_order, active
+       FROM problems ORDER BY section_id, sort_order, id`,
+    ),
+  ]);
+  return json({
+    collections: collections.results,
+    sections: sections.results,
+    problems: problems.results,
+  });
+}
+
+async function createCollection(request, env) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const id = catalogKey(payload.id, "Collection key");
+  const label = catalogLabel(payload.label, "Collection name");
+  const row = await env.DB.prepare(
+    "SELECT COALESCE(MAX(sort_order), -1) + 1 next_order FROM collections",
+  ).first();
+  await catalogWrite(
+    () =>
+      env.DB.prepare(
+        "INSERT INTO collections (id, label, sort_order) VALUES (?, ?, ?)",
+      )
+        .bind(id, label, row.next_order)
+        .run(),
+    "A collection with that key already exists",
+  );
+  return json(
+    {
+      collection: await env.DB.prepare(
+        "SELECT id, label, sort_order, active FROM collections WHERE id = ?",
+      )
+        .bind(id)
+        .first(),
+    },
+    201,
+  );
+}
+
+async function updateCollection(request, env, id) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const updates = [];
+  const values = [];
+  if (Object.hasOwn(payload, "label")) {
+    updates.push("label = ?");
+    values.push(catalogLabel(payload.label, "Collection name"));
+  }
+  if (Object.hasOwn(payload, "active")) {
+    updates.push("active = ?");
+    values.push(catalogActive(payload.active));
+  }
+  if (!updates.length) throw httpError(400, "No editable fields were provided");
+  const result = await env.DB.prepare(
+    `UPDATE collections SET ${updates.join(", ")} WHERE id = ?`,
+  )
+    .bind(...values, id)
+    .run();
+  if (!result.meta.changes) throw httpError(404, "Collection not found");
+  return json({ ok: true });
+}
+
+async function createSection(request, env) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const collectionId = catalogKey(payload.collection_id, "Collection key");
+  const slug = catalogKey(payload.slug, "Section key");
+  const label = catalogLabel(payload.label, "Section name");
+  const parent = await env.DB.prepare(
+    "SELECT id FROM collections WHERE id = ?",
+  )
+    .bind(collectionId)
+    .first();
+  if (!parent) throw httpError(404, "Collection not found");
+  const row = await env.DB.prepare(
+    "SELECT COALESCE(MAX(sort_order), -1) + 1 next_order FROM sections WHERE collection_id = ?",
+  )
+    .bind(collectionId)
+    .first();
+  const result = await catalogWrite(
+    () =>
+      env.DB.prepare(
+        "INSERT INTO sections (collection_id, slug, label, sort_order) VALUES (?, ?, ?, ?)",
+      )
+        .bind(collectionId, slug, label, row.next_order)
+        .run(),
+    "That section key already exists in this collection",
+  );
+  return json({ id: result.meta.last_row_id }, 201);
+}
+
+async function updateSection(request, env, id) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const updates = [];
+  const values = [];
+  if (Object.hasOwn(payload, "collection_id")) {
+    updates.push("collection_id = ?");
+    values.push(catalogKey(payload.collection_id, "Collection key"));
+  }
+  if (Object.hasOwn(payload, "slug")) {
+    updates.push("slug = ?");
+    values.push(catalogKey(payload.slug, "Section key"));
+  }
+  if (Object.hasOwn(payload, "label")) {
+    updates.push("label = ?");
+    values.push(catalogLabel(payload.label, "Section name"));
+  }
+  if (Object.hasOwn(payload, "active")) {
+    updates.push("active = ?");
+    values.push(catalogActive(payload.active));
+  }
+  if (!updates.length) throw httpError(400, "No editable fields were provided");
+  const result = await catalogWrite(
+    () =>
+      env.DB.prepare(
+        `UPDATE sections SET ${updates.join(", ")} WHERE id = ?`,
+      )
+        .bind(...values, id)
+        .run(),
+    "That section key already exists in the selected collection",
+  );
+  if (!result.meta.changes) throw httpError(404, "Section not found");
+  return json({ ok: true });
+}
+
+async function createProblem(request, env) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const sectionId = Number(payload.section_id);
+  if (!Number.isInteger(sectionId))
+    throw httpError(400, "A valid section_id is required");
+  const slug = catalogKey(payload.slug, "Problem key");
+  const title = catalogLabel(payload.title, "Problem title");
+  const sourceUrl = String(payload.source_url || "").trim().slice(0, 2_000);
+  const parent = await env.DB.prepare("SELECT id FROM sections WHERE id = ?")
+    .bind(sectionId)
+    .first();
+  if (!parent) throw httpError(404, "Section not found");
+  const row = await env.DB.prepare(
+    "SELECT COALESCE(MAX(sort_order), -1) + 1 next_order FROM problems WHERE section_id = ?",
+  )
+    .bind(sectionId)
+    .first();
+  const result = await catalogWrite(
+    () =>
+      env.DB.prepare(
+        "INSERT INTO problems (section_id, slug, title, source_url, sort_order) VALUES (?, ?, ?, ?, ?)",
+      )
+        .bind(sectionId, slug, title, sourceUrl || null, row.next_order)
+        .run(),
+    "That problem key already exists in this section",
+  );
+  return json({ id: result.meta.last_row_id }, 201);
+}
+
+async function updateProblem(request, env, id) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const updates = [];
+  const values = [];
+  if (Object.hasOwn(payload, "section_id")) {
+    const sectionId = Number(payload.section_id);
+    if (!Number.isInteger(sectionId))
+      throw httpError(400, "A valid section_id is required");
+    updates.push("section_id = ?");
+    values.push(sectionId);
+  }
+  if (Object.hasOwn(payload, "slug")) {
+    updates.push("slug = ?");
+    values.push(catalogKey(payload.slug, "Problem key"));
+  }
+  if (Object.hasOwn(payload, "title")) {
+    updates.push("title = ?");
+    values.push(catalogLabel(payload.title, "Problem title"));
+  }
+  if (Object.hasOwn(payload, "source_url")) {
+    updates.push("source_url = ?");
+    values.push(String(payload.source_url || "").trim().slice(0, 2_000) || null);
+  }
+  if (Object.hasOwn(payload, "active")) {
+    updates.push("active = ?");
+    values.push(catalogActive(payload.active));
+  }
+  if (!updates.length) throw httpError(400, "No editable fields were provided");
+  const result = await catalogWrite(
+    () =>
+      env.DB.prepare(
+        `UPDATE problems SET ${updates.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
+      )
+        .bind(...values, id)
+        .run(),
+    "That problem key already exists in the selected section",
+  );
+  if (!result.meta.changes) throw httpError(404, "Problem not found");
+  return json({ ok: true });
+}
+
+async function reorderStructure(request, env) {
+  await requireStaff(request, env);
+  const payload = await bodyJson(request);
+  const entity = String(payload.entity || "");
+  const ids = Array.isArray(payload.ids) ? payload.ids : [];
+  if (!["collections", "sections", "problems"].includes(entity))
+    throw httpError(400, "Invalid structure entity");
+  if (!ids.length || new Set(ids.map(String)).size !== ids.length)
+    throw httpError(400, "ids must contain each item exactly once");
+
+  let rows;
+  let statements;
+  if (entity === "collections") {
+    rows = (
+      await env.DB.prepare("SELECT id FROM collections ORDER BY sort_order, id").all()
+    ).results;
+    statements = ids.map((id, index) =>
+      env.DB.prepare("UPDATE collections SET sort_order = ? WHERE id = ?").bind(
+        index,
+        String(id),
+      ),
+    );
+  } else if (entity === "sections") {
+    const collectionId = catalogKey(payload.parent_id, "Collection key");
+    rows = (
+      await env.DB.prepare(
+        "SELECT id FROM sections WHERE collection_id = ? ORDER BY sort_order, id",
+      )
+        .bind(collectionId)
+        .all()
+    ).results;
+    statements = ids.map((id, index) =>
+      env.DB.prepare(
+        "UPDATE sections SET sort_order = ? WHERE id = ? AND collection_id = ?",
+      ).bind(index, Number(id), collectionId),
+    );
+  } else {
+    const sectionId = Number(payload.parent_id);
+    if (!Number.isInteger(sectionId))
+      throw httpError(400, "A valid parent section is required");
+    rows = (
+      await env.DB.prepare(
+        "SELECT id FROM problems WHERE section_id = ? ORDER BY sort_order, id",
+      )
+        .bind(sectionId)
+        .all()
+    ).results;
+    statements = ids.map((id, index) =>
+      env.DB.prepare(
+        "UPDATE problems SET sort_order = ? WHERE id = ? AND section_id = ?",
+      ).bind(index, Number(id), sectionId),
+    );
+  }
+
+  const expected = new Set(rows.map((row) => String(row.id)));
+  if (
+    ids.length !== expected.size ||
+    ids.some((id) => !expected.has(String(id)))
+  ) {
+    throw httpError(409, "The catalog changed; refresh before reordering");
+  }
+  await env.DB.batch(statements);
+  return json({ ok: true });
 }
 
 async function getDashboard(request, env) {
@@ -877,10 +1239,6 @@ async function deleteEditorial(request, env, id) {
   ) {
     throw httpError(403, "You cannot delete this editorial");
   }
-  const payload = await bodyJson(request);
-  if (String(payload.confirm_title || "") !== editorial.title) {
-    throw httpError(400, "The confirmation name does not match");
-  }
   await env.DB.prepare("DELETE FROM editorials WHERE id = ?").bind(id).run();
   return json({ ok: true, id });
 }
@@ -888,7 +1246,7 @@ async function deleteEditorial(request, env, id) {
 async function listUsers(request, env) {
   await requireOwner(request, env);
   const { results } = await env.DB.prepare(
-    "SELECT id, login, display_name, avatar_url, role, active, created_at, updated_at FROM users ORDER BY login COLLATE NOCASE",
+    "SELECT id, login, display_name, avatar_url, role, active, created_at, updated_at, last_seen_at FROM users ORDER BY login COLLATE NOCASE",
   ).all();
   return json({ users: results });
 }
