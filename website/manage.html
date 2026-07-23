@@ -1,220 +1,328 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex, nofollow">
-  <title>Editorial Manager</title>
-  <style>
-    :root { --ink:#121212; --muted:#727272; --line:#dedede; --soft:#f7f7f5; --paper:#fff; --green:#21613a; --amber:#8a5a08; --red:#9d2c2c; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
-    * { box-sizing: border-box; }
-    body { margin: 0; color: var(--ink); background: var(--paper); font: 13px/1.45 var(--sans); }
-    button, input, select { font: inherit; }
-    button, select, input { min-height: 36px; border: 1px solid #aaa; border-radius: 0; background: #fff; color: var(--ink); }
-    button { padding: 0 13px; cursor: pointer; }
-    button:hover { border-color: #222; }
-    button.primary { color: #fff; background: var(--ink); border-color: var(--ink); }
-    a { color: inherit; }
-    .shell { width: min(1320px, calc(100% - 40px)); margin: 0 auto; }
-    header { border-bottom: 1px solid var(--line); }
-    .topbar { height: 64px; display: flex; align-items: center; gap: 16px; }
-    .brand { font-weight: 650; letter-spacing: -.15px; }
-    .topbar .spacer { flex: 1; }
-    .quiet-link { color: var(--muted); text-decoration: none; }
-    .quiet-link:hover { color: var(--ink); }
-    main { padding: 42px 0 100px; }
-    .heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
-    h1 { margin: 0 0 6px; font-size: 32px; letter-spacing: -.8px; }
-    .subtitle { margin: 0; color: var(--muted); }
-    .summary { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom: 28px; border: 1px solid var(--line); }
-    .metric { min-width: 0; padding: 18px 20px; border-right: 1px solid var(--line); }
-    .metric:last-child { border-right: 0; }
-    .metric strong { display: block; margin-bottom: 3px; font-size: 25px; line-height: 1; }
-    .metric span { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .45px; }
-    .filters { display: grid; grid-template-columns: minmax(240px,1fr) 190px 150px 150px auto; gap: 8px; margin-bottom: 18px; }
-    .filters input, .filters select { width: 100%; padding: 0 10px; }
-    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; }
-    th { position: sticky; top: 0; z-index: 1; color: var(--muted); background: var(--soft); font-size: 11px; font-weight: 600; letter-spacing: .35px; text-transform: uppercase; }
-    tr:last-child td { border-bottom: 0; }
-    tbody tr:hover { background: #fbfbfa; }
-    .problem { min-width: 220px; }
-    .problem strong { display: block; margin-bottom: 2px; font-size: 14px; }
-    .path { color: var(--muted); font: 11px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace; }
-    .badge { display: inline-flex; align-items: center; min-height: 23px; padding: 0 8px; border: 1px solid currentColor; border-radius: 999px; font-size: 11px; text-transform: capitalize; }
-    .badge.ready { color: var(--green); }
-    .badge.incomplete { color: var(--amber); }
-    .badge.draft { color: var(--red); }
-    .listed { color: var(--green); }
-    .unlisted { color: var(--red); }
-    .issues { max-width: 330px; color: var(--muted); font-size: 12px; }
-    .issues.ok { color: var(--green); }
-    .actions { white-space: nowrap; }
-    .actions a { margin-right: 12px; text-underline-offset: 3px; }
-    .empty { padding: 54px 20px; color: var(--muted); text-align: center; }
-    .loading { padding: 80px 0; color: var(--muted); text-align: center; }
-    .error { padding: 18px; border: 1px solid #d5a2a2; color: var(--red); background: #fff8f8; }
-    dialog { width: min(420px, calc(100% - 32px)); padding: 0; border: 1px solid #888; }
-    dialog::backdrop { background: rgba(0,0,0,.35); }
-    .login { padding: 24px; }
-    .login h2 { margin: 0 0 8px; }
-    .login p { margin: 0 0 18px; color: var(--muted); }
-    .login input { width: 100%; padding: 0 10px; }
-    .login button { width: 100%; margin-top: 10px; }
-    .login-error { min-height: 20px; margin-top: 10px; color: var(--red); }
-    @media (max-width: 850px) { .summary { grid-template-columns: repeat(2,1fr); } .metric:nth-child(2) { border-right: 0; } .metric:nth-child(-n+2) { border-bottom: 1px solid var(--line); } .filters { grid-template-columns: 1fr 1fr; } .filters input { grid-column: 1 / -1; } .heading { align-items: start; flex-direction: column; } }
-  </style>
-</head>
-<body>
-  <header><div class="shell topbar"><span class="brand">Editorial manager</span><a class="quiet-link" href="index.html">Home</a><a class="quiet-link" href="browse.html">Browse</a><a class="quiet-link" href="all.html">Public catalogue</a><span class="spacer"></span><button id="logout">Sign out</button><button id="refresh">Refresh audit</button><button id="create" class="primary">New editorial</button></div></header>
-  <main class="shell">
-    <div class="heading"><div><h1>Repository overview</h1><p class="subtitle">Find unfinished work, unlisted files, and editorials that need attention.</p></div><span id="updated" class="subtitle"></span></div>
-    <section class="summary" aria-label="Editorial summary">
-      <div class="metric"><strong id="metric-total">—</strong><span>Total editorials</span></div>
-      <div class="metric"><strong id="metric-ready">—</strong><span>Ready</span></div>
-      <div class="metric"><strong id="metric-attention">—</strong><span>Need attention</span></div>
-      <div class="metric"><strong id="metric-unlisted">—</strong><span>Not on website</span></div>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editorial moderation</title>
+    <link rel="stylesheet" href="cms.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="index.html">Editorial moderation</a>
+      <span id="identity" class="muted"></span>
+      <span class="spacer"></span>
+      <a href="edit.html">Write</a>
+      <button id="export" hidden>Export backup</button>
+      <button id="logout" hidden>Sign out</button>
+    </header>
+
+    <section id="auth-gate" class="auth-gate">
+      <h1>Editor access</h1>
+      <p class="muted">
+        Sign in with an editor or owner account to review contributed
+        editorials.
+      </p>
+      <button id="login" class="primary">Continue with GitHub</button>
     </section>
-    <div class="filters">
-      <input id="search" type="search" placeholder="Search problem, path, or issue" aria-label="Search editorials">
-      <select id="section" aria-label="Filter by category"><option value="">All categories</option></select>
-      <select id="quality" aria-label="Filter by quality"><option value="">All quality levels</option><option value="ready">Ready</option><option value="incomplete">Incomplete</option><option value="draft">Draft</option></select>
-      <select id="visibility" aria-label="Filter by website visibility"><option value="">Listed and unlisted</option><option value="listed">On website</option><option value="unlisted">Not on website</option></select>
-      <select id="sort" aria-label="Sort editorials"><option value="attention">Needs attention first</option><option value="modified">Recently modified</option><option value="name">Problem name</option><option value="category">Category</option></select>
-    </div>
-    <div id="content" class="loading">Auditing editorial files…</div>
-  </main>
-  <dialog id="login-dialog">
-    <form id="login-form" class="login">
-      <h2>Management sign in</h2>
-      <p>Enter the password shown in the local server window.</p>
-      <input id="password" type="password" autocomplete="current-password" required aria-label="Management password">
-      <button class="primary">Continue</button>
-      <div id="login-error" class="login-error" role="alert"></div>
-    </form>
-  </dialog>
-  <script src="site-config.js"></script>
-  <script>
-    const els = Object.fromEntries(['logout','refresh','create','updated','metric-total','metric-ready','metric-attention','metric-unlisted','search','section','quality','visibility','sort','content','login-dialog','login-form','password','login-error'].map(id => [id, document.getElementById(id)]));
-    const sectionLabels = new Map(window.EDITORIAL_SITE_CONFIG.collections.flatMap(collection => collection.sections.map(([id, label]) => [`${collection.repositoryPath}|${id}`, label])));
-    let items = [];
-    let localToken = sessionStorage.getItem('editorial-local-token') || '';
 
-    function sectionLabel(item) { return sectionLabels.get(`${item.collection}|${item.section}`) || item.section; }
-    function editUrl(item) {
-      const collection = window.EDITORIAL_SITE_CONFIG.collections.find(entry => entry.repositoryPath === item.collection);
-      return `edit.html?${new URLSearchParams({ collection: collection?.id || item.collection.toLowerCase(), section: item.section, editorial: item.slug })}`;
-    }
-    function previewUrl(item) { return `../${item.collection}/${encodeURIComponent(item.section)}/preview.html?${new URLSearchParams({ file: `editorials/${item.slug}.md` })}`; }
-    function formatDate(seconds) { return new Intl.DateTimeFormat(undefined, { month:'short', day:'numeric', year:'numeric' }).format(new Date(seconds * 1000)); }
+    <main id="console" class="console" hidden>
+      <h1>Review queue</h1>
+      <div id="metrics" class="metrics"></div>
+      <div class="toolbar">
+        <select id="status-filter">
+          <option value="">All statuses</option>
+          <option value="submitted" selected>Submitted</option>
+          <option value="changes_requested">Changes requested</option>
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+          <option value="archived">Archived</option>
+        </select>
+        <input
+          id="search"
+          type="search"
+          placeholder="Search problems or authors"
+        />
+        <button id="refresh">Refresh</button>
+      </div>
+      <div id="queue" class="queue"></div>
 
-    async function api(path, options = {}) {
-      const headers = localToken ? { 'X-Local-Editor-Token': localToken } : {};
-      if (options.body) headers['Content-Type'] = 'application/json';
-      const response = await fetch(path, { ...options, headers, cache: 'no-store' });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        const error = new Error(body.error || `Request failed (${response.status})`);
-        error.status = response.status;
-        throw error;
+      <section id="review-panel" class="review-panel" hidden>
+        <article class="review-content">
+          <h2 id="review-title"></h2>
+          <p id="review-meta" class="muted"></p>
+          <div id="review-markdown"></div>
+          <h3>C++ solution</h3>
+          <pre><code id="review-code"></code></pre>
+        </article>
+        <aside class="review-actions">
+          <h2>Review</h2>
+          <div id="review-history"></div>
+          <label>
+            Comment
+            <textarea
+              id="comment"
+              placeholder="Give the author specific, actionable feedback."
+            ></textarea>
+          </label>
+          <div class="toolbar">
+            <button data-decision="comment">Add comment</button>
+            <button data-decision="request_changes">Request changes</button>
+            <button data-decision="approve">Approve</button>
+            <button id="publish" class="primary">
+              Publish current revision
+            </button>
+            <button id="archive" class="danger">Archive</button>
+          </div>
+          <div id="status" class="status"></div>
+        </aside>
+      </section>
+
+      <section id="users-section" hidden>
+        <h2>People and roles</h2>
+        <p class="muted">
+          New GitHub users begin as contributors. Owners can promote editors.
+        </p>
+        <table class="users">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Role</th>
+              <th>Joined</th>
+            </tr>
+          </thead>
+          <tbody id="users"></tbody>
+        </table>
+      </section>
+    </main>
+
+    <script src="site-config.js?v=4"></script>
+    <script src="api.js?v=4"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const state = { user: null, items: [], current: null };
+
+      function setStatus(message, type = "") {
+        $("status").textContent = message;
+        $("status").className = `status ${type}`;
       }
-      return body;
-    }
-    async function load() {
-      els.content.className = 'loading'; els.content.textContent = 'Auditing editorial files…';
-      try {
-        const status = await api('/__editor/status');
-        if (status.mode !== 'local') throw new Error('Open this page through the local editorial server.');
-        if (!status.authorized) {
-          els['login-dialog'].showModal();
-          els.password.focus();
+
+      function updateMetrics() {
+        const counts = Object.groupBy(state.items, (item) => item.status);
+        $("metrics").replaceChildren(
+          ...["submitted", "changes_requested", "draft", "published"].map(
+            (status) => {
+              const div = document.createElement("div");
+              div.className = "metric";
+              div.textContent = `${counts[status]?.length || 0} ${status.replaceAll("_", " ")}`;
+              return div;
+            },
+          ),
+        );
+      }
+
+      function renderQueue() {
+        const query = $("search").value.trim().toLowerCase();
+        const status = $("status-filter").value;
+        const visible = state.items.filter(
+          (item) =>
+            (!status || item.status === status) &&
+            (!query ||
+              `${item.title} ${item.section_label} ${item.author_name}`
+                .toLowerCase()
+                .includes(query)),
+        );
+        $("queue").replaceChildren();
+        if (!visible.length) {
+          $("queue").innerHTML =
+            '<p class="muted">No editorials match this view.</p>';
           return;
         }
-        items = (await api('/__editor/catalog')).items;
-        const sections = [...new Set(items.map(sectionLabel))].sort();
-        const current = els.section.value;
-        els.section.replaceChildren(new Option('All categories', ''), ...sections.map(label => new Option(label, label)));
-        els.section.value = current;
-        updateSummary(); render();
-        els.updated.textContent = `Audited ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
-      } catch (error) {
-        els.content.className = 'error';
-        els.content.textContent = error.status === 404
-          ? 'This page is running on a read-only file server. Start website/start-local.cmd and open port 8766 to use management.'
-          : error.message;
+        for (const item of visible) {
+          const row = document.createElement("div");
+          row.className = "queue-item";
+          row.innerHTML =
+            "<strong></strong><span></span><span class='badge'></span><button>Open review</button>";
+          row.querySelector("strong").textContent = item.title;
+          row.children[1].textContent = `${item.section_label} · ${item.author_name}`;
+          row.querySelector(".badge").textContent = item.status.replaceAll(
+            "_",
+            " ",
+          );
+          row.querySelector(".badge").classList.add(item.status);
+          row
+            .querySelector("button")
+            .addEventListener("click", () => openReview(item.id));
+          $("queue").appendChild(row);
+        }
       }
-    }
-    function updateSummary() {
-      els['metric-total'].textContent = items.length;
-      els['metric-ready'].textContent = items.filter(item => item.quality === 'ready').length;
-      els['metric-attention'].textContent = items.filter(item => item.quality !== 'ready').length;
-      els['metric-unlisted'].textContent = items.filter(item => !item.listed).length;
-    }
-    function filteredItems() {
-      const query = els.search.value.trim().toLowerCase();
-      const section = els.section.value;
-      const quality = els.quality.value;
-      const visibility = els.visibility.value;
-      const visible = items.filter(item => {
-        const haystack = `${item.title} ${item.slug} ${item.markdownPath} ${sectionLabel(item)} ${item.issues.join(' ')}`.toLowerCase();
-        return (!query || haystack.includes(query)) && (!section || sectionLabel(item) === section) && (!quality || item.quality === quality) && (!visibility || (visibility === 'listed') === item.listed);
-      });
-      const qualityRank = { draft: 0, incomplete: 1, ready: 2 };
-      visible.sort((a, b) => {
-        if (els.sort.value === 'modified') return b.modified - a.modified;
-        if (els.sort.value === 'name') return a.title.localeCompare(b.title);
-        if (els.sort.value === 'category') return sectionLabel(a).localeCompare(sectionLabel(b)) || a.title.localeCompare(b.title);
-        return qualityRank[a.quality] - qualityRank[b.quality] || Number(a.listed) - Number(b.listed) || a.title.localeCompare(b.title);
-      });
-      return visible;
-    }
-    function render() {
-      const visible = filteredItems();
-      els.content.className = '';
-      els.content.replaceChildren();
-      if (!visible.length) { const empty = document.createElement('div'); empty.className = 'empty'; empty.textContent = 'No editorials match these filters.'; els.content.appendChild(empty); return; }
-      const wrap = document.createElement('div'); wrap.className = 'table-wrap';
-      const table = document.createElement('table');
-      table.innerHTML = '<thead><tr><th>Problem</th><th>Category</th><th>Quality</th><th>Website</th><th>Audit</th><th>Size</th><th>Modified</th><th>Actions</th></tr></thead>';
-      const body = document.createElement('tbody');
-      for (const item of visible) {
-        const row = document.createElement('tr');
-        const problem = document.createElement('td'); problem.className = 'problem';
-        const title = document.createElement('strong'); title.textContent = item.title;
-        const path = document.createElement('span'); path.className = 'path'; path.textContent = item.markdownPath;
-        problem.append(title, path);
-        const category = document.createElement('td'); category.textContent = sectionLabel(item);
-        const quality = document.createElement('td'); const badge = document.createElement('span'); badge.className = `badge ${item.quality}`; badge.textContent = item.quality; quality.appendChild(badge);
-        const listed = document.createElement('td'); listed.className = item.listed ? 'listed' : 'unlisted'; listed.textContent = item.listed ? 'Listed' : 'Unlisted';
-        const issues = document.createElement('td'); issues.className = `issues ${item.issues.length ? '' : 'ok'}`; issues.textContent = item.issues.length ? item.issues.join(' · ') : 'No issues found';
-        const size = document.createElement('td'); size.textContent = `${item.words} words / ${item.codeLines} lines`;
-        const modified = document.createElement('td'); modified.textContent = formatDate(item.modified);
-        const actions = document.createElement('td'); actions.className = 'actions';
-        const edit = document.createElement('a'); edit.href = editUrl(item); edit.textContent = 'Edit';
-        const preview = document.createElement('a'); preview.href = previewUrl(item); preview.textContent = 'Preview'; preview.target = '_blank'; preview.rel = 'noopener';
-        actions.append(edit, preview);
-        row.append(problem, category, quality, listed, issues, size, modified, actions); body.appendChild(row);
-      }
-      table.appendChild(body); wrap.appendChild(table); els.content.appendChild(wrap);
-    }
 
-    for (const id of ['search','section','quality','visibility','sort']) els[id].addEventListener(id === 'search' ? 'input' : 'change', render);
-    els.refresh.addEventListener('click', load);
-    els.create.addEventListener('click', () => { location.href = 'edit.html?new=1'; });
-    els.logout.addEventListener('click', () => { sessionStorage.removeItem('editorial-local-token'); localToken = ''; location.reload(); });
-    els['login-form'].addEventListener('submit', async event => {
-      event.preventDefault(); els['login-error'].textContent = '';
-      try {
-        const result = await api('/__editor/login', { method: 'POST', body: JSON.stringify({ password: els.password.value }) });
-        localToken = result.token; sessionStorage.setItem('editorial-local-token', localToken);
-        els['login-dialog'].close();
-        const next = new URLSearchParams(location.search).get('next');
-        if (next) { location.replace(next); return; }
-        await load();
-      } catch (error) { els['login-error'].textContent = error.message; els.password.select(); }
-    });
-    load();
-  </script>
-</body>
+      async function refresh() {
+        const dashboard = await EditorialApi.request("/api/dashboard");
+        state.user = dashboard.user;
+        if (!["owner", "editor"].includes(state.user.role)) {
+          throw new Error(
+            "Your account is a contributor. An owner must grant editor access.",
+          );
+        }
+        state.items = dashboard.items;
+        $("identity").textContent =
+          `${state.user.display_name || state.user.login} · ${state.user.role}`;
+        $("logout").hidden = false;
+        $("export").hidden = state.user.role !== "owner";
+        updateMetrics();
+        renderQueue();
+        if (state.user.role === "owner") await loadUsers();
+      }
+
+      async function openReview(id) {
+        const result = await EditorialApi.request(`/api/editorials/${id}`);
+        state.current = result.editorial;
+        const revision = result.revisions.find(
+          (item) => item.id === result.editorial.current_revision_id,
+        );
+        $("review-title").textContent = result.editorial.title;
+        $("review-meta").textContent =
+          `${result.editorial.collection_label} · ${result.editorial.section_label} · ${result.editorial.author_name} · ${result.editorial.status.replaceAll("_", " ")}`;
+        $("review-markdown").innerHTML = marked.parse(revision?.markdown || "");
+        $("review-code").textContent =
+          revision?.solution_cpp || "// No C++ solution attached.";
+        $("review-history").replaceChildren();
+        for (const review of result.reviews) {
+          const div = document.createElement("div");
+          div.className = "review";
+          div.innerHTML = "<strong></strong><span class='badge'></span><p></p>";
+          div.querySelector("strong").textContent = review.reviewer_name;
+          div.querySelector(".badge").textContent = review.decision.replaceAll(
+            "_",
+            " ",
+          );
+          div.querySelector("p").textContent = review.comment || "No comment.";
+          $("review-history").appendChild(div);
+        }
+        if (!result.reviews.length)
+          $("review-history").innerHTML =
+            '<p class="muted">No reviews yet.</p>';
+        $("comment").value = "";
+        $("review-panel").hidden = false;
+        $("review-panel").scrollIntoView({ behavior: "smooth" });
+        history.replaceState(null, "", `manage.html?id=${id}`);
+      }
+
+      async function review(decision) {
+        if (!state.current) return;
+        setStatus("Saving review…");
+        try {
+          await EditorialApi.request(
+            `/api/editorials/${state.current.id}/review`,
+            {
+              method: "POST",
+              body: JSON.stringify({ decision, comment: $("comment").value }),
+            },
+          );
+          await refresh();
+          await openReview(state.current.id);
+          setStatus("Review saved.", "success");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function action(name) {
+        if (!state.current) return;
+        if (name === "archive" && !confirm("Archive this editorial?")) return;
+        setStatus(`${name === "publish" ? "Publishing" : "Archiving"}…`);
+        try {
+          await EditorialApi.request(
+            `/api/editorials/${state.current.id}/${name}`,
+            { method: "POST" },
+          );
+          await refresh();
+          await openReview(state.current.id);
+          setStatus(name === "publish" ? "Published." : "Archived.", "success");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function loadUsers() {
+        const result = await EditorialApi.request("/api/users");
+        $("users-section").hidden = false;
+        $("users").replaceChildren();
+        for (const user of result.users) {
+          const row = document.createElement("tr");
+          const person = document.createElement("td");
+          person.textContent = user.display_name || user.login;
+          const roleCell = document.createElement("td");
+          const select = document.createElement("select");
+          for (const role of ["contributor", "editor", "owner"])
+            select.add(new Option(role, role));
+          select.value = user.role;
+          select.disabled = user.id === state.user.id;
+          select.addEventListener("change", async () => {
+            try {
+              await EditorialApi.request(`/api/users/${user.id}/role`, {
+                method: "PUT",
+                body: JSON.stringify({ role: select.value }),
+              });
+            } catch (error) {
+              select.value = user.role;
+              alert(error.message);
+            }
+          });
+          roleCell.appendChild(select);
+          const joined = document.createElement("td");
+          joined.textContent = new Date(
+            `${user.created_at}Z`,
+          ).toLocaleDateString();
+          row.append(person, roleCell, joined);
+          $("users").appendChild(row);
+        }
+      }
+
+      async function exportBackup() {
+        const data = await EditorialApi.request("/api/export");
+        const url = URL.createObjectURL(
+          new Blob([JSON.stringify(data)], { type: "application/json" }),
+        );
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `editorials-${new Date().toISOString().slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+      }
+
+      async function initialize() {
+        if (!EditorialApi.hasSession()) return;
+        try {
+          await refresh();
+          $("auth-gate").hidden = true;
+          $("console").hidden = false;
+          const requested = Number(
+            new URLSearchParams(location.search).get("id"),
+          );
+          if (requested) await openReview(requested);
+        } catch (error) {
+          $("auth-gate").innerHTML =
+            "<h1>Access unavailable</h1><p></p><a href='edit.html'>Return to your workspace</a>";
+          $("auth-gate").querySelector("p").textContent = error.message;
+        }
+      }
+
+      $("login").addEventListener("click", () =>
+        EditorialApi.login(location.href),
+      );
+      $("logout").addEventListener("click", EditorialApi.logout);
+      $("refresh").addEventListener("click", refresh);
+      $("search").addEventListener("input", renderQueue);
+      $("status-filter").addEventListener("change", renderQueue);
+      $("publish").addEventListener("click", () => action("publish"));
+      $("archive").addEventListener("click", () => action("archive"));
+      $("export").addEventListener("click", exportBackup);
+      for (const button of document.querySelectorAll("[data-decision]")) {
+        button.addEventListener("click", () => review(button.dataset.decision));
+      }
+      initialize();
+    </script>
+  </body>
 </html>

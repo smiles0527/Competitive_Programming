@@ -1,12 +1,15 @@
 name = "editorial-editor-gateway"
-main = "worker.js"
+main = "src/worker.js"
 compatibility_date = "2026-07-20"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "competitive-programming-editorials"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "migrations"
+
 [vars]
-GITHUB_OWNER = "smiles0527"
-GITHUB_REPO = "Competitive_Programming"
-GITHUB_BRANCH = "main"
-ALLOWED_LOGIN = "smiles0527"
+OWNER_LOGINS = "smiles0527"
 SITE_ORIGIN = "https://smiles0527.github.io"
 EDITOR_URL = "https://smiles0527.github.io/Competitive_Programming/website/edit.html"
-EDITABLE_ROOTS = "CSES"
+DEV_MODE = "false"

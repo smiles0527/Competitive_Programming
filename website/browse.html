@@ -1,106 +1,236 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Browse Editorials</title>
-  <style>
-    :root { --ink:#111; --muted:#7d7d7d; --line:#e5e5e5; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; }
-    body { color: var(--ink); background: #fff; font: 13px/1.5 var(--sans); }
-    header { height: 64px; padding: 0 22px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
-    .home { margin-right: auto; }
-    .utility { color: var(--ink); text-decoration: none; font-size: 12px; }
-    .utility:hover { text-decoration: underline; text-underline-offset: 3px; }
-    label { color: var(--muted); font-size: 11px; letter-spacing: .4px; text-transform: lowercase; }
-    select { min-width: 180px; height: 34px; padding: 0 30px 0 10px; border: 1px solid #aaa; border-radius: 0; color: var(--ink); background: #fff; font: 12px var(--sans); }
-    #collection { min-width: 110px; }
-    iframe { display: block; width: 100%; height: calc(100% - 64px); border: 0; }
-    @media (max-width: 640px) { header { height: auto; min-height: 58px; padding: 10px 12px; } select { min-width: 0; flex: 1; } iframe { height: calc(100% - 58px); } }
-  </style>
-</head>
-<body>
-  <header>
-    <a class="home utility" href="index.html">Home</a>
-    <a id="manage" class="utility" href="manage.html" hidden>Manage</a>
-    <a class="utility" href="all.html">View all</a>
-    <label for="collection">collection</label>
-    <select id="collection" aria-label="Problem collection"></select>
-    <label for="section">section</label>
-    <select id="section" aria-label="Section"></select>
-  </header>
-  <iframe id="preview" title="Editorial collection"></iframe>
-  <script src="site-config.js"></script>
-  <script>
-    const config = window.EDITORIAL_SITE_CONFIG;
-    const collectionPicker = document.getElementById('collection');
-    const sectionPicker = document.getElementById('section');
-    const frame = document.getElementById('preview');
-    const params = new URLSearchParams(location.search);
-    const manage = document.getElementById('manage');
-    let requestedEditorial = params.get('editorial');
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Browse Editorials</title>
+    <style>
+      :root {
+        --ink: #111;
+        --muted: #7d7d7d;
+        --line: #e5e5e5;
+        --sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        color: var(--ink);
+        background: #fff;
+        font: 13px/1.5 var(--sans);
+      }
+      header {
+        height: 64px;
+        padding: 0 22px;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+      }
+      .home {
+        margin-right: auto;
+      }
+      .utility {
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 12px;
+      }
+      .utility:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      label {
+        color: var(--muted);
+        font-size: 11px;
+        letter-spacing: 0.4px;
+        text-transform: lowercase;
+      }
+      select {
+        min-width: 180px;
+        height: 34px;
+        padding: 0 30px 0 10px;
+        border: 1px solid #aaa;
+        border-radius: 0;
+        color: var(--ink);
+        background: #fff;
+        font: 12px var(--sans);
+      }
+      #collection {
+        min-width: 110px;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        height: calc(100% - 64px);
+        border: 0;
+      }
+      @media (max-width: 640px) {
+        header {
+          height: auto;
+          min-height: 58px;
+          padding: 10px 12px;
+        }
+        select {
+          min-width: 0;
+          flex: 1;
+        }
+        iframe {
+          height: calc(100% - 58px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a class="home utility" href="index.html">Home</a>
+      <a id="manage" class="utility" href="manage.html" hidden>Manage</a>
+      <a class="utility" href="all.html">View all</a>
+      <label for="collection">collection</label>
+      <select id="collection" aria-label="Problem collection"></select>
+      <label for="section">section</label>
+      <select id="section" aria-label="Section"></select>
+    </header>
+    <iframe id="preview" title="Editorial collection"></iframe>
+    <script src="site-config.js?v=4"></script>
+    <script src="api.js?v=4"></script>
+    <script>
+      const config = window.EDITORIAL_SITE_CONFIG;
+      const collectionPicker = document.getElementById("collection");
+      const sectionPicker = document.getElementById("section");
+      const frame = document.getElementById("preview");
+      const params = new URLSearchParams(location.search);
+      const manage = document.getElementById("manage");
+      let requestedEditorial = params.get("editorial");
+      let requestedFile = params.get("file");
+      let requestedSlug = params.get("slug");
 
-    for (const collection of config.collections) collectionPicker.add(new Option(collection.label, collection.id));
-    collectionPicker.value = params.get('collection') || config.collections[0].id;
-    async function showManagementWhenAuthorized() {
-      if (!['127.0.0.1', 'localhost'].includes(location.hostname)) return;
-      const token = sessionStorage.getItem('editorial-local-token') || '';
-      try {
-        const response = await fetch('/__editor/status', { headers: token ? { 'X-Local-Editor-Token': token } : {}, cache: 'no-store' });
-        const status = await response.json();
-        manage.hidden = !status.authorized;
-      } catch { manage.hidden = true; }
-    }
-    showManagementWhenAuthorized();
+      for (const collection of config.collections)
+        collectionPicker.add(new Option(collection.label, collection.id));
+      collectionPicker.value =
+        params.get("collection") || config.collections[0].id;
+      async function showManagementWhenAuthorized() {
+        if (!EditorialApi.hasSession()) return;
+        try {
+          const { user } = await EditorialApi.request("/api/me");
+          manage.hidden = !["owner", "editor"].includes(user.role);
+        } catch {
+          manage.hidden = true;
+        }
+      }
+      showManagementWhenAuthorized();
 
-    function selectedCollection() { return config.collections.find(item => item.id === collectionPicker.value) || config.collections[0]; }
-    function populateSections(preferred) {
-      const collection = selectedCollection();
-      sectionPicker.replaceChildren(...collection.sections.map(([value, label]) => new Option(label, value)));
-      sectionPicker.value = preferred || collection.defaultSection || collection.sections[0][0];
-      if (!sectionPicker.value) sectionPicker.selectedIndex = 0;
-      showCollection();
-    }
-    function showCollection() {
-      const collection = selectedCollection();
-      const section = sectionPicker.value;
-      const query = new URLSearchParams({ collection: collection.id, section });
-      history.replaceState(null, '', `?${query}`);
-      const previewQuery = new URLSearchParams({ v: Date.now() });
-      if (requestedEditorial) previewQuery.set('file', `editorials/${requestedEditorial}.md`);
-      frame.src = `${collection.path}/${encodeURIComponent(section)}/preview.html?${previewQuery}`;
-      requestedEditorial = null;
-    }
-    collectionPicker.addEventListener('change', () => populateSections());
-    sectionPicker.addEventListener('change', showCollection);
-    addEventListener('keydown', event => {
-      const commandKey = event.ctrlKey || event.metaKey;
-      if (commandKey && event.shiftKey && event.key.toLowerCase() === 'e') {
-        event.preventDefault();
-        location.href = `edit.html?collection=${encodeURIComponent(collectionPicker.value)}&section=${encodeURIComponent(sectionPicker.value)}`;
-        return;
+      function selectedCollection() {
+        return (
+          config.collections.find(
+            (item) => item.id === collectionPicker.value,
+          ) || config.collections[0]
+        );
       }
-      if (commandKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
-        event.preventDefault();
-        frame.contentWindow?.postMessage({ type: 'move-problem', direction: event.key === 'ArrowUp' ? -1 : 1 }, location.origin);
+      function populateSections(preferred) {
+        const collection = selectedCollection();
+        sectionPicker.replaceChildren(
+          ...collection.sections.map(
+            ([value, label]) => new Option(label, value),
+          ),
+        );
+        sectionPicker.value =
+          preferred || collection.defaultSection || collection.sections[0][0];
+        if (!sectionPicker.value) sectionPicker.selectedIndex = 0;
+        showCollection();
       }
-    });
-    addEventListener('message', event => {
-      if (event.origin === location.origin && event.data?.type === 'open-editor') {
-        location.href = `edit.html?collection=${encodeURIComponent(collectionPicker.value)}&section=${encodeURIComponent(sectionPicker.value)}`;
+      function showCollection() {
+        const collection = selectedCollection();
+        const section = sectionPicker.value;
+        const query = new URLSearchParams({
+          collection: collection.id,
+          section,
+        });
+        history.replaceState(null, "", `?${query}`);
+        const previewQuery = new URLSearchParams({ v: Date.now() });
+        if (requestedSlug) previewQuery.set("slug", requestedSlug);
+        else if (requestedFile) previewQuery.set("file", requestedFile);
+        else if (requestedEditorial)
+          previewQuery.set("slug", requestedEditorial);
+        previewQuery.set("collection", collection.id);
+        previewQuery.set("section", section);
+        frame.src = `section.html?${previewQuery}`;
+        requestedEditorial = null;
+        requestedFile = null;
+        requestedSlug = null;
       }
-    });
-    frame.addEventListener('load', () => {
-      try {
-        const file = new URL(frame.contentWindow.location.href).searchParams.get('file');
-        if (!file) return;
-        const editorial = file.split('/').pop().replace(/\.md$/, '');
-        const query = new URLSearchParams({ collection: collectionPicker.value, section: sectionPicker.value, editorial });
-        history.replaceState(null, '', `?${query}`);
-      } catch {}
-    });
-    populateSections(params.get('section'));
-  </script>
-</body>
+      collectionPicker.addEventListener("change", () => populateSections());
+      sectionPicker.addEventListener("change", showCollection);
+      addEventListener("keydown", (event) => {
+        const commandKey = event.ctrlKey || event.metaKey;
+        if (commandKey && event.shiftKey && event.key.toLowerCase() === "e") {
+          event.preventDefault();
+          location.href = `edit.html?collection=${encodeURIComponent(collectionPicker.value)}&section=${encodeURIComponent(sectionPicker.value)}`;
+          return;
+        }
+        if (
+          commandKey &&
+          (event.key === "ArrowUp" || event.key === "ArrowDown")
+        ) {
+          event.preventDefault();
+          frame.contentWindow?.postMessage(
+            {
+              type: "move-problem",
+              direction: event.key === "ArrowUp" ? -1 : 1,
+            },
+            location.origin,
+          );
+        }
+      });
+      addEventListener("message", (event) => {
+        if (
+          event.origin === location.origin &&
+          event.data?.type === "open-editor"
+        ) {
+          location.href = `edit.html?collection=${encodeURIComponent(collectionPicker.value)}&section=${encodeURIComponent(sectionPicker.value)}`;
+        }
+      });
+      frame.addEventListener("load", () => {
+        try {
+          const slug = new URL(
+            frame.contentWindow.location.href,
+          ).searchParams.get("slug");
+          if (!slug) return;
+          const query = new URLSearchParams({
+            collection: collectionPicker.value,
+            section: sectionPicker.value,
+            slug,
+          });
+          history.replaceState(null, "", `?${query}`);
+        } catch {}
+      });
+      async function initializeBrowse() {
+        try {
+          const catalog = await EditorialApi.request("/api/catalog");
+          for (const collection of config.collections) {
+            const known = new Set();
+            collection.sections = catalog.items
+              .filter((item) => item.collection === collection.id)
+              .filter((item) => {
+                const key = item.section.toLowerCase();
+                if (known.has(key)) return false;
+                known.add(key);
+                return true;
+              })
+              .map((item) => [item.section, item.section_label]);
+          }
+        } catch {}
+        populateSections(params.get("section"));
+      }
+      initializeBrowse();
+    </script>
+  </body>
 </html>

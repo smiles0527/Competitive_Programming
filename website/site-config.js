@@ -13,11 +13,12 @@ window.EDITORIAL_SITE_CONFIG = {
         ["Graphs", "Graph Algorithms"],
         ["DP", "Dynamic Programming"],
         ["Sorting", "Sorting and Searching"],
-        ["Interactive", "Interactive Problems"]
-      ]
-    }
+        ["Interactive", "Interactive Problems"],
+      ],
+    },
   ],
   editor: {
-    apiBase: "https://REPLACE-WITH-YOUR-WORKER.workers.dev"
-  }
+    apiBase: "https://editorial-editor-gateway.smilescp.workers.dev",
+    localApiBase: "http://127.0.0.1:8787",
+  },
 };

@@ -1,94 +1,186 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Competitive Programming Editorials</title>
-  <style>
-    :root { --ink:#111; --line:#ddd; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; }
-    body { display: grid; place-items: center; color: var(--ink); background: #fff; font-family: var(--sans); }
-    .auth { position: fixed; top: 18px; right: 20px; display: flex; align-items: center; gap: 10px; }
-    .auth button { min-height: 34px; padding: 0 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
-    main { width: min(520px, calc(100% - 32px)); }
-    h1 { margin: 0 0 24px; font-size: 24px; letter-spacing: -.4px; }
-    .buttons { display: grid; gap: 10px; }
-    a { display: flex; align-items: center; justify-content: space-between; min-height: 64px; padding: 0 20px; border: 1px solid var(--line); color: var(--ink); background: #fff; font-size: 16px; font-weight: 600; text-decoration: none; }
-    a:hover { color: #fff; background: var(--ink); border-color: var(--ink); }
-    dialog { width: min(400px, calc(100% - 32px)); padding: 0; border: 1px solid #888; }
-    dialog::backdrop { background: rgba(0,0,0,.35); }
-    form { padding: 24px; }
-    form h2 { margin: 0 0 8px; font-size: 19px; }
-    form p { margin: 0 0 18px; color: #666; font-size: 13px; }
-    form input { width: 100%; height: 38px; padding: 0 10px; border: 1px solid #999; }
-    form button { width: 100%; min-height: 38px; margin-top: 10px; color: #fff; background: var(--ink); border: 1px solid var(--ink); cursor: pointer; }
-    .error { min-height: 20px; margin-top: 10px; color: #9d2c2c; font-size: 12px; }
-  </style>
-</head>
-<body>
-  <div id="auth" class="auth" hidden><button id="sign-in">Sign in</button><button id="sign-out" hidden>Sign out</button></div>
-  <main>
-    <h1>Competitive Programming Editorials</h1>
-    <div class="buttons">
-      <a href="browse.html"><span>Browse editorials</span><span>→</span></a>
-      <a href="all.html"><span>View all</span><span>→</span></a>
-      <a id="manage" href="manage.html" hidden><span>Manage editorials</span><span>→</span></a>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Competitive Programming Editorials</title>
+    <style>
+      :root {
+        --ink: #111;
+        --line: #ddd;
+        --sans:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: grid;
+        place-items: center;
+        color: var(--ink);
+        background: #fff;
+        font-family: var(--sans);
+      }
+      .auth {
+        position: fixed;
+        top: 18px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .auth button {
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        background: #fff;
+        cursor: pointer;
+      }
+      main {
+        width: min(520px, calc(100% - 32px));
+      }
+      h1 {
+        margin: 0 0 24px;
+        font-size: 24px;
+        letter-spacing: -0.4px;
+      }
+      .buttons {
+        display: grid;
+        gap: 10px;
+      }
+      a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 64px;
+        padding: 0 20px;
+        border: 1px solid var(--line);
+        color: var(--ink);
+        background: #fff;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+      }
+      a:hover {
+        color: #fff;
+        background: var(--ink);
+        border-color: var(--ink);
+      }
+      dialog {
+        width: min(400px, calc(100% - 32px));
+        padding: 0;
+        border: 1px solid #888;
+      }
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.35);
+      }
+      form {
+        padding: 24px;
+      }
+      form h2 {
+        margin: 0 0 8px;
+        font-size: 19px;
+      }
+      form p {
+        margin: 0 0 18px;
+        color: #666;
+        font-size: 13px;
+      }
+      form input {
+        width: 100%;
+        height: 38px;
+        padding: 0 10px;
+        border: 1px solid #999;
+      }
+      form button {
+        width: 100%;
+        min-height: 38px;
+        margin-top: 10px;
+        color: #fff;
+        background: var(--ink);
+        border: 1px solid var(--ink);
+        cursor: pointer;
+      }
+      .error {
+        min-height: 20px;
+        margin-top: 10px;
+        color: #9d2c2c;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="auth" class="auth" hidden>
+      <button id="sign-in">Sign in</button
+      ><button id="sign-out" hidden>Sign out</button>
     </div>
-  </main>
-  <dialog id="login-dialog">
-    <form id="login-form">
-      <h2>Management sign in</h2>
-      <p>Enter the password shown in the local server window.</p>
-      <input id="password" type="password" autocomplete="current-password" required aria-label="Management password">
-      <button>Continue</button>
-      <div id="login-error" class="error" role="alert"></div>
-    </form>
-  </dialog>
-  <script>
-    const params = new URLSearchParams(location.search);
-    if (params.has('collection') || params.has('section') || params.has('editorial')) location.replace(`browse.html?${params}`);
-    const local = ['127.0.0.1', 'localhost'].includes(location.hostname);
-    const auth = document.getElementById('auth');
-    const manage = document.getElementById('manage');
-    const signIn = document.getElementById('sign-in');
-    const signOut = document.getElementById('sign-out');
-    const dialog = document.getElementById('login-dialog');
-    const form = document.getElementById('login-form');
-    const password = document.getElementById('password');
-    const loginError = document.getElementById('login-error');
-    let token = sessionStorage.getItem('editorial-local-token') || '';
+    <main>
+      <h1>Competitive Programming Editorials</h1>
+      <div class="buttons">
+        <a href="browse.html"><span>Browse editorials</span><span>→</span></a>
+        <a href="all.html"><span>View all</span><span>→</span></a>
+        <a id="manage" href="manage.html" hidden
+          ><span>Manage editorials</span><span>→</span></a
+        >
+      </div>
+    </main>
+    <dialog id="login-dialog">
+      <form id="login-form">
+        <h2>Management sign in</h2>
+        <p>Enter the password shown in the local server window.</p>
+        <input
+          id="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          aria-label="Management password"
+        />
+        <button>Continue</button>
+        <div id="login-error" class="error" role="alert"></div>
+      </form>
+    </dialog>
+    <script src="site-config.js?v=4"></script>
+    <script src="api.js?v=4"></script>
+    <script>
+      const params = new URLSearchParams(location.search);
+      if (
+        params.has("collection") ||
+        params.has("section") ||
+        params.has("editorial") ||
+        params.has("slug")
+      )
+        location.replace(`browse.html?${params}`);
+      const auth = document.getElementById("auth");
+      const manage = document.getElementById("manage");
+      const signIn = document.getElementById("sign-in");
+      const signOut = document.getElementById("sign-out");
 
-    async function request(path, options = {}) {
-      const headers = token ? { 'X-Local-Editor-Token': token } : {};
-      if (options.body) headers['Content-Type'] = 'application/json';
-      const response = await fetch(path, { ...options, headers, cache: 'no-store' });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
-      return body;
-    }
-    function showAuthorized(authorized) {
-      manage.hidden = !authorized;
-      signIn.hidden = authorized;
-      signOut.hidden = !authorized;
-    }
-    async function checkAuthorization() {
-      if (!local) return;
-      auth.hidden = false;
-      try { showAuthorized((await request('/__editor/status')).authorized); }
-      catch { auth.hidden = true; manage.hidden = true; }
-    }
-    signIn.addEventListener('click', () => { loginError.textContent = ''; dialog.showModal(); password.focus(); });
-    signOut.addEventListener('click', () => { token = ''; sessionStorage.removeItem('editorial-local-token'); showAuthorized(false); });
-    form.addEventListener('submit', async event => {
-      event.preventDefault(); loginError.textContent = '';
-      try {
-        const result = await request('/__editor/login', { method: 'POST', body: JSON.stringify({ password: password.value }) });
-        token = result.token; sessionStorage.setItem('editorial-local-token', token);
-        dialog.close(); password.value = ''; showAuthorized(true);
-      } catch (error) { loginError.textContent = error.message; password.select(); }
-    });
-    checkAuthorization();
-  </script>
-</body>
+      function showAuthorized(authorized) {
+        manage.hidden = !authorized;
+        signIn.hidden = authorized;
+        signOut.hidden = !authorized;
+      }
+
+      async function checkAuthorization() {
+        auth.hidden = false;
+        if (!EditorialApi.hasSession()) return showAuthorized(false);
+        try {
+          await EditorialApi.request("/api/me");
+          showAuthorized(true);
+        } catch {
+          showAuthorized(false);
+        }
+      }
+      signIn.addEventListener("click", () => EditorialApi.login(location.href));
+      signOut.addEventListener("click", EditorialApi.logout);
+      checkAuthorization();
+    </script>
+  </body>
 </html>

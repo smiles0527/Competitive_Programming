@@ -1,27 +1,57 @@
 # Editorial website
 
-## Editing of local repository
+This repository uses a small content-management system instead of one Markdown file per editorial.
 
-Execute `website/start-local.cmd`, then go to:
+- Cloudflare D1 stores problems, editorials, C++ solutions, immutable revisions, reviews, users, and roles.
+- The Worker in `editor-gateway` exposes the same API locally and in production.
+- GitHub OAuth identifies contributors. It does not grant them repository write access.
+- Contributors create drafts and submit them for review.
+- Editors review, request changes, and publish.
+- Owners can also manage roles and export complete backups.
+- GitHub Pages remains the public static frontend.
 
-```text
-http://127.0.0.1:8766/website/index.html
-```
+The original 399 Markdown/C++ pairs were imported into the consolidated
+`editor-gateway/seeds/editorials.json` snapshot. It is used only to initialize a new database;
+new content is created through the editor.
 
-The **Manage editorials** page executes the audit of all editorials found in the repository, including those that are not included on the public website. It finds all editorials with missing sections, template text, missing or corrupted C++ solutions, abbreviations, and unregistered files. Searching capabilities and filters allow narrowing down the list of editorials by category, quality, and website visibility.
+## Local commands
 
-The home page offers three main workflows: the section reader, all editorials catalog, and local management environment. Links to existing editorials in the format `index.html?collection=...` are automatically redirected to the section reader.
+Run these commands from the repository root.
 
-From the manager interface, you can open selected items in the split editor or create a new editorial. In local repository editing mode, **Save locally** saves the selected Markdown and C++ files directly to the appropriate folders. **New editorial** creates a pair of Markdown/C++ files in the selected section, registers it in that section's editorials list, and starts editing. No Git commands are executed and no changes are published.
+| Command                                            | Purpose                                                                   |
+| -------------------------------------------------- | ------------------------------------------------------------------------- |
+| `website\setup-local.cmd`                          | Install Wrangler, migrate local D1, and import the initial snapshot once. |
+| `website\start-local.cmd`                          | Start the local D1 API and the static site.                               |
+| `website\start-and-open.cmd`                       | Start both services and open the site.                                    |
+| `website\start-local.cmd -Port 9000 -ApiPort 9001` | Use custom ports.                                                         |
+| `website\check.cmd`                                | Validate the Worker, UI scripts, schema snapshot, and tests.              |
+| `website\build.cmd`                                | Alias for the complete validation.                                        |
+| `website\backup-editorials.cmd`                    | Export the production D1 database to `editor-gateway/backups`.            |
+| `website\deploy-gateway.cmd`                       | Check, migrate, and deploy the configured Worker.                         |
 
-After local login, the section reader, all editorials catalog, management console, and live editor include all sections and pairs of Markdown/C++ files found in the repository, including those that are not yet published. The deployed website uses only those sections that were explicitly published in `site-config.js`.
+The default local site is:
 
-The local server connects only to `127.0.0.1` and prints a new management password on startup. Accessing the catalog, editor, creation, and save endpoints requires browser-session authentication. The server verifies the previous file hash before overwriting and allows write operations only in directories registered as editorial roots containing `.md` and `.cpp` files. To keep a persistent password instead of generating one on every startup, set `EDITORIAL_EDITOR_PASSWORD` before starting the server.
+<http://127.0.0.1:8766/website/index.html>
 
-## Global editing
+Local development authentication uses the Worker's `/auth/dev` route. The ignored `.dev.vars` file
+enables it locally, while the committed production values keep `DEV_MODE = "false"`.
 
-On the deployed website, the local save endpoint is unavailable. After configuring the authenticated gateway, the same editor offers the **Save and publish** button. This operation generates a GitHub commit, waits until the GitHub Pages deployment finishes, and confirms the public visibility of the change. To make public changes available locally, pull the corresponding commit into the local repository.
+## Editorial workflow
 
-## Adding collections
+1. Sign in at `website/edit.html`.
+2. Choose an existing problem and create an editorial.
+3. Save revisions. Every save is immutable in D1.
+4. Submit the draft.
+5. An editor reviews it in `website/manage.html`.
+6. The editor can comment, request changes, approve, or publish the current revision.
+7. The public reader immediately uses the published revision. Later draft edits do not replace it
+   until an editor publishes again.
 
-Each contest or problem set should be added to `website/site-config.js`. Create the same top-level folder in the local server's `--editable-root` and in the deployed gateway's `EDITABLE_ROOTS` settings.
+Multiple people can publish independent editorials for the same problem. The reader displays an
+author selector when more than one published editorial exists.
+
+## Production setup
+
+See `editor-gateway/README.md`. Production requires a D1 database, a GitHub OAuth App, Worker
+secrets, and the deployed Worker URL in `site-config.js`. No Git commit is created for an editorial
+save.
