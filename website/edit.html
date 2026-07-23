@@ -1,448 +1,356 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex, nofollow">
-  <title>Edit Competitive Programming Editorials</title>
-  <style>
-    :root {
-      --ink: #121212;
-      --muted: #777;
-      --line: #dedede;
-      --paper: #fff;
-      --soft: #f7f7f5;
-      --accent: #2867c7;
-      --danger: #a32b2b;
-      --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-    }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; height: 100%; margin: 0; }
-    body { color: var(--ink); background: var(--paper); font: 13px/1.45 var(--sans); }
-    button, select, input, textarea { font: inherit; }
-    button, select {
-      min-height: 34px;
-      border: 1px solid #aaa;
-      border-radius: 0;
-      background: #fff;
-      color: var(--ink);
-    }
-    button { padding: 0 14px; cursor: pointer; }
-    button:hover:not(:disabled) { border-color: #333; }
-    button:disabled { cursor: not-allowed; color: #aaa; background: #fafafa; }
-    button.primary { color: #fff; background: var(--ink); border-color: var(--ink); }
-    select { padding: 0 30px 0 10px; }
-    .app { display: grid; grid-template-rows: 60px 42px minmax(0, 1fr); height: 100%; }
-    .topbar, .toolbar { display: flex; align-items: center; gap: 10px; padding: 0 18px; border-bottom: 1px solid var(--line); }
-    .topbar { justify-content: space-between; }
-    .selectors, .actions, .tabs { display: flex; align-items: center; gap: 8px; min-width: 0; }
-    #collection { width: 110px; }
-    #section { width: 190px; }
-    #file { width: 240px; }
-    .label { color: var(--muted); font-size: 11px; letter-spacing: .45px; text-transform: uppercase; }
-    .status { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .status.error { color: var(--danger); }
-    .status.saved { color: #24633a; }
-    .toolbar { justify-content: space-between; background: var(--soft); }
-    .tab { min-height: 28px; padding: 0 10px; border: 0; background: transparent; color: var(--muted); }
-    .tab.active { color: var(--ink); box-shadow: inset 0 -2px var(--ink); }
-    .workspace { display: grid; grid-template-columns: minmax(360px, 48%) minmax(440px, 52%); min-height: 0; }
-    .editor-pane { display: grid; grid-template-rows: 34px minmax(0, 1fr); min-width: 0; border-right: 1px solid var(--line); }
-    .pane-heading { display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 11px; letter-spacing: .35px; }
-    textarea {
-      width: 100%; height: 100%; resize: none; border: 0; outline: 0;
-      padding: 22px 24px 80px; color: #202020; background: #fbfbfa;
-      font: 13px/1.62 var(--mono); tab-size: 4;
-    }
-    textarea:read-only { color: #666; }
-    dialog { width: min(720px, calc(100% - 32px)); max-height: calc(100% - 32px); padding: 0; border: 1px solid #aaa; color: var(--ink); background: #fff; }
-    dialog::backdrop { background: rgba(0,0,0,.28); }
-    .dialog-head, .dialog-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
-    .dialog-head h2 { margin: 0; font-size: 17px; }
-    .dialog-body { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 16px; padding: 20px; }
-    .field { display: grid; gap: 6px; }
-    .field.wide { grid-column: 1 / -1; }
-    .field label { color: var(--muted); font-size: 11px; letter-spacing: .35px; text-transform: uppercase; }
-    .field input, .field select { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #aaa; background: #fff; }
-    .field textarea { min-height: 92px; height: 92px; padding: 9px 10px; border: 1px solid #aaa; background: #fff; font: inherit; resize: vertical; }
-    .field small { color: var(--muted); }
-    .dialog-actions { justify-content: flex-end; border-top: 1px solid var(--line); border-bottom: 0; }
-    .preview-pane { min-width: 0; min-height: 0; }
-    iframe { display: block; width: 100%; height: 100%; border: 0; background: #fff; }
-    @media (max-width: 860px) {
-      .app { grid-template-rows: auto auto minmax(0,1fr); }
-      .topbar { align-items: stretch; flex-direction: column; padding: 12px; }
-      .selectors { flex-wrap: wrap; }
-      .selectors select { flex: 1; width: auto !important; }
-      .actions { justify-content: flex-end; }
-      .workspace { display: block; overflow: auto; }
-      .editor-pane { height: 62vh; border-right: 0; border-bottom: 1px solid var(--line); }
-      .preview-pane { height: 75vh; }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Editorial workspace</title>
+    <link rel="stylesheet" href="cms.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
     <header class="topbar">
-      <div class="selectors">
-        <span class="label">collection</span>
-        <select id="collection" aria-label="Problem collection"></select>
-        <span class="label">section</span>
-        <select id="section" aria-label="Section"></select>
-        <span class="label">editorial</span>
-        <select id="file" aria-label="Editorial"></select>
-      </div>
-      <div class="actions">
-        <button id="new-editorial">New editorial</button>
-        <button id="exit">Exit editor</button>
-        <span id="status" class="status">Local draft mode</span>
-        <button id="login">Sign in with GitHub</button>
-        <button id="logout" hidden>Sign out</button>
-        <button id="save" class="primary" disabled>Download drafts</button>
-      </div>
+      <a class="brand" href="index.html">Editorial workspace</a>
+      <span id="identity" class="muted"></span>
+      <span class="spacer"></span>
+      <a id="moderate-link" href="manage.html" hidden>Moderate</a>
+      <button id="logout" hidden>Sign out</button>
     </header>
-    <div class="toolbar">
-      <div class="tabs" role="tablist" aria-label="File type">
-        <button id="markdown-tab" class="tab active" role="tab">Editorial Markdown</button>
-        <button id="code-tab" class="tab" role="tab">C++ solution</button>
+
+    <section id="auth-gate" class="auth-gate">
+      <h1>Write with your GitHub identity</h1>
+      <p class="muted">
+        Contributors keep private drafts, submit revisions for review, and
+        publish only after an editor approves them.
+      </p>
+      <button id="login" class="primary">Continue with GitHub</button>
+    </section>
+
+    <main id="app" class="app" hidden>
+      <div class="editor-layout">
+        <aside class="sidebar">
+          <h2>Your editorials</h2>
+          <div class="stack">
+            <label
+              >Collection
+              <select id="collection"></select
+            ></label>
+            <label
+              >Section
+              <select id="section"></select
+            ></label>
+            <label
+              >Problem
+              <select id="problem"></select
+            ></label>
+            <button id="create">Create editorial</button>
+          </div>
+          <div id="drafts" class="draft-list"></div>
+        </aside>
+
+        <section class="editor">
+          <div class="toolbar">
+            <span id="editorial-status" class="badge">No draft selected</span>
+            <input
+              id="summary"
+              maxlength="500"
+              placeholder="Revision summary"
+            />
+            <button id="save" class="primary" disabled>Save revision</button>
+            <button id="submit" disabled>Submit for review</button>
+          </div>
+          <div class="tabs">
+            <button id="markdown-tab" class="active">Editorial Markdown</button>
+            <button id="code-tab">C++ solution</button>
+          </div>
+          <textarea
+            id="markdown"
+            spellcheck="true"
+            placeholder="# Editorial"
+          ></textarea>
+          <textarea id="code" spellcheck="false" hidden></textarea>
+          <div id="status" class="status"></div>
+        </section>
+
+        <aside class="preview">
+          <h2>Live preview</h2>
+          <article id="preview"></article>
+          <div class="reviews">
+            <h2>Review history</h2>
+            <div id="reviews" class="muted">No reviews yet.</div>
+          </div>
+        </aside>
       </div>
-      <span id="path" class="status"></span>
-    </div>
-    <div class="workspace">
-      <section class="editor-pane" aria-label="Source editor">
-        <div class="pane-heading"><span>source</span><span>Ctrl+S to save</span></div>
-        <textarea id="editor" spellcheck="false"></textarea>
-      </section>
-      <section class="preview-pane" aria-label="Live preview">
-        <iframe id="render" src="editor-render.html" sandbox="allow-scripts" title="Live editorial preview"></iframe>
-      </section>
-    </div>
-  </div>
+    </main>
 
-  <dialog id="create-dialog">
-    <form id="create-form" method="dialog">
-      <div class="dialog-head"><h2>Create editorial</h2><button id="create-close" type="button" aria-label="Close">Close</button></div>
-      <div class="dialog-body">
-        <div class="field wide"><label for="create-title">Problem name</label><input id="create-title" required placeholder="Counting Rooms"></div>
-        <div class="field"><label for="create-source">Source</label><input id="create-source" required placeholder="CSES 1192: Counting Rooms"></div>
-        <div class="field"><label for="create-url">Problem URL</label><input id="create-url" type="url" placeholder="https://cses.fi/problemset/task/1192/"></div>
-        <div class="field"><label for="create-slug">File name</label><input id="create-slug" required pattern="[a-z0-9][a-z0-9_-]*" placeholder="countingrooms"><small>Creates this .md and .cpp pair.</small></div>
-        <div class="field"><label for="create-limits">Limits</label><input id="create-limits" placeholder="1 <= n,m <= 1000"></div>
-        <div class="field wide"><label for="create-section">Category</label><select id="create-section"></select></div>
-        <div class="field wide"><label for="create-task">Question</label><textarea id="create-task" required placeholder="Describe exactly what must be computed or constructed."></textarea></div>
-      </div>
-      <div class="dialog-actions"><button id="create-cancel" type="button">Cancel</button><button class="primary" value="create">Create files</button></div>
-    </form>
-  </dialog>
-
-  <script src="site-config.js"></script>
-  <script>
-    const config = window.EDITORIAL_SITE_CONFIG || { collections: [], editor: {} };
-    const apiBase = String(config.editor?.apiBase || '').replace(/\/$/, '');
-    const configured = apiBase.startsWith('https://') && !apiBase.includes('REPLACE-WITH');
-    const els = Object.fromEntries(['collection','section','file','new-editorial','exit','status','login','logout','save','path','editor','render','markdown-tab','code-tab','create-dialog','create-form','create-close','create-cancel','create-title','create-source','create-url','create-slug','create-limits','create-section','create-task'].map(id => [id, document.getElementById(id)]));
-    const state = { session: sessionStorage.getItem('editorial-editor-session') || '', local: false, localToken: sessionStorage.getItem('editorial-local-token') || '', markdown: '', code: '', mdSha: '', cppSha: '', tab: 'markdown', dirty: false };
-
-    function setStatus(message, kind = '') {
-      els.status.textContent = message;
-      els.status.className = `status ${kind}`;
-    }
-    function selectedCollection() {
-      return config.collections.find(collection => collection.id === els.collection.value) || config.collections[0];
-    }
-    function resolveRepoPath(section, file) {
-      const parts = [selectedCollection().repositoryPath, section];
-      for (const part of file.split('/')) part === '..' ? parts.pop() : part !== '.' && parts.push(part);
-      return parts.join('/');
-    }
-    function currentPaths() {
-      const md = resolveRepoPath(els.section.value, els.file.value);
-      const cpp = md.replace('/editorials/', '/').replace(/\.md$/, '.cpp');
-      return { md, cpp };
-    }
-    function localUrl(path) { return `../${path.split('/').map(encodeURIComponent).join('/')}`; }
-    function currentText() { return state.tab === 'markdown' ? state.markdown : state.code; }
-    function storeCurrentText() {
-      if (state.tab === 'markdown') state.markdown = els.editor.value;
-      else state.code = els.editor.value;
-    }
-    function render() {
-      els.render.contentWindow?.postMessage({ type: 'render', markdown: state.markdown, code: state.code }, '*');
-    }
-    function selectTab(tab) {
-      storeCurrentText(); state.tab = tab; els.editor.value = currentText();
-      els['markdown-tab'].classList.toggle('active', tab === 'markdown');
-      els['code-tab'].classList.toggle('active', tab === 'code');
-      els.path.textContent = tab === 'markdown' ? currentPaths().md : currentPaths().cpp;
-    }
-    async function api(path, options = {}) {
-      const headers = new Headers(options.headers || {});
-      if (state.session) headers.set('Authorization', `Bearer ${state.session}`);
-      const response = await fetch(`${apiBase}${path}`, { ...options, headers });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || `Request failed (${response.status})`);
-      return body;
-    }
-    async function localApi(path, options = {}) {
-      const headers = new Headers(options.headers || {});
-      if (state.localToken) headers.set('X-Local-Editor-Token', state.localToken);
-      const response = await fetch(path, { ...options, headers, cache: 'no-store' });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(body.error || `Local request failed (${response.status})`);
-      return body;
-    }
-    async function detectLocalMode() {
-      if (!['127.0.0.1', 'localhost'].includes(location.hostname)) return;
-      try {
-        const status = await localApi('/__editor/status');
-        if (status.mode !== 'local') return;
-        if (!status.authorized) {
-          const next = location.pathname.split('/').pop() + location.search;
-          location.replace(`manage.html?${new URLSearchParams({ next })}`);
-          return false;
-        }
-        state.local = true;
-        state.session = ''; sessionStorage.removeItem('editorial-editor-session');
-        els.login.hidden = true; els.logout.hidden = true;
-        els.save.textContent = 'Save locally';
-        setStatus('Local repository mode');
-        return true;
-      } catch {}
-    }
-    async function loadSection() {
-      const collection = selectedCollection();
-      const response = await fetch(`${collection.path}/${encodeURIComponent(els.section.value)}/preview.html`);
-      const documentText = await response.text();
-      const parsed = new DOMParser().parseFromString(documentText, 'text/html');
-      const options = [...parsed.querySelectorAll('#editorial option')];
-      if (state.local) {
-        const catalog = await localApi('/__editor/catalog');
-        const known = new Set(options.map(option => option.value));
-        for (const item of catalog.items.filter(item => item.collection === collection.repositoryPath && item.section === els.section.value)) {
-          const value = `editorials/${item.slug}.md`;
-          if (!known.has(value)) options.push(new Option(`${item.title} (unlisted)`, value));
-        }
-      }
-      els.file.replaceChildren(...options.map(option => new Option(option.textContent, option.value)));
-      await loadFiles();
-    }
-    function editorialTemplate(values) {
-      const source = values.url ? `[${values.source}](${values.url})` : values.source;
-      const limits = values.limits || 'Add the official constraints.';
-      return `# ${values.title}\n\n## Problem\n\n- **Source:** ${source}\n- **Code:** [View accepted C++ solution (../${values.slug}.cpp)](../${values.slug}.cpp)\n- **Constraints:** ${limits}\n\n${values.task}\n\n## Idea\n\nExplain what the constraints rule out, then derive the key invariant or reduction.\n\n## Algorithm\n\n1. Describe the first implementation step.\n2. Describe the maintained state or transition.\n3. Output the required result.\n\n## Correctness\n\n### Lemma 1\n\nState the central invariant.\n\n#### Proof\n\nProve why it is maintained. $\\square$\n\n### Theorem\n\nThe algorithm produces the required answer.\n\n#### Proof\n\nCombine the invariant with the termination condition. $\\square$\n\n## Implementation\n\nDiscuss only details that are easy to get wrong.\n\n## Complexity\n\nState the time and auxiliary-space complexity.\n\n## Worked Example\n\nTrace the central state on a small concrete instance.\n`;
-    }
-    function cppTemplate() {
-      return `#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    ios::sync_with_stdio(false);\n    cin.tie(nullptr);\n\n    return 0;\n}\n`;
-    }
-    function openCreateDialog() {
-      if (!state.local) { setStatus('Creating repository files is available on the local editorial server.', 'error'); return; }
-      if (state.dirty) { setStatus('Save or discard the current changes before creating an editorial.', 'error'); return; }
-      const collection = selectedCollection();
-      els['create-section'].replaceChildren(...collection.sections.map(([value, label]) => new Option(label, value)));
-      els['create-section'].value = els.section.value;
-      els['create-form'].reset();
-      delete els['create-slug'].dataset.edited;
-      els['create-section'].value = els.section.value;
-      els['create-dialog'].showModal();
-      els['create-title'].focus();
-    }
-    async function createEditorial(event) {
-      event.preventDefault();
-      if (event.submitter?.value !== 'create') return;
-      const values = {
-        title: els['create-title'].value.trim(), source: els['create-source'].value.trim(),
-        url: els['create-url'].value.trim(), slug: els['create-slug'].value.trim().toLowerCase(),
-        limits: els['create-limits'].value.trim(), section: els['create-section'].value,
-        task: els['create-task'].value.trim()
+    <script src="site-config.js?v=4"></script>
+    <script src="api.js?v=4"></script>
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const state = {
+        user: null,
+        problems: [],
+        items: [],
+        current: null,
+        dirty: false,
       };
-      if (!values.title || !values.source || !values.task || !/^[a-z0-9][a-z0-9_-]*$/.test(values.slug)) return;
-      setStatus('Creating editorial files');
-      try {
-        await localApi('/__editor/create', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ collection: selectedCollection().repositoryPath, ...values, markdown: editorialTemplate(values), code: cppTemplate() })
-        });
-        els['create-dialog'].close();
-        els.section.value = values.section;
-        await loadSection();
-        els.file.value = `editorials/${values.slug}.md`;
-        await loadFiles();
-        setStatus('Editorial created locally', 'saved');
-      } catch (error) { setStatus(error.message, 'error'); }
-    }
-    async function loadFiles() {
-      state.dirty = false; els.save.disabled = true; setStatus(state.local ? 'Loading local files' : state.session ? 'Loading' : 'Local draft mode');
-      const paths = currentPaths();
-      try {
-        if (state.local) {
-          const [md, cpp] = await Promise.all([
-            localApi(`/__editor/file?path=${encodeURIComponent(paths.md)}`),
-            localApi(`/__editor/file?path=${encodeURIComponent(paths.cpp)}`)
-          ]);
-          state.markdown = md.content; state.mdSha = md.sha;
-          state.code = cpp.content; state.cppSha = cpp.sha;
-        } else if (state.session) {
-          const [md, cpp] = await Promise.all([
-            api(`/api/file?path=${encodeURIComponent(paths.md)}`),
-            api(`/api/file?path=${encodeURIComponent(paths.cpp)}`)
-          ]);
-          state.markdown = md.content; state.mdSha = md.sha;
-          state.code = cpp.content; state.cppSha = cpp.sha;
-        } else {
-          const [md, cpp] = await Promise.all([fetch(localUrl(paths.md)), fetch(localUrl(paths.cpp))]);
-          state.markdown = await md.text(); state.code = await cpp.text();
-          state.mdSha = ''; state.cppSha = '';
+      const fields = {
+        markdown: $("markdown"),
+        code: $("code"),
+        summary: $("summary"),
+      };
+
+      function setStatus(message, type = "") {
+        $("status").textContent = message;
+        $("status").className = `status ${type}`;
+      }
+
+      function markDirty() {
+        state.dirty = true;
+        $("save").disabled = !state.current && !$("markdown").value.trim();
+        renderPreview();
+      }
+
+      function renderPreview() {
+        $("preview").innerHTML = marked.parse(
+          $("markdown").value || "*Start writing to see a preview.*",
+        );
+      }
+
+      function populateSelectors() {
+        const collections = [
+          ...new Map(
+            state.problems.map((p) => [p.collection, p.collection_label]),
+          ).entries(),
+        ];
+        $("collection").replaceChildren(
+          ...collections.map(([id, label]) => new Option(label, id)),
+        );
+        const requested = new URLSearchParams(location.search);
+        $("collection").value =
+          requested.get("collection") || collections[0]?.[0] || "";
+        populateSections(requested.get("section"));
+      }
+
+      function populateSections(preferred = "") {
+        const problems = state.problems.filter(
+          (p) => p.collection === $("collection").value,
+        );
+        const sections = [
+          ...new Map(
+            problems.map((p) => [p.section, p.section_label]),
+          ).entries(),
+        ];
+        $("section").replaceChildren(
+          ...sections.map(([id, label]) => new Option(label, id)),
+        );
+        $("section").value = preferred || sections[0]?.[0] || "";
+        populateProblems();
+      }
+
+      function populateProblems() {
+        const problems = state.problems.filter(
+          (p) =>
+            p.collection === $("collection").value &&
+            p.section === $("section").value,
+        );
+        $("problem").replaceChildren(
+          ...problems.map((p) => new Option(p.title, p.id)),
+        );
+      }
+
+      function renderDrafts() {
+        $("drafts").replaceChildren();
+        if (!state.items.length) {
+          $("drafts").innerHTML = '<p class="muted">No editorials yet.</p>';
+          return;
         }
-        els.editor.value = currentText(); els.path.textContent = state.tab === 'markdown' ? paths.md : paths.cpp;
-        els.editor.readOnly = false;
-        render(); setStatus(state.local ? 'Local repository mode' : state.session ? 'Ready to edit' : 'Local draft mode');
-      } catch (error) { setStatus(error.message, 'error'); }
-    }
-    async function establishSession() {
-      const fragment = new URLSearchParams(location.hash.slice(1));
-      if (fragment.has('session')) {
-        state.session = fragment.get('session'); sessionStorage.setItem('editorial-editor-session', state.session);
-        history.replaceState(null, '', location.pathname + location.search);
+        for (const item of state.items) {
+          const button = document.createElement("button");
+          button.className = `draft ${state.current?.id === item.id ? "active" : ""}`;
+          button.innerHTML = `<strong></strong><span></span>`;
+          button.querySelector("strong").textContent = item.title;
+          button.querySelector("span").textContent =
+            `${item.section_label} · ${item.status.replaceAll("_", " ")}`;
+          button.addEventListener("click", () => openEditorial(item.id));
+          $("drafts").appendChild(button);
+        }
       }
-      if (!state.session) return;
-      try {
-        const me = await api('/api/me');
-        els.login.hidden = true; els.logout.hidden = false; els.editor.readOnly = false;
-        els.save.textContent = 'Save and publish';
-        setStatus(`Signed in as ${me.login}`); els.save.disabled = !state.dirty;
-      } catch {
-        state.session = ''; sessionStorage.removeItem('editorial-editor-session');
-        els.editor.readOnly = false; els.save.textContent = 'Download drafts';
-        setStatus('Session expired. Continuing in local draft mode.', 'error');
+
+      async function refreshDashboard() {
+        const [dashboard, problems] = await Promise.all([
+          EditorialApi.request("/api/dashboard"),
+          EditorialApi.request("/api/problems"),
+        ]);
+        state.user = dashboard.user;
+        state.items = dashboard.items;
+        state.problems = problems.items;
+        $("identity").textContent =
+          `${state.user.display_name || state.user.login} · ${state.user.role}`;
+        $("moderate-link").hidden = !["owner", "editor"].includes(
+          state.user.role,
+        );
+        $("logout").hidden = false;
+        populateSelectors();
+        renderDrafts();
       }
-    }
-    async function save() {
-      if (!state.dirty) return;
-      storeCurrentText(); els.save.disabled = true;
-      const paths = currentPaths();
-      if (state.local) {
-        setStatus('Saving locally');
-        try {
-          const result = await localApi('/__editor/save', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ files: [
-              { path: paths.md, content: state.markdown, sha: state.mdSha },
-              { path: paths.cpp, content: state.code, sha: state.cppSha }
-            ] })
-          });
-          state.mdSha = result.files[0].sha; state.cppSha = result.files[1].sha;
-          state.dirty = false; setStatus('Saved to the local repository', 'saved');
-        } catch (error) { setStatus(error.message, 'error'); els.save.disabled = false; }
-        return;
-      }
-      if (!state.session) {
-        download(paths.md, state.markdown);
-        setTimeout(() => download(paths.cpp, state.code), 150);
+
+      async function openEditorial(id) {
+        if (state.dirty && !confirm("Discard the unsaved changes?")) return;
+        const result = await EditorialApi.request(`/api/editorials/${id}`);
+        state.current = result.editorial;
+        const current = result.revisions.find(
+          (revision) => revision.id === result.editorial.current_revision_id,
+        );
+        fields.markdown.value = current?.markdown || "";
+        fields.code.value = current?.solution_cpp || "";
+        fields.summary.value = "";
         state.dirty = false;
-        setStatus('Drafts downloaded. The repository was not changed.', 'saved');
-        return;
+        $("editorial-status").textContent = result.editorial.status.replaceAll(
+          "_",
+          " ",
+        );
+        $("editorial-status").className = `badge ${result.editorial.status}`;
+        $("save").disabled = true;
+        $("submit").disabled = !["draft", "changes_requested"].includes(
+          result.editorial.status,
+        );
+        $("reviews").replaceChildren();
+        if (!result.reviews.length)
+          $("reviews").textContent = "No reviews yet.";
+        for (const review of result.reviews) {
+          const item = document.createElement("div");
+          item.className = "review";
+          item.innerHTML = `<strong></strong><span class="badge"></span><p></p>`;
+          item.querySelector("strong").textContent = review.reviewer_name;
+          item.querySelector(".badge").textContent = review.decision.replaceAll(
+            "_",
+            " ",
+          );
+          item.querySelector("p").textContent = review.comment || "No comment.";
+          $("reviews").appendChild(item);
+        }
+        renderPreview();
+        renderDrafts();
+        history.replaceState(null, "", `edit.html?id=${id}`);
       }
-      setStatus('Publishing');
-      try {
-        const result = await api('/api/save', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            files: [
-              { path: paths.md, content: state.markdown, sha: state.mdSha },
-              { path: paths.cpp, content: state.code, sha: state.cppSha }
-            ],
-            message: `Update ${paths.md.replace(/^CSES\//, '')}`
-          })
-        });
-        state.mdSha = result.files[0].sha; state.cppSha = result.files[1].sha;
-        state.dirty = false; setStatus('Saved. Public update is deploying.', 'saved');
-        waitUntilPublished(paths, state.markdown, state.code);
-      } catch (error) { setStatus(error.message, 'error'); els.save.disabled = false; }
-    }
-    async function waitUntilPublished(paths, markdown, code) {
-      const deadline = Date.now() + 3 * 60_000;
-      while (Date.now() < deadline) {
-        await new Promise(resolve => setTimeout(resolve, 5000));
+
+      async function createEditorial() {
+        const problemId = Number($("problem").value);
+        if (!problemId) return;
+        const problem = state.problems.find((item) => item.id === problemId);
+        const markdown = `# ${problem.title}\n\n## Idea\n\nExplain the central observation.\n\n## Algorithm\n\n1. Describe the steps.\n\n## Correctness\n\nProve that the algorithm returns the required result.\n\n## Complexity\n\nState the time and memory complexity.\n`;
+        setStatus("Creating draft…");
         try {
-          const stamp = Date.now();
-          const [md, cpp] = await Promise.all([
-            fetch(`${localUrl(paths.md)}?published=${stamp}`, { cache: 'no-store' }).then(response => response.text()),
-            fetch(`${localUrl(paths.cpp)}?published=${stamp}`, { cache: 'no-store' }).then(response => response.text())
-          ]);
-          if (md === markdown && cpp === code) {
-            if (!state.dirty) setStatus('Published live', 'saved');
-            return;
-          }
-        } catch {}
-      }
-      if (!state.dirty) setStatus('Saved. GitHub Pages is still deploying.', 'saved');
-    }
-    function download(path, content) {
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(new Blob([content], { type: 'text/plain;charset=utf-8' }));
-      link.href = url; link.download = path.split('/').pop(); link.click();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
-    function populateSections(preferred) {
-      const collection = selectedCollection();
-      els.section.replaceChildren(...collection.sections.map(([value, label]) => new Option(label, value)));
-      els.section.value = preferred || collection.defaultSection || collection.sections[0][0];
-      if (!els.section.value) els.section.selectedIndex = 0;
-      return loadSection();
-    }
-    for (const collection of config.collections) els.collection.add(new Option(collection.label, collection.id));
-    const initial = new URLSearchParams(location.search);
-    els.collection.value = initial.get('collection') || config.collections[0]?.id;
-    if (!els.collection.value) els.collection.selectedIndex = 0;
-    els.collection.addEventListener('change', () => populateSections());
-    els.section.addEventListener('change', loadSection);
-    els.file.addEventListener('change', loadFiles);
-    els['new-editorial'].addEventListener('click', openCreateDialog);
-    els['create-close'].addEventListener('click', () => els['create-dialog'].close());
-    els['create-cancel'].addEventListener('click', () => els['create-dialog'].close());
-    els['create-title'].addEventListener('input', () => {
-      if (els['create-slug'].dataset.edited) return;
-      els['create-slug'].value = els['create-title'].value.toLowerCase().replace(/[^a-z0-9]+/g, '').replace(/^_+|_+$/g, '');
-    });
-    els['create-slug'].addEventListener('input', () => { els['create-slug'].dataset.edited = 'true'; });
-    els['create-form'].addEventListener('submit', createEditorial);
-    els.editor.addEventListener('input', () => { storeCurrentText(); state.dirty = true; els.save.disabled = false; render(); setStatus(state.local ? 'Unsaved local changes' : state.session ? 'Unsaved changes' : 'Unsaved local draft'); });
-    els['markdown-tab'].addEventListener('click', () => selectTab('markdown'));
-    els['code-tab'].addEventListener('click', () => selectTab('code'));
-    els.login.addEventListener('click', () => {
-      if (configured) location.href = `${apiBase}/auth/start`;
-      else setStatus('Local draft mode');
-    });
-    els.exit.addEventListener('click', () => {
-      if (state.dirty && !confirm('Discard unsaved changes and exit the editor?')) return;
-      state.dirty = false;
-      location.href = 'manage.html';
-    });
-    els.logout.addEventListener('click', () => { state.session = ''; sessionStorage.removeItem('editorial-editor-session'); location.reload(); });
-    els.save.addEventListener('click', save);
-    addEventListener('keydown', event => { if (event.ctrlKey && event.key.toLowerCase() === 's') { event.preventDefault(); save(); } });
-    addEventListener('beforeunload', event => { if (state.dirty) { event.preventDefault(); event.returnValue = ''; } });
-    els.render.addEventListener('load', render);
-
-    async function initialize() {
-      if (!configured) els.login.hidden = true;
-      const localResult = await detectLocalMode();
-      if (localResult === false) return;
-      if (!state.local) await establishSession();
-      await populateSections(initial.get('section'));
-      const editorial = initial.get('editorial');
-      if (editorial) {
-        const value = `editorials/${editorial}.md`;
-        if ([...els.file.options].some(option => option.value === value)) {
-          els.file.value = value;
-          await loadFiles();
+          const result = await EditorialApi.request("/api/editorials", {
+            method: "POST",
+            body: JSON.stringify({
+              problem_id: problemId,
+              markdown,
+              solution_cpp: "",
+              summary: "Initial draft",
+            }),
+          });
+          await refreshDashboard();
+          await openEditorial(result.editorial.id);
+          setStatus("Draft created.", "success");
+        } catch (error) {
+          setStatus(error.message, "error");
         }
       }
-      if (initial.get('new') === '1' && state.local) openCreateDialog();
-    }
-    initialize();
-  </script>
-</body>
+
+      async function saveRevision() {
+        if (!state.current) return;
+        $("save").disabled = true;
+        setStatus("Saving revision…");
+        try {
+          await EditorialApi.request(`/api/editorials/${state.current.id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+              markdown: fields.markdown.value,
+              solution_cpp: fields.code.value,
+              summary: fields.summary.value || "Updated editorial",
+            }),
+          });
+          state.dirty = false;
+          await refreshDashboard();
+          await openEditorial(state.current.id);
+          setStatus("Revision saved.", "success");
+        } catch (error) {
+          $("save").disabled = false;
+          setStatus(error.message, "error");
+        }
+      }
+
+      async function submit() {
+        if (state.dirty) await saveRevision();
+        if (!state.current) return;
+        try {
+          await EditorialApi.request(
+            `/api/editorials/${state.current.id}/submit`,
+            { method: "POST" },
+          );
+          await refreshDashboard();
+          await openEditorial(state.current.id);
+          setStatus("Submitted for review.", "success");
+        } catch (error) {
+          setStatus(error.message, "error");
+        }
+      }
+
+      function selectTab(name) {
+        const markdown = name === "markdown";
+        $("markdown").hidden = !markdown;
+        $("code").hidden = markdown;
+        $("markdown-tab").classList.toggle("active", markdown);
+        $("code-tab").classList.toggle("active", !markdown);
+      }
+
+      async function initialize() {
+        if (!EditorialApi.hasSession()) return;
+        try {
+          await refreshDashboard();
+          $("auth-gate").hidden = true;
+          $("app").hidden = false;
+          const requestedId = Number(
+            new URLSearchParams(location.search).get("id"),
+          );
+          if (requestedId) await openEditorial(requestedId);
+          else if (state.items[0]) await openEditorial(state.items[0].id);
+          else renderPreview();
+        } catch (error) {
+          if (error.status === 401) return EditorialApi.logout();
+          $("auth-gate").innerHTML =
+            `<h1>Unable to load the workspace</h1><p></p>`;
+          $("auth-gate").querySelector("p").textContent = error.message;
+        }
+      }
+
+      $("login").addEventListener("click", () =>
+        EditorialApi.login(location.href),
+      );
+      $("logout").addEventListener("click", EditorialApi.logout);
+      $("collection").addEventListener("change", () => populateSections());
+      $("section").addEventListener("change", populateProblems);
+      $("create").addEventListener("click", createEditorial);
+      $("save").addEventListener("click", saveRevision);
+      $("submit").addEventListener("click", submit);
+      $("markdown-tab").addEventListener("click", () => selectTab("markdown"));
+      $("code-tab").addEventListener("click", () => selectTab("code"));
+      for (const field of Object.values(fields))
+        field.addEventListener("input", markDirty);
+      addEventListener("keydown", (event) => {
+        if (
+          (event.ctrlKey || event.metaKey) &&
+          event.key.toLowerCase() === "s"
+        ) {
+          event.preventDefault();
+          saveRevision();
+        }
+      });
+      addEventListener("beforeunload", (event) => {
+        if (state.dirty) event.preventDefault();
+      });
+      initialize();
+    </script>
+  </body>
 </html>

@@ -1,0 +1,4 @@
+OWNER_LOGINS=smiles0527
+SITE_ORIGIN=http://127.0.0.1:8766
+EDITOR_URL=http://127.0.0.1:8766/website/edit.html
+DEV_MODE=true

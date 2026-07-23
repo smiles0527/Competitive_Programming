@@ -12,8 +12,13 @@ web/
 
 *.txt
 *.json
+!website/editor-gateway/package.json
+!website/editor-gateway/package-lock.json
+!website/editor-gateway/seeds/editorials.json
 temp
 .DS_store
+__pycache__/
+*.pyc
 .preview-server.log
 .preview-server-error.log
 website/editor-gateway/wrangler.toml
